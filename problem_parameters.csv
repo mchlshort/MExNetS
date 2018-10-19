@@ -5,6 +5,6 @@ AF,0.2
 ACH,618
 fixcost,30000
 EMAC,0.000001
-diameter,0.35
-packcost,1000
+diameter,0.7
+packcost,1500
 SurfA,300

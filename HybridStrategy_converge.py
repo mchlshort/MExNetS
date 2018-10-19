@@ -163,7 +163,7 @@ class HybridStrategy(object):
                     
         return corrections   
   
-    def _check_convergence(self, MENS_model, exchanger_models, m, tol = 0.02, previous_corrections=None):
+    def _check_convergence(self, MENS_model, exchanger_models, m, tol = 0.001, previous_corrections=None):
         """Convergence checking for the iterative procedure.
         
         This function compares the previous solutions 2 solutions as well as the globally best solution
@@ -361,7 +361,7 @@ class HybridStrategy(object):
             
             if (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
                 #change for a while loop with a max iter
-                for i in range(50):
+                for i in range(500):
                     print("MINLP didn't solve, attempting new matches")  
                     mh=min_height/((i+1)*4)
                     #print("mh",mh)
@@ -498,7 +498,7 @@ stream_properties = read_stream_data(filenameSP)
 #Ex1MEN = MENS(rich_data=Rich_data,lean_data=Lean_data, correction_factors = None)
 Example1 = HybridStrategy()
 #p_data = Example1.provide_problem_data(rich_data=Rich_data,lean_data=Lean_data, parameter_data=problem_parameters, stream_properties = stream_properties)
-Example1.run_hybrid_strategy(cor_filter_size=0.1, max_iter=3)
+Example1.run_hybrid_strategy(cor_filter_size=0.005, max_iter=5000)
 #MEN_init = Ex1MEN.NLP_MENS_init() 
 stop = timeit.default_timer()
 ex_time = stop - start 

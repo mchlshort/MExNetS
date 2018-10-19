@@ -126,13 +126,13 @@ class MENS(object):
                         results = solver.solve(m,tee=False, options=options3)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            solver = SolverFactory('./../../BARON/baron')
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            else:
-                                print("BARON failed to find a feasible solution")
-                            results = solver.solve(m,tee=False)
+                        #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        #    solver = SolverFactory('./../../BARON/baron')
+                        #    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        #        print("successfully solved")
+                        #    else:
+                        #         print("BARON failed to find a feasible solution")
+                        #    results = solver.solve(m,tee=False)
                         else:
                             print("Cannot determine cause of fault")
                             print("Solver Status:",  result.solver.status)
@@ -216,9 +216,11 @@ class MENS(object):
             results (solver results): returns the solved model and results from the solve.
             
         """
-        opt = SolverFactory('bonmin',executable='./../../../../cygwin64/home/Michael/Bonmin-1.8.6/build/bin/bonmin')
-        #opt = SolverFactory('./../../Bonmin/build/bin/bonmin')
+        #opt = SolverFactory('bonmin',executable='./../../../../cygwin64/home/Michael/Bonmin-1.8.6/build/bin/bonmin')
+        opt = SolverFactory('./../../Bonmin/build/bin/bonmin')
         options={}
+        options['bonmin.algorithm']='B-BB'
+        
         #This can probably be greatly improved
         try:
             results = opt.solve(m,options = options,tee=False)
@@ -230,6 +232,7 @@ class MENS(object):
                 options['mu_strategy'] = 'monotone'
                 options['mu_init'] = 1e-6
                 options['bonmin.algorithm']='B-BB'
+                options['bonmin.allowable_fraction_gap']= 0.05
                 results = opt.solve(m,options = options,tee=False)
                 
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -242,7 +245,7 @@ class MENS(object):
                     options1['mu_init'] = 1e-5
                     options1['bound_relax_factor'] = 0
                     options1['bonmin.algorithm']='B-BB'
-                    options1['num_resolve_at_root']=5
+                    options1['bonmin.num_resolve_at_root']=5
                     results = opt.solve(m,options = options1,tee=False)
                     
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -253,7 +256,7 @@ class MENS(object):
                         options2['mu_init'] = 1e-5
                         options2['bound_relax_factor'] = 0
                         options2['bonmin.algorithm']='B-BB'
-                        options2['num_resolve_at_node']=5
+                        options2['bonmin.num_resolve_at_node']=5
                         results = opt.solve(m,options = options2,tee=False)
                         
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -273,9 +276,23 @@ class MENS(object):
                                 options4['bound_push'] = 1e-5
                                 #options3['bound_relax_factor'] = 0
                                 options4['bonmin.algorithm']='B-Hyb'
+                                options4['bonmin.pump_for_minlp']='yes'
                                 options4['pump_for_minlp.time_limit']=90
                                 options4['pump_for_minlp.solution_limit']= 7
                                 results = opt.solve(m, options = options4, tee=False)
+                                if(results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                    print("successfully solved")
+                                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                    options11['bonmin.algorithm']='B-OA'
+                                    results = opt.solve(m, options = options4, tee=False)
+                                    if(results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                        print("successfully solved")
+                                    else:
+                                        print("Cannot determine cause of fault")
+                                        print("Solver Status: ",  result.solver.status)
+                                else:
+                                    print("Cannot determine cause of fault")
+                                    print("Solver Status: ",  result.solver.status)
                             else:
                                 print("Cannot determine cause of fault")
                                 print("Solver Status: ",  result.solver.status)
@@ -569,19 +586,19 @@ class MENS(object):
         #   VARIABLES
         #=================
         #These are actually fixed here to arex
-        model.y = Var(model.i,model.j,model.k, initialize = model.arex,bounds=(0,1))
+        model.y = Param(model.i,model.j,model.k, initialize = model.arex)
         #relaxed binary
-        model.y1 = Param(model.i,model.j,model.k, initialize = model.arex,within = NonNegativeReals)
+        model.y1 = Param(model.i,model.j,model.k, initialize = model.arex)
         
         #Variables for design of network
         #Composition at each interval boundary
         def cl_init(model,j,k):
             #return 0.0
-            return self._lean_data.at[j,'Cin']
+            return abs((self._lean_data.at[j,'Cin']-self._lean_data.at[j,'Cout']))/2
 
         def cr_init(model,i,k):
             #return 0.0
-            return self._rich_data.at[i,'Cout']
+            return abs((self._rich_data.at[i,'Cout']-self._rich_data.at[i,'Cin']))/2
 
         def cr_bounds(model,i,k):
             lb = self._rich_data.at[i,'Cout']
@@ -598,6 +615,7 @@ class MENS(object):
         
         #Composition at each interval boundary before mixing
         #enables non sio-compositional mixing
+        
         def crin_bounds(model,i,j,k):
             lb = 0.0
             #Rich_data.at[i,'Cout']
@@ -622,12 +640,12 @@ class MENS(object):
         #model.clin = Var(model.i,model.j,model.k, initialize = clin_init, bounds=clin_bounds)
         
         #Amount of lean stream utilized
-        model.avlean = Var(model.j, initialize=0.04,bounds=(0.00001,5))
+        model.avlean = Var(model.j, initialize=0.3, within=NonNegativeReals)
         
         #Mass exchanged
         def m_init(model,i,j,k):
             if model.arex[i,j,k] ==1:
-                c=(self._rich_data.at[i,'F']*(self._rich_data.at[i,'Cin']-self._rich_data.at[i,'Cout']))
+                c=(self._rich_data.at[i,'F']*(self._rich_data.at[i,'Cin']-self._rich_data.at[i,'Cout']))/2
                 return c
             else:
                 return 0.0
@@ -654,7 +672,7 @@ class MENS(object):
         def L_init(model,j):
             if self._lean_data.at[j,'F']>0:
                 #print("LEAN DATA:   ",self._lean_data.at[j,'F'])
-                return self._lean_data.at[j,'F']
+                return self._lean_data.at[j,'F']/2
         
             else:
                 return 0.1
@@ -734,7 +752,7 @@ class MENS(object):
         #height of column
         def height_init(model, i,j,k):
             if model.arex[i,j,k] ==1:
-                return 0.1
+                return 2
             else:
                 return 0.0
     
@@ -1027,7 +1045,7 @@ class MENS(object):
 
         def KYTransferMass_(model, i,j,k):
             if model.arex[i,j,k]==1:
-                return model.kya[i,j,k]==model.kw*model.surfA[i,j,k]*model.surfAcor[i,j,k]*model.kwcor[i,j,k]*model.y[i,j,k]
+                return model.kya[i,j,k]==model.kw*model.surfA[i,j,k]*model.surfAcor[i,j,k]*model.kwcor[i,j,k]
             else:
                 return Constraint.Skip
     
@@ -1035,9 +1053,9 @@ class MENS(object):
     
         def HeightColumn_(model,i,j,k):
             if model.arex[i,j,k] == 1:
-                return model.height[i,j,k] == model.y[i,j,k]*model.M[i,j,k]/(((model.kya[i,j,k]*numpy.pi/4*((model.dia[i,j,k]*model.diacor[i,j,k])**2))) *\
-                                          (((1e-8+model.dcin[i,j,k]*model.dcout[i,j,(k+1)])*\
-                                           (model.dcin[i,j,k]+model.dcout[i,j,(k+1)])*0.5 + 1e-8)**(0.33333)+1e-6))
+                return model.height[i,j,k] == model.M[i,j,k]/(((model.kya[i,j,k]*numpy.pi/4*((model.dia[i,j,k]*model.diacor[i,j,k])**2))) *\
+                                          (((model.dcin[i,j,k]*model.dcout[i,j,(k+1)])*\
+                                           (model.dcin[i,j,k]+model.dcout[i,j,(k+1)])*0.5)**(0.33333)))
             else:
                 return Constraint.Skip
 
@@ -1052,7 +1070,8 @@ class MENS(object):
             for i in model.i:
                 for j in model.j:
                     for k in model.k:
-                        tac += model.AF*23805*((model.diacor[i,j,k]*model.dia[i,j,k])**0.57)*1.15*model.heightcor[i,j,k]*model.height[i,j,k]
+                        tac += model.AF*23805*((model.diacor[i,j,k]*model.dia[i,j,k])**0.57)*1.15*model.heightcor[i,j,k]*model.height[i,j,k]*model.y[i,j,k]
+                        tac += model.AF*numpy.pi*((model.dia[i,j,k]*model.diacor[i,j,k])**2)/4*model.height[i,j,k]*model.heightcor[i,j,k]*model.packcost[i,j,k]*model.packcostcor[i,j,k]
                         tac += model.fixcost*model.y[i,j,k]
             for j in model.j:
                 tac += model.L[j]*model.AC[j]            
@@ -1454,6 +1473,7 @@ class MENS(object):
                 for j in model.j:
                     for k in model.k:
                         tac += model.AF*23805*((model.diacor[i,j,k]*model.dia[i,j,k])**0.57)*1.15*model.heightcor[i,j,k]*model.height[i,j,k]
+                        tac += model.AF*numpy.pi*((model.dia[i,j,k]*model.diacor[i,j,k])**2)/4*model.height[i,j,k]*model.heightcor[i,j,k]*model.packcost[i,j,k]*model.packcostcor[i,j,k]
                         tac += model.fixcost*model.y[i,j,k]
             for j in model.j:
                 tac += model.L1[j]*model.AC[j]                    

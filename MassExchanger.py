@@ -1631,7 +1631,7 @@ class mass_exchanger(object):
         m.del_component(m.loverdlo)
         
         def loverdlo_(m):
-            return m.height >= 1*m.diameter
+            return m.height >= 2*m.diameter
             
         m.loverdlo = Constraint(rule=loverdlo_)
        
@@ -1721,6 +1721,31 @@ class mass_exchanger(object):
         # POST PROCESSING AND PRINT
         #======================================== 
         #display(m)
+        
+        print(type(results))
+        if results == "Failed epically":
+            print("The exchanger problem could not be solved")
+            
+        success_solve = bool
+
+        print("results type: ",type(results))
+        if results == 'failed epically':
+            print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
+            success_solve = False
+        elif not isinstance(results, str):
+            if isinstance(results, pyomo.core.base.PyomoModel.ConcreteModel):
+                print("model did not solve correctly, so it is skipped")
+                success_solve = False
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                success_solve=True
+            else:
+                #Should add way to deal with unsolved NLPs (increase elements?)
+                print("NLP1 failed.")
+                success_solve = False
+        else:
+            success_solve = False
+        print("solve success = ", success_solve) 
+       
         q= m.AF*23805*(m.diameter**0.57)*1.15*m.height()
         w=m.AF*pi*(m.diameter()**2)/4*m.height()*m.PackCost
         #print(m.FixCost, "    ",q,"   ", w)
@@ -1745,15 +1770,11 @@ class mass_exchanger(object):
         #m.display()
         print('=============================================================================================')
         print(results)
-        print(type(results))
-        if results == "Failed epically":
-            print("The exchanger problem could not be solved")
-        #results.pprint
         #m.load(results)
         #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
         #    print("The exchanger problem could not be solved")
             #raise Exception("Could not find a valid model to continue iterations")
-        return m, results, presolve_clone
+        return m, results, presolve_clone, success_solve
 #CRin_Side = {}
 #CRin_Side['R1'] = 0.07
 #CRin_Side['L2'] = 0.045

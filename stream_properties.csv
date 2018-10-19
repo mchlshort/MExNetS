@@ -5,8 +5,8 @@ RHOL,L1,900
 RHOL,L2,842.5
 aci,L1,117360
 aci,L2,176040
-surften,L1,0.00728
-surften,L2,0.00225
+surften,L1,0.0728
+surften,L2,0.0225
 visRich,R1,1.88648E-05
 visRich,R2,1.58723E-05
 vis,L1,0.0011
