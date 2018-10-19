@@ -1,0 +1,10 @@
+,value
+kw,0.05
+omega,0.0001
+AF,0.2
+ACH,618
+fixcost,30000
+EMAC,0.000001
+diameter,0.35
+packcost,1000
+SurfA,300
