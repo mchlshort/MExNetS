@@ -272,7 +272,7 @@ class HybridStrategy(object):
         print("NLP MEX fix costs: ", fixcosts) 
         utilitycosts = 0
         for j in MENS_model.j:
-            utilitycosts = value(MENS_model.L1[j])*value(MENS_model.AC[j])
+            utilitycosts += value(MENS_model.L1[j])*value(MENS_model.AC[j])
         print("NLP MEX utility costs: ", utilitycosts)     
         realval = capval+ fixcosts+ utilitycosts
         
