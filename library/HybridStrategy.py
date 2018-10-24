@@ -318,14 +318,23 @@ class HybridStrategy(object):
             for i in new_cors:
                 previous_corrections[i] = 1
         
-        # second we compare the correction factors        
-        stop_flag2 = True
-        for i in new_cors:
-            #print(i)
-            comp = new_cors[i]/previous_corrections[i]
-            if comp > tol:
-                stop_flag2 = False
-        print(stop_flag1,stop_flag2)
+        # second we compare the correction factors 
+        stop_flag2 = False
+        if self.iter_count>=2:
+            stop_flag2 = True
+            for i in new_cors:
+                print(i)
+                comp = new_cors[i]/previous_corrections[i]
+                print(comp)
+                if comp >= 1 + tol:
+                    stop_flag2 = False
+                    print(stop_flag1,stop_flag2)
+                elif comp <= 1 - tol:
+                    stop_flag2 = False
+                    print(stop_flag1,stop_flag2)
+                else:
+                    top_flag2 = True  
+                    
         if stop_flag2 == True or stop_flag1 == True:
             print("There was no change in correction facotrs between consecutive runs. This means that the solution was found")
             return True
