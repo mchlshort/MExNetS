@@ -23,8 +23,8 @@ import timeit
 import sys
 #import csv
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-from MassExchanger import *
-from MENS_MINLP import *
+from library.MassExchanger import *
+from library.MENS_MINLP import *
 
 __author__ = "Michael Short"
 __copyright__ = "Copyright 2018"
