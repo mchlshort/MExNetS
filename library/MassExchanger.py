@@ -2094,11 +2094,13 @@ class mass_exchanger(object):
 
         m.Aid = Constraint(rule = Aid_) 
 
+        m.del_component(m.packingFactorEq)
         def packingFactorEq_(m):
             return m.packfact == (2.0034)*(m.packsize**(-1.564))
         
         m.packingFactorEq = Constraint(rule=packingFactorEq_)
         
+        m.del_component(m.AreaofPackingEq)
         def AreaofPackingEq_(m):
             return m.SpecAreaPacking == (5.0147)*(m.packsize**(-0.978))
         
@@ -2109,16 +2111,19 @@ class mass_exchanger(object):
         
         #m.PackingDensityEq = Constraint(rule=PackingDensityEq_)
         
+        m.del_component(m.PackVoidEq)
         def PackVoidEq_(m):
             return m.packVoid == 0.0569*log(m.packsize)+0.9114
         
         m.PackVoidEq = Constraint(rule=PackVoidEq_)
         
+        m.del_component(m.PackCostEq)
         def PackCostEq_(m):
             return m.PackCost == 397431*(m.packsize**(2)) - 53449*(m.packsize) + 2366.1
         
         m.PackCostEq = Constraint(rule=PackCostEq_)   
         
+        #m.del_component(m.packingFactorEq)
         def PackSizeCons_(m):
             return m.packsize *10 >= m.diameter
 
