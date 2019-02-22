@@ -328,24 +328,34 @@ class HybridStrategy(object):
         
         # second we compare the correction factors 
         stop_flag2 = False
+        stop_dict = dict()
         if self.iter_count>=2:
             stop_flag2 = True
             for i in new_cors:
+                print("jy1")
                 print(i)
                 comp = new_cors[i]/previous_corrections[i]
                 print(comp)
                 if comp >= 1 + tol:
-                    stop_flag2 = False
-                    print(stop_flag1,stop_flag2)
+                    stop_dict[i] = False
+                    print(stop_flag2)
                 elif comp <= 1 - tol:
-                    stop_flag2 = False
-                    print(stop_flag1,stop_flag2)
+                    stop_dict[i] = False
+                    print(stop_flag2)
                 else:
-                    stop_flag2 = True  
+                    stop_dict[i] = True
+                    
+        for k,v in stop_dict.items():
+            print("jy2")
+            print(k)
+            print(v)
+            if v == False:
+                stop_flag2 = False
+                
         print("Stop_flag 1 = difference between MINLP and NLP", stop_flag1)   
         print("Stop_flag 2 = difference between correction factors", stop_flag2)          
         if stop_flag2 == True or stop_flag1 == True:
-            print("There was no change in correction facotrs between consecutive runs. This means that the solution was found")
+            print("There was no change in correction factors between consecutive runs. This means that the solution was found")
             return True
         else:
             return False
