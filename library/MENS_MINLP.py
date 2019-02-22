@@ -67,6 +67,7 @@ class MENS(object):
         self._correction_factors = None
         self._parameters = parameter_data
         self._stream_properties = stream_properties
+        self.BARONsolved = False
         
         if correction_factors == None:
             print("No correction factors provided, so all assumed to equal 1")
@@ -256,7 +257,8 @@ class MENS(object):
         #opt = SolverFactory('bonmin',executable='./../../../../cygwin64/home/Michael/Bonmin-1.8.6/build/bin/bonmin')
         #opt = SolverFactory('./../../Bonmin/build/bin/bonmin')
         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                print("successfully solved with BARON")
+            self.BARONsolved = True    
+            print("successfully solved with BARON")
         else:
             opt = SolverFactory('./../../../Bonmin/build/bin/bonmin')
             options={}
@@ -1555,6 +1557,9 @@ class MENS(object):
             model.dcin.pprint()
             model.dcout.pprint()
             model.y.pprint()
+        model.baronsolved = False
+        if self.BARONsolved == True:
+            model.baronsolved = True
         #print(results)
         return model,results
     
