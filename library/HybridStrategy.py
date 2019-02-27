@@ -332,23 +332,19 @@ class HybridStrategy(object):
         if self.iter_count>=2:
             stop_flag2 = True
             for i in new_cors:
-                print("jy1")
-                print(i)
+
                 comp = new_cors[i]/previous_corrections[i]
-                print(comp)
+
                 if comp >= 1 + tol:
                     stop_dict[i] = False
-                    print(stop_flag2)
+
                 elif comp <= 1 - tol:
                     stop_dict[i] = False
-                    print(stop_flag2)
+
                 else:
                     stop_dict[i] = True
                     
         for k,v in stop_dict.items():
-            print("jy2")
-            print(k)
-            print(v)
             if v == False:
                 stop_flag2 = False
                 
@@ -359,6 +355,15 @@ class HybridStrategy(object):
             return True
         else:
             return False
+        
+    def cut_generator(self, cut_type):
+        '''This function will serve to generate the cuts to the MINLP problem based on the previous solution.
+        These cuts will rely on whether the optimization problem is solved with a global solver such as BARON, 
+        or whether a local solution was obtained. The options need to be supplied as a dictionary with the keys
+        being the option name and the value being True or False. The types of cuts that we can add, will include:
+            cut_type (dict): dictionary that admit the following keywords as keys:
+                'bin_cut'
+        '''
         
         
     def run_hybrid_strategy(self, max_iter=None, cor_filter_size=None,rich_data=None,lean_data=None, correction_factors = None, parameter_data=None, stream_properties = None, tol = 0.02, exname = None):
@@ -492,7 +497,8 @@ class HybridStrategy(object):
                             FlowM[i] = MENS_solved.M[i,j,k].value/(MENS_solved.cr[i,k].value-MENS_solved.cr[i,(k+1)].value)
                             FlowM[j] = MENS_solved.M[i,j,k].value/(MENS_solved.cl[j,k].value-MENS_solved.cl[j,(k+1)].value)
                             ME_inits = self._obtain_initializations(MENS_solved,i,j,k)   #, me_inits=ME_inits
-                            mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties)
+                            nfe = 100
+                            mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
                             ME1, success1, presolve_1 = mx.Construct_pyomo_model()
                             ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
                             ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
@@ -508,7 +514,7 @@ class HybridStrategy(object):
                                     success = success6
                                 else:
                                     print("The initial exchanger solution attempt failed. Increasing FEs")
-                                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=400,ncp = 3)
+                                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=(nfe*4),ncp = 3)
                                     ME1, success1, presolve_1 = mx.Construct_pyomo_model()
                                     ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
                                     ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)

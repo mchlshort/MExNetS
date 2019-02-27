@@ -94,17 +94,310 @@ class mass_exchanger(object):
             results = solver.solve(m1,tee=True, solver = 'conopt')
         except:
             print("conopt failed")
-            #results = "fail"
-            #results.solver =
-            #results.solver.status = 'Fail'
-            #results.solver.termination_condition = "Fail"
-        
+            print("CONOPT assumed unsuccessful... IPOPT it is")
+            solver= SolverFactory('ipopt')
+            options={}
+            try:
+                results = solver.solve(m,tee=False, options=options)
+                #m.load(results)
+    
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                    print("First solve was infeasible")
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible")
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
+                        results = solver.solve(m,tee=False, options=options2) 
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status:",  results.solver.status)
+                                #results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            #results = m
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)  
+                        #results = m                      
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  results.solver.status)
+                    #results = m
+            except:
+                print("Something failed during the solve process!")
+                try:
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible")
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #options['bound_push'] =1e-5
+                        results = solver.solve(m,tee=False, options=options2) 
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options3['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)    
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)
+                        results = m
+                except:
+                    print("Something failed again during the solve")
+                    try:
+                        
+                        options4 = {}
+                        options4['mu_init'] = 1e-6
+                        options4['bound_push'] =1e-6
+                        results = solver.solve(m,tee=False, options=options3)
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options4 = {}
+                            options4['mu_init'] = 1e-6
+                            #options['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4) 
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                print("Second solve was infeasible")
+                                options4 = {}
+                                options4['mu_init'] = 1e-5
+                                options4['bound_push'] =1e-5
+                                results = solver.solve(m,tee=False, options=options4)
+                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                    print("successfully solved")
+                                elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                    solver = SolverFactory('baron')
+                                    results = solver.solve(m,tee=True)    
+                                else:
+                                    print("Cannot determine cause of fault")
+                                    print ("Solver Status: ",  results.solver.status)
+                                    results = "Failed epically"
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status: ",  results.solver.status)
+                                results = "Failed epically"
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = "Failed epically"
+                        
+                    except:
+                        try:
+                            print("Something failed again again during the solve")
+                            options4 = {}
+                            options4['mu_init'] = 1e-5
+                            options4['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = "Failed epically"  
+                        except:
+                            results = "Failed epically"
+                            pass
+
         print("This is to see why we are still solving with ipopt")
-        print(results)
-        print(results.solver.status)
-        print(results.solver.termination_condition)
-        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
-            print("successfully solved using conopt")  
+        
+        if results == "Failed epically":
+            print("CONOPT assumed unsuccessful... IPOPT it is")
+            solver= SolverFactory('ipopt')
+            options={}
+            try:
+                results = solver.solve(m,tee=False, options=options)
+                #m.load(results)
+    
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                    print("First solve was infeasible")
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible")
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
+                        results = solver.solve(m,tee=False, options=options2) 
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status:",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)  
+                        results = m                      
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  results.solver.status)
+                    results = m
+            except:
+                print("Something failed during the solve process!")
+                try:
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible")
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #options['bound_push'] =1e-5
+                        results = solver.solve(m,tee=False, options=options2) 
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options3['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)    
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)
+                        results = m
+                except:
+                    print("Something failed again during the solve")
+                    try:
+                        
+                        options4 = {}
+                        options4['mu_init'] = 1e-6
+                        options4['bound_push'] =1e-6
+                        results = solver.solve(m,tee=False, options=options3)
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options4 = {}
+                            options4['mu_init'] = 1e-6
+                            #options['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4) 
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                print("Second solve was infeasible")
+                                options4 = {}
+                                options4['mu_init'] = 1e-5
+                                options4['bound_push'] =1e-5
+                                results = solver.solve(m,tee=False, options=options4)
+                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                    print("successfully solved")
+                                #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                #    solver = SolverFactory('./../../BARON/baron')
+                                #    results = solver.solve(m,tee=True)    
+                                else:
+                                    print("Cannot determine cause of fault")
+                                    print ("Solver Status: ",  results.solver.status)
+                                    results = m
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status: ",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                        
+                    except:
+                        try:
+                            print("Something failed again again during the solve")
+                            options4 = {}
+                            options4['mu_init'] = 1e-5
+                            options4['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = "Failed epically"  
+                        except:
+                            results = m
+                            results = "Failed epically"
+        elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+            print("successfully solved with CONOPT")
+        elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+            print("successfully solved using IPOPT")
         else:
             print("CONOPT assumed unsuccessful... IPOPT it is")
             solver= SolverFactory('ipopt')
@@ -1758,7 +2051,7 @@ class mass_exchanger(object):
         
         def PackSizeCons_(m):
             return m.packsize *20 >= m.diameter
-        #m.PackSizeCons = Constraint(rule=PackCostEq_)
+        m.PackSizeCons = Constraint(rule=PackCostEq_)
         #========================================
         # OBJECTIVE and SOLVE
         #======================================== 
@@ -2186,10 +2479,10 @@ class mass_exchanger(object):
         
         m.PackCostEq = Constraint(rule=PackCostEq_)   
         
-        #m.del_component(m.packingFactorEq)
-        def PackSizeCons_(m):
-            return m.packsize *10 >= m.diameter
-
+        #m.del_component(m.m.del_component(m.Obj4))
+        #def PackSizeCons_(m):
+        #    return m.packsize *10 >= m.diameter
+        m.del_component(m.PackSizeCons)
         #========================================
         # OBJECTIVE and SOLVE
         #======================================== 

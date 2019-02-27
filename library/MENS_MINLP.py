@@ -68,6 +68,7 @@ class MENS(object):
         self._parameters = parameter_data
         self._stream_properties = stream_properties
         self.BARONsolved = False
+        self.DICOPTsolved = False
         
         if correction_factors == None:
             print("No correction factors provided, so all assumed to equal 1")
@@ -175,7 +176,7 @@ class MENS(object):
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
                         elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            solver = SolverFactory('./../../BARON/baron')
+                            solver = SolverFactory('baron')
                             results = solver.solve(m,tee=True)
                             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                                 print("successfully solved")
@@ -226,6 +227,8 @@ class MENS(object):
             results = opt.solve(m,options = options,tee=False)
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
+                self.BARONsolved = True
+                
             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                 print("First solve was infeasible, solving with changed match options")
                 options['EpsR']= 0.02
@@ -233,6 +236,7 @@ class MENS(object):
                 
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
+                    self.BARONsolved = True
                 
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                     print("Second solve was infeasible, solving with changed match options")
@@ -240,6 +244,7 @@ class MENS(object):
                     results = opt.solve(m,options = options,tee=False)
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
+                        self.BARONsolved = True
                     
                     else:
                         print("Cannot determine cause of fault")
@@ -256,9 +261,26 @@ class MENS(object):
                     
         #opt = SolverFactory('bonmin',executable='./../../../../cygwin64/home/Michael/Bonmin-1.8.6/build/bin/bonmin')
         #opt = SolverFactory('./../../Bonmin/build/bin/bonmin')
-        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+        '''if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
             self.BARONsolved = True    
             print("successfully solved with BARON")
+        else:
+            solver=SolverFactory('gams')
+            options={}
+            m1 = m
+            print("Solving with DICOPT")
+            try:
+                results = solver.solve(m1,tee=True, solver = 'dicopt')
+
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    self.DICOPTsolved = True    
+                    print("successfully solved with DICOPT")
+            except:
+                pass
+        '''   
+        print("BARONsolved:", self.BARONsolved)
+        if self.BARONsolved == True:
+            print("Solved using one of the global solvers")
         else:
             opt = SolverFactory('./../../../Bonmin/build/bin/bonmin')
             options={}
