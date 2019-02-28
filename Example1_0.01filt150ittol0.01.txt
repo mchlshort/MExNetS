@@ -1,0 +1,2154 @@
+User-defined tolerance for correction factors:  0.01
+User-defined maximum number of iterations:  2
+User-defined correction factor filter:  0.01
+No correction factors provided, so all assumed to equal 1
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------ITERATION NUMBER:  0 -----------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+successfully solved
+THIS IS THE END OF THE NLP INITIALIZATION
+MEN_init
+height : Size=16, Index=height_index
+    Key             : Lower : Value               : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :   0.0 :  0.3645904513596376 :  None : False : False :  Reals
+    ('R1', 'L1', 2) :   0.0 :  3.4934701572367484 :  None : False : False :  Reals
+    ('R1', 'L1', 3) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R1', 'L1', 4) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) :   0.0 :                 0.0 :  None : False : False :  Reals
+    ('R1', 'L2', 2) :   0.0 :                 0.0 :  None : False : False :  Reals
+    ('R1', 'L2', 3) :   0.0 :  1.1447898105734113 :  None : False : False :  Reals
+    ('R1', 'L2', 4) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L1', 1) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) :   0.0 : 0.26924883796411786 :  None : False : False :  Reals
+    ('R2', 'L1', 3) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L1', 4) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) :   0.0 :                 0.0 :  None : False : False :  Reals
+    ('R2', 'L2', 3) :   0.0 :  0.3247918384533056 :  None : False : False :  Reals
+    ('R2', 'L2', 4) :   0.0 :                 0.0 :  None : False :  True :  Reals
+M : Size=16, Index=M_index
+    Key             : Lower : Value                 : Upper               : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :     0 :    0.0339079692022501 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L1', 2) :     0 :  0.028255956018522606 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L1', 3) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R1', 'L1', 4) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R1', 'L2', 1) :     0 :                   0.0 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L2', 2) :     0 :                   0.0 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L2', 3) :     0 : 0.0005660826034593637 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L2', 4) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L1', 1) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L1', 2) :     0 :   0.00500469206975417 :             0.00509 : False : False :  Reals
+    ('R2', 'L1', 3) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L1', 4) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L2', 1) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L2', 2) :     0 :                   0.0 :             0.00509 : False : False :  Reals
+    ('R2', 'L2', 3) :     0 : 8.530881525047577e-05 :             0.00509 : False : False :  Reals
+    ('R2', 'L2', 4) :     0 :                   0.0 :                   0 : False :  True :  Reals
+L : Size=2, Index=j
+    Key : Lower  : Value              : Upper  : Fixed : Stale : Domain
+     L1 : 0.0001 : 1.5237887280400781 : 1.5862 : False : False :  Reals
+     L2 :  1e-05 : 0.7591886744049181 :    100 : False : False :  Reals
+cr : Size=8, Index=cr_index
+    Key       : Lower  : Value                 : Upper : Fixed : Stale : Domain
+    ('R1', 1) : 0.0003 :                  0.07 :  0.07 : False : False :  Reals
+    ('R1', 2) : 0.0003 :   0.03232448722265396 :  0.07 : False : False :  Reals
+    ('R1', 3) : 0.0003 : 0.0009289756706326349 :  0.07 : False : False :  Reals
+    ('R1', 4) : 0.0003 :                0.0003 :  0.07 : False : False :  Reals
+    ('R2', 1) : 0.0001 :                 0.051 : 0.051 : False : False :  Reals
+    ('R2', 2) : 0.0001 :                 0.051 : 0.051 : False : False :  Reals
+    ('R2', 3) : 0.0001 : 0.0009530848182144205 : 0.051 : False : False :  Reals
+    ('R2', 4) : 0.0001 :                0.0001 : 0.051 : False : False :  Reals
+cl : Size=8, Index=cl_index
+    Key       : Lower                  : Value                  : Upper   : Fixed : Stale : Domain
+    ('L1', 1) :  0.0008699999999999999 :                0.04495 : 0.04495 : False : False :  Reals
+    ('L1', 2) :  0.0008699999999999999 :    0.02269759486068798 : 0.04495 : False : False :  Reals
+    ('L1', 3) :  0.0008699999999999999 :  0.0008699999999999999 : 0.04495 : False : False :  Reals
+    ('L1', 4) :  0.0008699999999999999 :  0.0008699999999999999 : 0.04495 : False : False :  Reals
+    ('L2', 1) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 2) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 3) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 4) : 5.2000000000000004e-05 : 5.2000000000000004e-05 : 0.00091 : False : False :  Reals
+dcin : Size=16, Index=dcin_index
+    Key             : Lower : Value                  : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) : 1e-06 :     0.0250500000001022 :     1 : False : False :  Reals
+    ('R1', 'L1', 2) : 1e-06 :   0.009626892361965848 :     1 : False : False :  Reals
+    ('R1', 'L1', 3) :     0 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L1', 4) :     0 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) : 1e-06 :    0.06909000665403889 :     1 : False : False :  Reals
+    ('R1', 'L2', 2) : 1e-06 :    0.03141447722286067 :     1 : False : False :  Reals
+    ('R1', 'L2', 3) : 1e-06 : 1.8980483822709755e-05 :     1 : False : False :  Reals
+    ('R1', 'L2', 4) :     0 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R2', 'L1', 1) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) : 1e-06 :   0.028302415139247583 :     1 : False : False :  Reals
+    ('R2', 'L1', 3) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 4) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) :     0 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) : 1e-06 :     0.0500900000001422 :     1 : False : False :  Reals
+    ('R2', 'L2', 3) : 1e-06 :  4.307963132119088e-05 :     1 : False : False :  Reals
+    ('R2', 'L2', 4) :     0 :    0.05094799999999999 :  None : False :  True :  Reals
+dcout : Size=16, Index=dcout_index
+    Key             : Lower : Value                  : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :     0 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L1', 2) : 1e-06 :    0.00962689236196588 :     1 : False : False :  Reals
+    ('R1', 'L1', 3) : 1e-06 :  5.898567049451896e-05 :     1 : False : False :  Reals
+    ('R1', 'L1', 4) :     0 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) :     0 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 2) : 1e-06 :   0.031414477222860906 :     1 : False : False :  Reals
+    ('R1', 'L2', 3) : 1e-06 :  1.897048371640837e-05 :     1 : False : False :  Reals
+    ('R1', 'L2', 4) : 1e-06 : 0.00024800000036026776 :     1 : False : False :  Reals
+    ('R2', 'L1', 1) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 3) : 1e-06 :  8.309481819440075e-05 :     1 : False : False :  Reals
+    ('R2', 'L1', 4) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) :     0 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) :     0 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 3) : 1e-06 : 4.3079631298193156e-05 :     1 : False : False :  Reals
+    ('R2', 'L2', 4) : 1e-06 :  4.800000024463951e-05 :     1 : False : False :  Reals
+y : Size=16, Index=y_index, Domain=Any, Default=None, Mutable=False
+    Key             : Value
+    ('R1', 'L1', 1) :     1
+    ('R1', 'L1', 2) :     1
+    ('R1', 'L1', 3) :     0
+    ('R1', 'L1', 4) :     0
+    ('R1', 'L2', 1) :     1
+    ('R1', 'L2', 2) :     1
+    ('R1', 'L2', 3) :     1
+    ('R1', 'L2', 4) :     0
+    ('R2', 'L1', 1) :     0
+    ('R2', 'L1', 2) :     1
+    ('R2', 'L1', 3) :     0
+    ('R2', 'L1', 4) :     0
+    ('R2', 'L2', 1) :     0
+    ('R2', 'L2', 2) :     1
+    ('R2', 'L2', 3) :     1
+    ('R2', 'L2', 4) :     0
+MINLP MODEL SOLVING
+L2
+L1
+==================ATTEMPTING TO SOLVE WITH BARON==========================
+successfully solved
+successfully solved with BARON
+
+Problem: 
+- Name: problem
+  Lower bound: 447695.24939
+  Upper bound: 447740.018915
+  Number of objectives: 1
+  Number of constraints: 108
+  Number of variables: 103
+  Sense: unknown
+Solver: 
+- Status: ok
+  Termination condition: optimal
+  Error rc: 0
+  Time: 0.8485283851623535
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+height : Size=16, Index=height_index
+    Key             : Lower : Value                : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :   0.0 :                  0.0 :  None : False : False : NonNegativeReals
+    ('R1', 'L1', 2) :   0.0 :   3.7868059185601397 :  None : False : False : NonNegativeReals
+    ('R1', 'L1', 3) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R1', 'L1', 4) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R1', 'L2', 1) :   0.0 :                  0.0 :   0.0 : False : False : NonNegativeReals
+    ('R1', 'L2', 2) :   0.0 :                  0.0 :   0.0 : False : False : NonNegativeReals
+    ('R1', 'L2', 3) :   0.0 :  0.04421055987736276 :  None : False : False : NonNegativeReals
+    ('R1', 'L2', 4) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L1', 1) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L1', 2) :   0.0 :   0.3926912932289792 :  None : False : False : NonNegativeReals
+    ('R2', 'L1', 3) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L1', 4) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L2', 1) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L2', 2) :   0.0 :                  0.0 :   0.0 : False : False : NonNegativeReals
+    ('R2', 'L2', 3) :   0.0 : 0.006520457287690825 :  None : False : False : NonNegativeReals
+    ('R2', 'L2', 4) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+M : Size=16, Index=M_index
+    Key             : Lower : Value                 : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :   0.0 :                   0.0 :  None : False : False :  Reals
+    ('R1', 'L1', 2) :   0.0 :  0.062180100000000016 :  None : False : False :  Reals
+    ('R1', 'L1', 3) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R1', 'L1', 4) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R1', 'L2', 1) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R1', 'L2', 2) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R1', 'L2', 3) :   0.0 :  0.000549899999999999 :  None : False : False :  Reals
+    ('R1', 'L2', 4) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L1', 1) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L1', 2) :   0.0 :             0.0050089 :  None : False : False :  Reals
+    ('R2', 'L1', 3) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L1', 4) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L2', 1) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L2', 2) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L2', 3) :   0.0 : 8.110000000000062e-05 :  None : False : False :  Reals
+    ('R2', 'L2', 4) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+L1 : Size=2, Index=j
+    Key : Lower  : Value              : Upper  : Fixed : Stale : Domain
+     L1 : 0.0001 : 1.5242513611615245 : 1.5862 : False : False :  Reals
+     L2 :  1e-05 : 0.7354312354312356 :    100 : False : False :  Reals
+cr : Size=8, Index=cr_index
+    Key       : Lower  : Value                 : Upper : Fixed : Stale : Domain
+    ('R1', 1) : 0.0003 :                  0.07 :  0.07 : False : False :  Reals
+    ('R1', 2) : 0.0003 :                  0.07 :  0.07 : False : False :  Reals
+    ('R1', 3) : 0.0003 : 0.0009109999999999951 :  0.07 : False : False :  Reals
+    ('R1', 4) : 0.0003 :                0.0003 :  0.07 : False : False :  Reals
+    ('R2', 1) : 0.0001 :                 0.051 : 0.051 : False : False :  Reals
+    ('R2', 2) : 0.0001 :                 0.051 : 0.051 : False : False :  Reals
+    ('R2', 3) : 0.0001 : 0.0009110000000000021 : 0.051 : False : False :  Reals
+    ('R2', 4) : 0.0001 :                0.0001 : 0.051 : False : False :  Reals
+cl : Size=8, Index=cl_index
+    Key       : Lower                  : Value                  : Upper   : Fixed : Stale : Domain
+    ('L1', 1) :  0.0008699999999999999 :                0.04495 : 0.04495 : False : False :  Reals
+    ('L1', 2) :  0.0008699999999999999 :                0.04495 : 0.04495 : False : False :  Reals
+    ('L1', 3) :  0.0008699999999999999 :  0.0008699999999999999 : 0.04495 : False : False :  Reals
+    ('L1', 4) :  0.0008699999999999999 :  0.0008699999999999999 : 0.04495 : False : False :  Reals
+    ('L2', 1) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 2) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 3) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 4) : 5.2000000000000004e-05 : 5.2000000000000004e-05 : 0.00091 : False : False :  Reals
+dcin : Size=16, Index=dcin_index
+    Key             : Lower : Value                 : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) : 1e-06 :   0.02507781900504854 :     1 : False : False :  Reals
+    ('R1', 'L1', 2) : 1e-06 :  0.025049999999999992 :     1 : False : False :  Reals
+    ('R1', 'L1', 3) : 1e-06 :   0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L1', 4) : 1e-06 :   0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) : 1e-06 :   0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 2) : 1e-06 :   0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 3) : 1e-06 :                 1e-06 :     1 : False : False :  Reals
+    ('R1', 'L2', 4) : 1e-06 :   0.06994800000000001 :  None : False :  True :  Reals
+    ('R2', 'L1', 1) : 1e-06 :  0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) : 1e-06 : 0.0060499999999999825 :     1 : False : False :  Reals
+    ('R2', 'L1', 3) : 1e-06 :  0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 4) : 1e-06 :  0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) : 1e-06 :   0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) : 1e-06 :   0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 3) : 1e-06 :                 1e-06 :     1 : False : False :  Reals
+    ('R2', 'L2', 4) : 1e-06 :   0.05094799999999999 :  None : False :  True :  Reals
+dcout : Size=16, Index=dcout_index
+    Key             : Lower : Value                  : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) : 1e-06 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L1', 2) : 1e-06 :   0.024949999999999993 :     1 : False : False :  Reals
+    ('R1', 'L1', 3) : 1e-06 :  4.100000000000011e-05 :     1 : False : False :  Reals
+    ('R1', 'L1', 4) : 1e-06 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) : 1e-06 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 2) : 1e-06 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 3) : 1e-06 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 4) : 1e-06 : 0.00024799999999999996 :     1 : False : False :  Reals
+    ('R2', 'L1', 1) : 1e-06 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) : 1e-06 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 3) : 1e-06 :  4.099999999999937e-05 :     1 : False : False :  Reals
+    ('R2', 'L1', 4) : 1e-06 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) : 1e-06 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) : 1e-06 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 3) : 1e-06 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 4) : 1e-06 : 4.8000000000000015e-05 :     1 : False : False :  Reals
+y : Size=16, Index=y_index
+    Key             : Lower : Value : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L1', 2) :     0 :   1.0 :     1 : False : False : Binary
+    ('R1', 'L1', 3) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L1', 4) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L2', 1) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L2', 2) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L2', 3) :     0 :   1.0 :     1 : False : False : Binary
+    ('R1', 'L2', 4) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L1', 1) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L1', 2) :     0 :   1.0 :     1 : False : False : Binary
+    ('R2', 'L1', 3) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L1', 4) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L2', 1) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L2', 2) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L2', 3) :     0 :   1.0 :     1 : False : False : Binary
+    ('R2', 'L2', 4) :     0 :   0.0 :     1 : False : False : Binary
+The first solve of the MINLP is feasible
+unknown
+
+Problem: 
+- Name: problem
+  Lower bound: 447695.24939
+  Upper bound: 447740.018915
+  Number of objectives: 1
+  Number of constraints: 108
+  Number of variables: 103
+  Sense: unknown
+Solver: 
+- Status: ok
+  Termination condition: optimal
+  Error rc: 0
+  Time: 0.8485283851623535
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+MATCH:  0  match  R1 with  L2  is not a selected match in  1
+MATCH:  1  match  R1 with  L2  is not a selected match in  2
+SETTING UP THE PROBLEM FOR MATCH [i,j,k] =  R1 L2 3
+Setting up the 1st NLP subp-problem...
+Hi
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2105
+  Number of variables: 2105
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.30234241485595703
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+Hi
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 2nd NLP subp-problem
+visRich : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 1.88648e-05
+RHOG : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None :  1.14
+RHOL : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 842.5
+First solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2111
+  Number of variables: 2109
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.5191085338592529
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 3rd NLP subp-problem, deet in GAMS
+First solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2116
+  Number of variables: 2114
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 10.031803846359253
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 4th NLP subp-problem, final in GAMS
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status: warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 5th NLP subp-problem, pack in GAMS
+height : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 3.0075784491015707 :  None : False : False : NonNegativeReals
+First solve was infeasible
+successfully solved
+<class 'pyomo.opt.results.results_.SolverResults'>
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+FixCost      25309.291686114553 * diameter**0.57     3.8789286858935577 * PackCost
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 4.622575031937856 :  None : False : False : NonNegativeReals
+diameter : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 2.311287520962864 :  None : False : False : NonNegativeReals
+FloodAct : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 5986.8710430641395 :  None : False : False : NonNegativeReals
+Flood : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 5986.871043091543 :  None : False : False : NonNegativeReals
+ai : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 268.73455697736216 :  None : False : False : NonNegativeReals
+packfact : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1166.6890958291951 :  None : False : False : NonNegativeReals
+VelocityR : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.1881654258958309 :  None : False : False : NonNegativeReals
+VelocityL : Size=1, Index=None
+    Key  : Lower : Value                  : Upper : Fixed : Stale : Domain
+    None :     0 : 0.00018131289487406923 :  None : False : False : NonNegativeReals
+koga : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.010897608363878663 :  None : False : False : NonNegativeReals
+packsize : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.017059933004885442 :  None : False : False : NonNegativeReals
+PackCost : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1569.9324813383137 :  None : False : False : NonNegativeReals
+SpecAreaPacking : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 268.76402508263567 :  None : False : False : NonNegativeReals
+ReL : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.4518501635529086 :  None : False : False : NonNegativeReals
+ReG : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 42.30788715084288 :  None : False : False : NonNegativeReals
+packVoid : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.6797588104209439 :  None : False : False : NonNegativeReals
+=============================================================================================
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 7.030925035476685
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 7.030925035476685
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+ME5 results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+MATCH:  3  match  R1 with  L2  is not a selected match in  4
+MATCH:  4  match  R1 with  L1  is not a selected match in  1
+SETTING UP THE PROBLEM FOR MATCH [i,j,k] =  R1 L1 2
+Setting up the 1st NLP subp-problem...
+Hi
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2105
+  Number of variables: 2105
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.0839071273803711
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+Hi
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 2nd NLP subp-problem
+visRich : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 1.88648e-05
+RHOG : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None :  1.14
+RHOL : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 900.0
+First solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2111
+  Number of variables: 2109
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 1.0902776718139648
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 3rd NLP subp-problem, deet in GAMS
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2116
+  Number of variables: 2114
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 3.1896748542785645
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 4th NLP subp-problem, final in GAMS
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2117
+  Number of variables: 2115
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Solved To Acceptable Level.
+  Termination condition: optimal
+  Id: 1
+  Error rc: 0
+  Time: 9.803220748901367
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 5th NLP subp-problem, pack in GAMS
+height : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 3.3867745206043067 :  None : False : False : NonNegativeReals
+successfully solved
+<class 'pyomo.opt.results.results_.SolverResults'>
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+FixCost      25827.717149442575 * diameter**0.57     4.122207858487807 * PackCost
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 4.717262020116815 :  None : False : False : NonNegativeReals
+diameter : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 2.3586310150419836 :  None : False : False : NonNegativeReals
+FloodAct : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 7809.7891022894755 :  None : False : False : NonNegativeReals
+Flood : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 7809.789102405847 :  None : False : False : NonNegativeReals
+ai : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 320.0183428830109 :  None : False : False : NonNegativeReals
+packfact : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1705.5661624116703 :  None : False : False : NonNegativeReals
+VelocityR : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.18068735756445778 :  None : False : False : NonNegativeReals
+VelocityL : Size=1, Index=None
+    Key  : Lower : Value                  : Upper : Fixed : Stale : Domain
+    None :     0 : 0.00035872151858550716 :  None : False : False : NonNegativeReals
+koga : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.011406985256447283 :  None : False : False : NonNegativeReals
+packsize : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.013382398257465825 :  None : False : False : NonNegativeReals
+PackCost : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1721.9995502152435 :  None : False : False : NonNegativeReals
+SpecAreaPacking : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 340.7962077853251 :  None : False : False : NonNegativeReals
+ReL : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.9171331294735884 :  None : False : False : NonNegativeReals
+ReG : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 32.03949477955766 :  None : False : False : NonNegativeReals
+packVoid : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.6659439265921215 :  None : False : False : NonNegativeReals
+=============================================================================================
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 2.7338826656341553
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 2.7338826656341553
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+ME5 results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+MATCH:  6  match  R1 with  L1  is not a selected match in  3
+MATCH:  7  match  R1 with  L1  is not a selected match in  4
+MATCH:  8  match  R2 with  L2  is not a selected match in  1
+MATCH:  9  match  R2 with  L2  is not a selected match in  2
+SETTING UP THE PROBLEM FOR MATCH [i,j,k] =  R2 L2 3
+Setting up the 1st NLP subp-problem...
+Hi
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2105
+  Number of variables: 2105
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.14841294288635254
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+Hi
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 2nd NLP subp-problem
+visRich : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 1.58723e-05
+RHOG : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None :   1.5
+RHOL : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 842.5
+Something failed during the solve process!
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status:  warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 3rd NLP subp-problem, deet in GAMS
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2116
+  Number of variables: 2114
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Solved To Acceptable Level.
+  Termination condition: optimal
+  Id: 1
+  Error rc: 0
+  Time: 10.660841226577759
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 4th NLP subp-problem, final in GAMS
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status: warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 5th NLP subp-problem, pack in GAMS
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 39.57209959565527 :  None : False : False : NonNegativeReals
+First solve was infeasible
+Second solve was infeasible
+successfully solved
+<class 'pyomo.opt.results.results_.SolverResults'>
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+FixCost      8849.325697484015 * diameter**0.57     0.16580681008959447 * PackCost
+height : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1.6162709144925738 :  None : False : False : NonNegativeReals
+diameter : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.8081354622399803 :  None : False : False : NonNegativeReals
+FloodAct : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 27908.247025921588 :  None : False : False : NonNegativeReals
+Flood : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 27908.24702646197 :  None : False : False : NonNegativeReals
+ai : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1054.8741782444713 :  None : False : False : NonNegativeReals
+packfact : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 10519.66206397097 :  None : False : False : NonNegativeReals
+VelocityR : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.12997221795809796 :  None : False : False : NonNegativeReals
+VelocityL : Size=1, Index=None
+    Key  : Lower : Value                  : Upper : Fixed : Stale : Domain
+    None :     0 : 0.00021872853596196582 :  None : False : False : NonNegativeReals
+koga : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.0123454886710881 :  None : False : False : NonNegativeReals
+packsize : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 0.004181515234215 :  None : False : False : NonNegativeReals
+PackCost : Size=1, Index=None
+    Key  : Lower : Value            : Upper : Fixed : Stale : Domain
+    None :     0 : 2149.55130096409 :  None : False : False : NonNegativeReals
+SpecAreaPacking : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1063.1159024548992 :  None : False : False : NonNegativeReals
+ReL : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.1388654011007797 :  None : False : False : NonNegativeReals
+ReG : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 11.553705977640396 :  None : False : False : NonNegativeReals
+packVoid : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.5997540568514539 :  None : False : False : NonNegativeReals
+=============================================================================================
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 13.07408356666565
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 13.07408356666565
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+ME5 results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+MATCH:  11  match  R2 with  L2  is not a selected match in  4
+MATCH:  12  match  R2 with  L1  is not a selected match in  1
+SETTING UP THE PROBLEM FOR MATCH [i,j,k] =  R2 L1 2
+Setting up the 1st NLP subp-problem...
+Hi
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2105
+  Number of variables: 2105
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.19005703926086426
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+Hi
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 2nd NLP subp-problem
+visRich : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 1.58723e-05
+RHOG : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None :   1.5
+RHOL : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 900.0
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2111
+  Number of variables: 2109
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 3.770869016647339
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 3rd NLP subp-problem, deet in GAMS
+First solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2116
+  Number of variables: 2114
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.35575175285339355
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 4th NLP subp-problem, final in GAMS
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status: warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 5th NLP subp-problem, pack in GAMS
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 15.36990014196963 :  None : False : False : NonNegativeReals
+First solve was infeasible
+successfully solved
+<class 'pyomo.opt.results.results_.SolverResults'>
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+FixCost      8686.523256783092 * diameter**0.57     0.15682301023372644 * PackCost
+height : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1.5865361235369062 :  None : False : False : NonNegativeReals
+diameter : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 0.793268066768299 :  None : False : False : NonNegativeReals
+FloodAct : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 21824.456377155646 :  None : False : False : NonNegativeReals
+Flood : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 21824.456377156217 :  None : False : False : NonNegativeReals
+ai : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 713.0639312627227 :  None : False : False : NonNegativeReals
+packfact : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 7403.6503054612585 :  None : False : False : NonNegativeReals
+VelocityR : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.13488973938815482 :  None : False : False : NonNegativeReals
+VelocityL : Size=1, Index=None
+    Key  : Lower : Value                 : Upper : Fixed : Stale : Domain
+    None :     0 : 0.0002554632545587067 :  None : False : False : NonNegativeReals
+koga : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.01181276118780577 :  None : False : False : NonNegativeReals
+packsize : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.005234507340434193 :  None : False : False : NonNegativeReals
+PackCost : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 2097.2104532275694 :  None : False : False : NonNegativeReals
+SpecAreaPacking : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 853.4624371689042 :  None : False : False : NonNegativeReals
+ReL : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 0.293122931800985 :  None : False : False : NonNegativeReals
+ReG : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 14.936398763724734 :  None : False : False : NonNegativeReals
+packVoid : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.6125337430252247 :  None : False : False : NonNegativeReals
+=============================================================================================
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.6539413928985596
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.6539413928985596
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+ME5 results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+MATCH:  14  match  R2 with  L1  is not a selected match in  3
+MATCH:  15  match  R2 with  L1  is not a selected match in  4
+CHECKING FOR CONVERGENCE for iteration number:  0
+MINLP objective function value is  447740.01891530806
+exchanger.success for exchanger  R1 L2 3 = True
+exchanger.success for exchanger  R1 L1 2 = True
+exchanger.success for exchanger  R2 L2 3 = True
+exchanger.success for exchanger  R2 L1 2 = True
+NLP MEX shell costs:  98372.66885636038
+NLP MEX pack costs:  13873.397315694561
+NLP MEX cap costs:  112246.06617205494
+MINLP cap costs: 18900.169702256215
+NLP MEX fix costs:  120000.0
+NLP MEX utility costs:  308351.4544312312
+NLP objective function value is  540597.5206032861
+difference between real solution and MINLP solution is (%): 17.176827149401763
+Is this false?
+{(0, 'kwcor'): 1, (0, 'diacor'): 1, (0, 'heightcor'): 1, (0, 'packcostcor'): 1, (0, 'surfAcor'): 1, (1, 'kwcor'): 1, (1, 'diacor'): 1, (1, 'heightcor'): 1, (1, 'packcostcor'): 1, (1, 'surfAcor'): 1, (2, 'kwcor'): 0.99, (2, 'diacor'): 1.01, (2, 'heightcor'): 1.01, (2, 'packcostcor'): 1.01, (2, 'surfAcor'): 0.99, (3, 'kwcor'): 1, (3, 'diacor'): 1, (3, 'heightcor'): 1, (3, 'packcostcor'): 1, (3, 'surfAcor'): 1, (4, 'kwcor'): 1, (4, 'diacor'): 1, (4, 'heightcor'): 1, (4, 'packcostcor'): 1, (4, 'surfAcor'): 1, (5, 'kwcor'): 0.99, (5, 'diacor'): 1.01, (5, 'heightcor'): 1.01, (5, 'packcostcor'): 1.01, (5, 'surfAcor'): 1.01, (6, 'kwcor'): 1, (6, 'diacor'): 1, (6, 'heightcor'): 1, (6, 'packcostcor'): 1, (6, 'surfAcor'): 1, (7, 'kwcor'): 1, (7, 'diacor'): 1, (7, 'heightcor'): 1, (7, 'packcostcor'): 1, (7, 'surfAcor'): 1, (8, 'kwcor'): 1, (8, 'diacor'): 1, (8, 'heightcor'): 1, (8, 'packcostcor'): 1, (8, 'surfAcor'): 1, (9, 'kwcor'): 1, (9, 'diacor'): 1, (9, 'heightcor'): 1, (9, 'packcostcor'): 1, (9, 'surfAcor'): 1, (10, 'kwcor'): 0.99, (10, 'diacor'): 1.01, (10, 'heightcor'): 1.01, (10, 'packcostcor'): 1.01, (10, 'surfAcor'): 1.01, (11, 'kwcor'): 1, (11, 'diacor'): 1, (11, 'heightcor'): 1, (11, 'packcostcor'): 1, (11, 'surfAcor'): 1, (12, 'kwcor'): 1, (12, 'diacor'): 1, (12, 'heightcor'): 1, (12, 'packcostcor'): 1, (12, 'surfAcor'): 1, (13, 'kwcor'): 0.99, (13, 'diacor'): 1.01, (13, 'heightcor'): 1.01, (13, 'packcostcor'): 1.01, (13, 'surfAcor'): 1.01, (14, 'kwcor'): 1, (14, 'diacor'): 1, (14, 'heightcor'): 1, (14, 'packcostcor'): 1, (14, 'surfAcor'): 1, (15, 'kwcor'): 1, (15, 'diacor'): 1, (15, 'heightcor'): 1, (15, 'packcostcor'): 1, (15, 'surfAcor'): 1}
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------ITERATION NUMBER:  1 -----------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+successfully solved
+THIS IS THE END OF THE NLP INITIALIZATION
+MEN_init
+height : Size=16, Index=height_index
+    Key             : Lower : Value               : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :   0.0 :  0.3639015100100285 :  None : False : False :  Reals
+    ('R1', 'L1', 2) :   0.0 :  3.4227739465151736 :  None : False : False :  Reals
+    ('R1', 'L1', 3) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R1', 'L1', 4) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) :   0.0 :                 0.0 :  None : False : False :  Reals
+    ('R1', 'L2', 2) :   0.0 :                 0.0 :  None : False : False :  Reals
+    ('R1', 'L2', 3) :   0.0 :  1.1422953952811423 :  None : False : False :  Reals
+    ('R1', 'L2', 4) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L1', 1) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) :   0.0 : 0.26425682097356035 :  None : False : False :  Reals
+    ('R2', 'L1', 3) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L1', 4) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) :   0.0 :                 0.0 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) :   0.0 :                 0.0 :  None : False : False :  Reals
+    ('R2', 'L2', 3) :   0.0 : 0.31882641844293097 :  None : False : False :  Reals
+    ('R2', 'L2', 4) :   0.0 :                 0.0 :  None : False :  True :  Reals
+M : Size=16, Index=M_index
+    Key             : Lower : Value                 : Upper               : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :     0 :   0.03386988011030279 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L1', 2) :     0 :  0.028293920273204858 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L1', 3) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R1', 'L1', 4) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R1', 'L2', 1) :     0 :                   0.0 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L2', 2) :     0 :                   0.0 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L2', 3) :     0 : 0.0005662075967522042 : 0.06273000000000001 : False : False :  Reals
+    ('R1', 'L2', 4) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L1', 1) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L1', 2) :     0 :  0.005004704396725384 :             0.00509 : False : False :  Reals
+    ('R2', 'L1', 3) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L1', 4) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L2', 1) :     0 :                   0.0 :                   0 : False :  True :  Reals
+    ('R2', 'L2', 2) :     0 :                   0.0 :             0.00509 : False : False :  Reals
+    ('R2', 'L2', 3) :     0 : 8.529648833565259e-05 :             0.00509 : False : False :  Reals
+    ('R2', 'L2', 4) :     0 :                   0.0 :                   0 : False :  True :  Reals
+L : Size=2, Index=j
+    Key : Lower  : Value              : Upper  : Fixed : Stale : Domain
+     L1 : 0.0001 : 1.5237861756280608 : 1.5862 : False : False :  Reals
+     L2 :  1e-05 : 0.7593198637950928 :    100 : False : False :  Reals
+cr : Size=8, Index=cr_index
+    Key       : Lower  : Value                 : Upper : Fixed : Stale : Domain
+    ('R1', 1) : 0.0003 :                  0.07 :  0.07 : False : False :  Reals
+    ('R1', 2) : 0.0003 :   0.03236680860826447 :  0.07 : False : False :  Reals
+    ('R1', 3) : 0.0003 : 0.0009291145512142986 :  0.07 : False : False :  Reals
+    ('R1', 4) : 0.0003 :                0.0003 :  0.07 : False : False :  Reals
+    ('R2', 1) : 0.0001 :                 0.051 : 0.051 : False : False :  Reals
+    ('R2', 2) : 0.0001 :                 0.051 : 0.051 : False : False :  Reals
+    ('R2', 3) : 0.0001 : 0.0009529615437757715 : 0.051 : False : False :  Reals
+    ('R2', 4) : 0.0001 :                0.0001 : 0.051 : False : False :  Reals
+cl : Size=8, Index=cl_index
+    Key       : Lower                  : Value                  : Upper   : Fixed : Stale : Domain
+    ('L1', 1) :  0.0008699999999999999 :                0.04495 : 0.04495 : False : False :  Reals
+    ('L1', 2) :  0.0008699999999999999 :   0.022722553936538173 : 0.04495 : False : False :  Reals
+    ('L1', 3) :  0.0008699999999999999 :  0.0008699999999999999 : 0.04495 : False : False :  Reals
+    ('L1', 4) :  0.0008699999999999999 :  0.0008699999999999999 : 0.04495 : False : False :  Reals
+    ('L2', 1) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 2) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 3) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 4) : 5.2000000000000004e-05 : 5.2000000000000004e-05 : 0.00091 : False : False :  Reals
+dcin : Size=16, Index=dcin_index
+    Key             : Lower : Value                  : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) : 1e-06 :   0.025049999999976886 :     1 : False : False :  Reals
+    ('R1', 'L1', 2) : 1e-06 :   0.009644254671725973 :     1 : False : False :  Reals
+    ('R1', 'L1', 3) :     0 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L1', 4) :     0 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) : 1e-06 :    0.06909000957252542 :     1 : False : False :  Reals
+    ('R1', 'L2', 2) : 1e-06 :    0.03145679860871939 :     1 : False : False :  Reals
+    ('R1', 'L2', 3) : 1e-06 : 1.9119291824650976e-05 :     1 : False : False :  Reals
+    ('R1', 'L2', 4) :     0 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R2', 'L1', 1) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) : 1e-06 :   0.028277456063393134 :     1 : False : False :  Reals
+    ('R2', 'L1', 3) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 4) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) :     0 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) : 1e-06 :    0.05009000000038619 :     1 : False : False :  Reals
+    ('R2', 'L2', 3) : 1e-06 :  4.295628450698055e-05 :     1 : False : False :  Reals
+    ('R2', 'L2', 4) :     0 :    0.05094799999999999 :  None : False :  True :  Reals
+dcout : Size=16, Index=dcout_index
+    Key             : Lower : Value                  : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :     0 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L1', 2) : 1e-06 :   0.009644254671726348 :     1 : False : False :  Reals
+    ('R1', 'L1', 3) : 1e-06 : 5.9124550869893705e-05 :     1 : False : False :  Reals
+    ('R1', 'L1', 4) :     0 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) :     0 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 2) : 1e-06 :    0.03145679860871937 :     1 : False : False :  Reals
+    ('R1', 'L2', 3) : 1e-06 : 1.9109291978472314e-05 :     1 : False : False :  Reals
+    ('R1', 'L2', 4) : 1e-06 : 0.00024800000000657705 :     1 : False : False :  Reals
+    ('R2', 'L1', 1) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 3) : 1e-06 :  8.297154375373502e-05 :     1 : False : False :  Reals
+    ('R2', 'L1', 4) :     0 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) :     0 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) :     0 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 3) : 1e-06 :  4.295628453993132e-05 :     1 : False : False :  Reals
+    ('R2', 'L2', 4) : 1e-06 :  4.800000010505224e-05 :     1 : False : False :  Reals
+y : Size=16, Index=y_index, Domain=Any, Default=None, Mutable=False
+    Key             : Value
+    ('R1', 'L1', 1) :     1
+    ('R1', 'L1', 2) :     1
+    ('R1', 'L1', 3) :     0
+    ('R1', 'L1', 4) :     0
+    ('R1', 'L2', 1) :     1
+    ('R1', 'L2', 2) :     1
+    ('R1', 'L2', 3) :     1
+    ('R1', 'L2', 4) :     0
+    ('R2', 'L1', 1) :     0
+    ('R2', 'L1', 2) :     1
+    ('R2', 'L1', 3) :     0
+    ('R2', 'L1', 4) :     0
+    ('R2', 'L2', 1) :     0
+    ('R2', 'L2', 2) :     1
+    ('R2', 'L2', 3) :     1
+    ('R2', 'L2', 4) :     0
+MINLP MODEL SOLVING
+L2
+L1
+==================ATTEMPTING TO SOLVE WITH BARON==========================
+successfully solved
+successfully solved with BARON
+
+Problem: 
+- Name: problem
+  Lower bound: 447630.38928
+  Upper bound: 447675.152319
+  Number of objectives: 1
+  Number of constraints: 108
+  Number of variables: 103
+  Sense: unknown
+Solver: 
+- Status: ok
+  Termination condition: optimal
+  Error rc: 0
+  Time: 0.4450867176055908
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+height : Size=16, Index=height_index
+    Key             : Lower : Value                : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :   0.0 :                  0.0 :  None : False : False : NonNegativeReals
+    ('R1', 'L1', 2) :   0.0 :   3.7125621380490568 :  None : False : False : NonNegativeReals
+    ('R1', 'L1', 3) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R1', 'L1', 4) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R1', 'L2', 1) :   0.0 :                  0.0 :   0.0 : False : False : NonNegativeReals
+    ('R1', 'L2', 2) :   0.0 :                  0.0 :   0.0 : False : False : NonNegativeReals
+    ('R1', 'L2', 3) :   0.0 :  0.04421940331583189 :  None : False : False : NonNegativeReals
+    ('R1', 'L2', 4) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L1', 1) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L1', 2) :   0.0 :  0.38499222261112404 :  None : False : False : NonNegativeReals
+    ('R2', 'L1', 3) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L1', 4) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L2', 1) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+    ('R2', 'L2', 2) :   0.0 :                  0.0 :   0.0 : False : False : NonNegativeReals
+    ('R2', 'L2', 3) :   0.0 : 0.006392617781228005 :  None : False : False : NonNegativeReals
+    ('R2', 'L2', 4) :   0.0 :                    0 :   0.0 : False :  True : NonNegativeReals
+M : Size=16, Index=M_index
+    Key             : Lower : Value                 : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :   0.0 :                   0.0 :  None : False : False :  Reals
+    ('R1', 'L1', 2) :   0.0 :  0.062180100000000016 :  None : False : False :  Reals
+    ('R1', 'L1', 3) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R1', 'L1', 4) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R1', 'L2', 1) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R1', 'L2', 2) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R1', 'L2', 3) :   0.0 :  0.000549899999999999 :  None : False : False :  Reals
+    ('R1', 'L2', 4) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L1', 1) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L1', 2) :   0.0 :             0.0050089 :  None : False : False :  Reals
+    ('R2', 'L1', 3) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L1', 4) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L2', 1) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L2', 2) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+    ('R2', 'L2', 3) :   0.0 : 8.110000000000062e-05 :  None : False : False :  Reals
+    ('R2', 'L2', 4) :   0.0 :                   0.0 :   0.0 : False :  True :  Reals
+L1 : Size=2, Index=j
+    Key : Lower  : Value              : Upper  : Fixed : Stale : Domain
+     L1 : 0.0001 : 1.5242513611615247 : 1.5862 : False : False :  Reals
+     L2 :  1e-05 : 0.7354312354312356 :    100 : False : False :  Reals
+cr : Size=8, Index=cr_index
+    Key       : Lower  : Value                 : Upper : Fixed : Stale : Domain
+    ('R1', 1) : 0.0003 :                  0.07 :  0.07 : False : False :  Reals
+    ('R1', 2) : 0.0003 :                  0.07 :  0.07 : False : False :  Reals
+    ('R1', 3) : 0.0003 : 0.0009109999999999951 :  0.07 : False : False :  Reals
+    ('R1', 4) : 0.0003 :                0.0003 :  0.07 : False : False :  Reals
+    ('R2', 1) : 0.0001 :                 0.051 : 0.051 : False : False :  Reals
+    ('R2', 2) : 0.0001 :                 0.051 : 0.051 : False : False :  Reals
+    ('R2', 3) : 0.0001 : 0.0009110000000000021 : 0.051 : False : False :  Reals
+    ('R2', 4) : 0.0001 :                0.0001 : 0.051 : False : False :  Reals
+cl : Size=8, Index=cl_index
+    Key       : Lower                  : Value                  : Upper   : Fixed : Stale : Domain
+    ('L1', 1) :  0.0008699999999999999 :                0.04495 : 0.04495 : False : False :  Reals
+    ('L1', 2) :  0.0008699999999999999 :                0.04495 : 0.04495 : False : False :  Reals
+    ('L1', 3) :  0.0008699999999999999 :  0.0008699999999999999 : 0.04495 : False : False :  Reals
+    ('L1', 4) :  0.0008699999999999999 :  0.0008699999999999999 : 0.04495 : False : False :  Reals
+    ('L2', 1) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 2) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 3) : 5.2000000000000004e-05 :                0.00091 : 0.00091 : False : False :  Reals
+    ('L2', 4) : 5.2000000000000004e-05 : 5.2000000000000004e-05 : 0.00091 : False : False :  Reals
+dcin : Size=16, Index=dcin_index
+    Key             : Lower : Value                : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) : 1e-06 :  0.02507781900504854 :     1 : False : False :  Reals
+    ('R1', 'L1', 2) : 1e-06 :              0.02505 :     1 : False : False :  Reals
+    ('R1', 'L1', 3) : 1e-06 :  0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L1', 4) : 1e-06 :  0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) : 1e-06 :  0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 2) : 1e-06 :  0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 3) : 1e-06 :                1e-06 :     1 : False : False :  Reals
+    ('R1', 'L2', 4) : 1e-06 :  0.06994800000000001 :  None : False :  True :  Reals
+    ('R2', 'L1', 1) : 1e-06 : 0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) : 1e-06 : 0.006049999999999992 :     1 : False : False :  Reals
+    ('R2', 'L1', 3) : 1e-06 : 0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 4) : 1e-06 : 0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) : 1e-06 :  0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) : 1e-06 :  0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 3) : 1e-06 :                1e-06 :     1 : False : False :  Reals
+    ('R2', 'L2', 4) : 1e-06 :  0.05094799999999999 :  None : False :  True :  Reals
+dcout : Size=16, Index=dcout_index
+    Key             : Lower : Value                  : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) : 1e-06 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L1', 2) : 1e-06 :                0.02495 :     1 : False : False :  Reals
+    ('R1', 'L1', 3) : 1e-06 :   4.10000000000001e-05 :     1 : False : False :  Reals
+    ('R1', 'L1', 4) : 1e-06 :    0.06913000000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 1) : 1e-06 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 2) : 1e-06 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 3) : 1e-06 :    0.06994800000000001 :  None : False :  True :  Reals
+    ('R1', 'L2', 4) : 1e-06 : 0.00024799999999999996 :     1 : False : False :  Reals
+    ('R2', 'L1', 1) : 1e-06 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 2) : 1e-06 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L1', 3) : 1e-06 :  4.099999999999937e-05 :     1 : False : False :  Reals
+    ('R2', 'L1', 4) : 1e-06 :   0.050129999999999994 :  None : False :  True :  Reals
+    ('R2', 'L2', 1) : 1e-06 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 2) : 1e-06 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 3) : 1e-06 :    0.05094799999999999 :  None : False :  True :  Reals
+    ('R2', 'L2', 4) : 1e-06 : 4.8000000000000015e-05 :     1 : False : False :  Reals
+y : Size=16, Index=y_index
+    Key             : Lower : Value : Upper : Fixed : Stale : Domain
+    ('R1', 'L1', 1) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L1', 2) :     0 :   1.0 :     1 : False : False : Binary
+    ('R1', 'L1', 3) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L1', 4) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L2', 1) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L2', 2) :     0 :   0.0 :     1 : False : False : Binary
+    ('R1', 'L2', 3) :     0 :   1.0 :     1 : False : False : Binary
+    ('R1', 'L2', 4) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L1', 1) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L1', 2) :     0 :   1.0 :     1 : False : False : Binary
+    ('R2', 'L1', 3) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L1', 4) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L2', 1) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L2', 2) :     0 :   0.0 :     1 : False : False : Binary
+    ('R2', 'L2', 3) :     0 :   1.0 :     1 : False : False : Binary
+    ('R2', 'L2', 4) :     0 :   0.0 :     1 : False : False : Binary
+The first solve of the MINLP is feasible
+unknown
+
+Problem: 
+- Name: problem
+  Lower bound: 447630.38928
+  Upper bound: 447675.152319
+  Number of objectives: 1
+  Number of constraints: 108
+  Number of variables: 103
+  Sense: unknown
+Solver: 
+- Status: ok
+  Termination condition: optimal
+  Error rc: 0
+  Time: 0.4450867176055908
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+MATCH:  0  match  R1 with  L2  is not a selected match in  1
+MATCH:  1  match  R1 with  L2  is not a selected match in  2
+SETTING UP THE PROBLEM FOR MATCH [i,j,k] =  R1 L2 3
+Setting up the 1st NLP subp-problem...
+Hi
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2105
+  Number of variables: 2105
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.2434377670288086
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+Hi
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 2nd NLP subp-problem
+visRich : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 1.88648e-05
+RHOG : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None :  1.14
+RHOL : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 842.5
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2111
+  Number of variables: 2109
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.4710807800292969
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 3rd NLP subp-problem, deet in GAMS
+First solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2116
+  Number of variables: 2114
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 8.06398868560791
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 4th NLP subp-problem, final in GAMS
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status: warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 5th NLP subp-problem, pack in GAMS
+height : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 3.0686600826063066 :  None : False : False : NonNegativeReals
+First solve was infeasible
+successfully solved
+<class 'pyomo.opt.results.results_.SolverResults'>
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+FixCost      25307.669095625624 * diameter**0.57     3.8781826939636277 * PackCost
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 4.622278676497562 :  None : False : False : NonNegativeReals
+diameter : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 2.311139343248726 :  None : False : False : NonNegativeReals
+FloodAct : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 5981.842204771501 :  None : False : False : NonNegativeReals
+Flood : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 5981.842204761838 :  None : False : False : NonNegativeReals
+ai : Size=1, Index=None
+    Key  : Lower : Value            : Upper : Fixed : Stale : Domain
+    None :     0 : 268.532983478347 :  None : False : False : NonNegativeReals
+packfact : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1165.2893580687683 :  None : False : False : NonNegativeReals
+VelocityR : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.18818955496151424 :  None : False : False : NonNegativeReals
+VelocityL : Size=1, Index=None
+    Key  : Lower : Value                  : Upper : Fixed : Stale : Domain
+    None :     0 : 0.00018133614521783538 :  None : False : False : NonNegativeReals
+koga : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.01089604021801592 :  None : False : False : NonNegativeReals
+packsize : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.017073032647615286 :  None : False : False : NonNegativeReals
+PackCost : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1569.4100217201378 :  None : False : False : NonNegativeReals
+SpecAreaPacking : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 268.56234526592806 :  None : False : False : NonNegativeReals
+ReL : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.4522473292714751 :  None : False : False : NonNegativeReals
+ReG : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 42.34508807166745 :  None : False : False : NonNegativeReals
+packVoid : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.6798024848977241 :  None : False : False : NonNegativeReals
+=============================================================================================
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 3.8265256881713867
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 3.8265256881713867
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+ME5 results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+MATCH:  3  match  R1 with  L2  is not a selected match in  4
+MATCH:  4  match  R1 with  L1  is not a selected match in  1
+SETTING UP THE PROBLEM FOR MATCH [i,j,k] =  R1 L1 2
+Setting up the 1st NLP subp-problem...
+Hi
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2105
+  Number of variables: 2105
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.08281135559082031
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+Hi
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 2nd NLP subp-problem
+visRich : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 1.88648e-05
+RHOG : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None :  1.14
+RHOL : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 900.0
+First solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2111
+  Number of variables: 2109
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 4.318284511566162
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 3rd NLP subp-problem, deet in GAMS
+First solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2116
+  Number of variables: 2114
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 4.976098299026489
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 4th NLP subp-problem, final in GAMS
+First solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2117
+  Number of variables: 2115
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Solved To Acceptable Level.
+  Termination condition: optimal
+  Id: 1
+  Error rc: 0
+  Time: 2.3958749771118164
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 5th NLP subp-problem, pack in GAMS
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 3.253590947656044 :  None : False : False : NonNegativeReals
+First solve was infeasible
+successfully solved
+<class 'pyomo.opt.results.results_.SolverResults'>
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+FixCost      25827.717024884343 * diameter**0.57     4.122207798867172 * PackCost
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 4.717261997367076 :  None : False : False : NonNegativeReals
+diameter : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 2.3586310036726514 :  None : False : False : NonNegativeReals
+FloodAct : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 7809.788606213784 :  None : False : False : NonNegativeReals
+Flood : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 7809.788606291295 :  None : False : False : NonNegativeReals
+ai : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 320.01832610134755 :  None : False : False : NonNegativeReals
+packfact : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1705.5660076322256 :  None : False : False : NonNegativeReals
+VelocityR : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.1806873593063908 :  None : False : False : NonNegativeReals
+VelocityL : Size=1, Index=None
+    Key  : Lower : Value                  : Upper : Fixed : Stale : Domain
+    None :     0 : 0.00035872152204365613 :  None : False : False : NonNegativeReals
+koga : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.011406985131034381 :  None : False : False : NonNegativeReals
+packsize : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.013382399033965755 :  None : False : False : NonNegativeReals
+PackCost : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1721.9995169718486 :  None : False : False : NonNegativeReals
+SpecAreaPacking : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 340.79618844599344 :  None : False : False : NonNegativeReals
+ReL : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.9171331864090835 :  None : False : False : NonNegativeReals
+ReG : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 32.03949690659705 :  None : False : False : NonNegativeReals
+packVoid : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.6659439298936904 :  None : False : False : NonNegativeReals
+=============================================================================================
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 10.070693731307983
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 10.070693731307983
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+ME5 results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+MATCH:  6  match  R1 with  L1  is not a selected match in  3
+MATCH:  7  match  R1 with  L1  is not a selected match in  4
+MATCH:  8  match  R2 with  L2  is not a selected match in  1
+MATCH:  9  match  R2 with  L2  is not a selected match in  2
+SETTING UP THE PROBLEM FOR MATCH [i,j,k] =  R2 L2 3
+Setting up the 1st NLP subp-problem...
+Hi
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2105
+  Number of variables: 2105
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.05013108253479004
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+Hi
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 2nd NLP subp-problem
+visRich : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 1.58723e-05
+RHOG : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None :   1.5
+RHOL : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 842.5
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status: warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 3rd NLP subp-problem, deet in GAMS
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status: warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 4th NLP subp-problem, final in GAMS
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status: warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 5th NLP subp-problem, pack in GAMS
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 20161.62067448017 :  None : False : False : NonNegativeReals
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+successfully solved
+<class 'pyomo.opt.results.results_.SolverResults'>
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+FixCost      8849.327691382914 * diameter**0.57     0.1658069221645758 * PackCost
+height : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 1.616271278665044 :  None : False : False : NonNegativeReals
+diameter : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 0.808135644321188 :  None : False : False : NonNegativeReals
+FloodAct : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 27908.32990802237 :  None : False : False : NonNegativeReals
+Flood : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 27908.329909001663 :  None : False : False : NonNegativeReals
+ai : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1054.8769323975673 :  None : False : False : NonNegativeReals
+packfact : Size=1, Index=None
+    Key  : Lower : Value            : Upper : Fixed : Stale : Domain
+    None :     0 : 10519.7066947552 :  None : False : False : NonNegativeReals
+VelocityR : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.12997215938996656 :  None : False : False : NonNegativeReals
+VelocityL : Size=1, Index=None
+    Key  : Lower : Value                  : Upper : Fixed : Stale : Domain
+    None :     0 : 0.00021872843739549535 :  None : False : False : NonNegativeReals
+koga : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.012345495253902734 :  None : False : False : NonNegativeReals
+packsize : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.00418150389120937 :  None : False : False : NonNegativeReals
+PackCost : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 2149.5518695353885 :  None : False : False : NonNegativeReals
+SpecAreaPacking : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1063.1187228834597 :  None : False : False : NonNegativeReals
+ReL : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.13886497596313202 :  None : False : False : NonNegativeReals
+ReG : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 11.55367011961336 :  None : False : False : NonNegativeReals
+packVoid : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.5997539025012097 :  None : False : False : NonNegativeReals
+=============================================================================================
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 2.9511191844940186
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 2.9511191844940186
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+ME5 results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+MATCH:  11  match  R2 with  L2  is not a selected match in  4
+MATCH:  12  match  R2 with  L1  is not a selected match in  1
+SETTING UP THE PROBLEM FOR MATCH [i,j,k] =  R2 L1 2
+Setting up the 1st NLP subp-problem...
+Hi
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2105
+  Number of variables: 2105
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Solved To Acceptable Level.
+  Termination condition: optimal
+  Id: 1
+  Error rc: 0
+  Time: 0.29082608222961426
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+Hi
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 2nd NLP subp-problem
+visRich : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 1.58723e-05
+RHOG : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None :   1.5
+RHOL : Size=1, Index=None, Domain=Any, Default=None, Mutable=False
+    Key  : Value
+    None : 900.0
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2111
+  Number of variables: 2109
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.5385303497314453
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 3rd NLP subp-problem, deet in GAMS
+First solve was infeasible
+Second solve was infeasible
+successfully solved
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2116
+  Number of variables: 2114
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 15.542659044265747
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+Setting up the 4th NLP subp-problem, final in GAMS
+First solve was infeasible
+Second solve was infeasible
+Second solve was infeasible
+Cannot determine cause of fault
+Solver Status: warning
+unknown
+results type:  <class 'pyomo.core.base.PyomoModel.ConcreteModel'>
+model did not solve correctly, so it is skipped
+solve success =  False
+Setting up the 5th NLP subp-problem, pack in GAMS
+height : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 15.067052631587744 :  None : False : False : NonNegativeReals
+First solve was infeasible
+successfully solved
+<class 'pyomo.opt.results.results_.SolverResults'>
+results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+solve success =  True
+FixCost      8686.523334133884 * diameter**0.57     0.15682301442314386 * PackCost
+height : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 1.5865361376645177 :  None : False : False : NonNegativeReals
+diameter : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.7932680738321978 :  None : False : False : NonNegativeReals
+FloodAct : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 21824.45894724907 :  None : False : False : NonNegativeReals
+Flood : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 21824.45894724327 :  None : False : False : NonNegativeReals
+ai : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 713.0639951407037 :  None : False : False : NonNegativeReals
+packfact : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 7403.651550989323 :  None : False : False : NonNegativeReals
+VelocityR : Size=1, Index=None
+    Key  : Lower : Value               : Upper : Fixed : Stale : Domain
+    None :     0 : 0.13488973698581255 :  None : False : False : NonNegativeReals
+VelocityL : Size=1, Index=None
+    Key  : Lower : Value                  : Upper : Fixed : Stale : Domain
+    None :     0 : 0.00025546324964544087 :  None : False : False : NonNegativeReals
+koga : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.011812761436201098 :  None : False : False : NonNegativeReals
+packsize : Size=1, Index=None
+    Key  : Lower : Value                : Upper : Fixed : Stale : Domain
+    None :     0 : 0.005234506777393498 :  None : False : False : NonNegativeReals
+PackCost : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 2097.2104809788966 :  None : False : False : NonNegativeReals
+SpecAreaPacking : Size=1, Index=None
+    Key  : Lower : Value             : Upper : Fixed : Stale : Domain
+    None :     0 : 853.4625269515835 :  None : False : False : NonNegativeReals
+ReL : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.2931228999050542 :  None : False : False : NonNegativeReals
+ReG : Size=1, Index=None
+    Key  : Lower : Value            : Upper : Fixed : Stale : Domain
+    None :     0 : 14.9363969264529 :  None : False : False : NonNegativeReals
+packVoid : Size=1, Index=None
+    Key  : Lower : Value              : Upper : Fixed : Stale : Domain
+    None :     0 : 0.6125337369048388 :  None : False : False : NonNegativeReals
+=============================================================================================
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.37728166580200195
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+
+Problem: 
+- Lower bound: -inf
+  Upper bound: inf
+  Number of objectives: 1
+  Number of constraints: 2121
+  Number of variables: 2119
+  Sense: unknown
+Solver: 
+- Status: ok
+  Message: Ipopt trunk\x3a Optimal Solution Found
+  Termination condition: optimal
+  Id: 0
+  Error rc: 0
+  Time: 0.37728166580200195
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+
+ME5 results type:  <class 'pyomo.opt.results.results_.SolverResults'>
+MATCH:  14  match  R2 with  L1  is not a selected match in  3
+MATCH:  15  match  R2 with  L1  is not a selected match in  4
+CHECKING FOR CONVERGENCE for iteration number:  1
+MINLP objective function value is  447675.1523190463
+exchanger.success for exchanger  R1 L2 3 = True
+exchanger.success for exchanger  R1 L1 2 = True
+exchanger.success for exchanger  R2 L2 3 = True
+exchanger.success for exchanger  R2 L1 2 = True
+NLP MEX shell costs:  98368.56467454041
+NLP MEX pack costs:  13870.20007350267
+NLP MEX cap costs:  112238.76474804309
+MINLP cap costs: 18825.3313451159
+NLP MEX fix costs:  120000.0
+NLP MEX utility costs:  308351.45443123125
+NLP objective function value is  540590.2191792743
+difference between real solution and MINLP solution is (%): 17.18770772458516
+{(0, 'kwcor'): 1, (0, 'diacor'): 1, (0, 'heightcor'): 1, (0, 'packcostcor'): 1, (0, 'surfAcor'): 1, (1, 'kwcor'): 1, (1, 'diacor'): 1, (1, 'heightcor'): 1, (1, 'packcostcor'): 1, (1, 'surfAcor'): 1, (2, 'kwcor'): 0.9801, (2, 'diacor'): 1.0201, (2, 'heightcor'): 1.0201, (2, 'packcostcor'): 1.0201, (2, 'surfAcor'): 0.9801, (3, 'kwcor'): 1, (3, 'diacor'): 1, (3, 'heightcor'): 1, (3, 'packcostcor'): 1, (3, 'surfAcor'): 1, (4, 'kwcor'): 1, (4, 'diacor'): 1, (4, 'heightcor'): 1, (4, 'packcostcor'): 1, (4, 'surfAcor'): 1, (5, 'kwcor'): 0.9801, (5, 'diacor'): 1.0201, (5, 'heightcor'): 1.0201, (5, 'packcostcor'): 1.0201, (5, 'surfAcor'): 1.0201, (6, 'kwcor'): 1, (6, 'diacor'): 1, (6, 'heightcor'): 1, (6, 'packcostcor'): 1, (6, 'surfAcor'): 1, (7, 'kwcor'): 1, (7, 'diacor'): 1, (7, 'heightcor'): 1, (7, 'packcostcor'): 1, (7, 'surfAcor'): 1, (8, 'kwcor'): 1, (8, 'diacor'): 1, (8, 'heightcor'): 1, (8, 'packcostcor'): 1, (8, 'surfAcor'): 1, (9, 'kwcor'): 1, (9, 'diacor'): 1, (9, 'heightcor'): 1, (9, 'packcostcor'): 1, (9, 'surfAcor'): 1, (10, 'kwcor'): 0.9801, (10, 'diacor'): 1.0201, (10, 'heightcor'): 1.0201, (10, 'packcostcor'): 1.0201, (10, 'surfAcor'): 1.0201, (11, 'kwcor'): 1, (11, 'diacor'): 1, (11, 'heightcor'): 1, (11, 'packcostcor'): 1, (11, 'surfAcor'): 1, (12, 'kwcor'): 1, (12, 'diacor'): 1, (12, 'heightcor'): 1, (12, 'packcostcor'): 1, (12, 'surfAcor'): 1, (13, 'kwcor'): 0.9801, (13, 'diacor'): 1.0201, (13, 'heightcor'): 1.0201, (13, 'packcostcor'): 1.0201, (13, 'surfAcor'): 1.0201, (14, 'kwcor'): 1, (14, 'diacor'): 1, (14, 'heightcor'): 1, (14, 'packcostcor'): 1, (14, 'surfAcor'): 1, (15, 'kwcor'): 1, (15, 'diacor'): 1, (15, 'heightcor'): 1, (15, 'packcostcor'): 1, (15, 'surfAcor'): 1}
+=======================================================================
+\\\\\\\\\\\CORRECTION LOG///////////////////////////////////
+Every correction factor at every iteration logged
+=======================================================================
+{0: {(0, 'kwcor'): 1, (0, 'diacor'): 1, (0, 'heightcor'): 1, (0, 'packcostcor'): 1, (0, 'surfAcor'): 1, (1, 'kwcor'): 1, (1, 'diacor'): 1, (1, 'heightcor'): 1, (1, 'packcostcor'): 1, (1, 'surfAcor'): 1, (2, 'kwcor'): 0.99, (2, 'diacor'): 1.01, (2, 'heightcor'): 1.01, (2, 'packcostcor'): 1.01, (2, 'surfAcor'): 0.99, (3, 'kwcor'): 1, (3, 'diacor'): 1, (3, 'heightcor'): 1, (3, 'packcostcor'): 1, (3, 'surfAcor'): 1, (4, 'kwcor'): 1, (4, 'diacor'): 1, (4, 'heightcor'): 1, (4, 'packcostcor'): 1, (4, 'surfAcor'): 1, (5, 'kwcor'): 0.99, (5, 'diacor'): 1.01, (5, 'heightcor'): 1.01, (5, 'packcostcor'): 1.01, (5, 'surfAcor'): 1.01, (6, 'kwcor'): 1, (6, 'diacor'): 1, (6, 'heightcor'): 1, (6, 'packcostcor'): 1, (6, 'surfAcor'): 1, (7, 'kwcor'): 1, (7, 'diacor'): 1, (7, 'heightcor'): 1, (7, 'packcostcor'): 1, (7, 'surfAcor'): 1, (8, 'kwcor'): 1, (8, 'diacor'): 1, (8, 'heightcor'): 1, (8, 'packcostcor'): 1, (8, 'surfAcor'): 1, (9, 'kwcor'): 1, (9, 'diacor'): 1, (9, 'heightcor'): 1, (9, 'packcostcor'): 1, (9, 'surfAcor'): 1, (10, 'kwcor'): 0.99, (10, 'diacor'): 1.01, (10, 'heightcor'): 1.01, (10, 'packcostcor'): 1.01, (10, 'surfAcor'): 1.01, (11, 'kwcor'): 1, (11, 'diacor'): 1, (11, 'heightcor'): 1, (11, 'packcostcor'): 1, (11, 'surfAcor'): 1, (12, 'kwcor'): 1, (12, 'diacor'): 1, (12, 'heightcor'): 1, (12, 'packcostcor'): 1, (12, 'surfAcor'): 1, (13, 'kwcor'): 0.99, (13, 'diacor'): 1.01, (13, 'heightcor'): 1.01, (13, 'packcostcor'): 1.01, (13, 'surfAcor'): 1.01, (14, 'kwcor'): 1, (14, 'diacor'): 1, (14, 'heightcor'): 1, (14, 'packcostcor'): 1, (14, 'surfAcor'): 1, (15, 'kwcor'): 1, (15, 'diacor'): 1, (15, 'heightcor'): 1, (15, 'packcostcor'): 1, (15, 'surfAcor'): 1}, 1: {(0, 'kwcor'): 1, (0, 'diacor'): 1, (0, 'heightcor'): 1, (0, 'packcostcor'): 1, (0, 'surfAcor'): 1, (1, 'kwcor'): 1, (1, 'diacor'): 1, (1, 'heightcor'): 1, (1, 'packcostcor'): 1, (1, 'surfAcor'): 1, (2, 'kwcor'): 0.9801, (2, 'diacor'): 1.0201, (2, 'heightcor'): 1.0201, (2, 'packcostcor'): 1.0201, (2, 'surfAcor'): 0.9801, (3, 'kwcor'): 1, (3, 'diacor'): 1, (3, 'heightcor'): 1, (3, 'packcostcor'): 1, (3, 'surfAcor'): 1, (4, 'kwcor'): 1, (4, 'diacor'): 1, (4, 'heightcor'): 1, (4, 'packcostcor'): 1, (4, 'surfAcor'): 1, (5, 'kwcor'): 0.9801, (5, 'diacor'): 1.0201, (5, 'heightcor'): 1.0201, (5, 'packcostcor'): 1.0201, (5, 'surfAcor'): 1.0201, (6, 'kwcor'): 1, (6, 'diacor'): 1, (6, 'heightcor'): 1, (6, 'packcostcor'): 1, (6, 'surfAcor'): 1, (7, 'kwcor'): 1, (7, 'diacor'): 1, (7, 'heightcor'): 1, (7, 'packcostcor'): 1, (7, 'surfAcor'): 1, (8, 'kwcor'): 1, (8, 'diacor'): 1, (8, 'heightcor'): 1, (8, 'packcostcor'): 1, (8, 'surfAcor'): 1, (9, 'kwcor'): 1, (9, 'diacor'): 1, (9, 'heightcor'): 1, (9, 'packcostcor'): 1, (9, 'surfAcor'): 1, (10, 'kwcor'): 0.9801, (10, 'diacor'): 1.0201, (10, 'heightcor'): 1.0201, (10, 'packcostcor'): 1.0201, (10, 'surfAcor'): 1.0201, (11, 'kwcor'): 1, (11, 'diacor'): 1, (11, 'heightcor'): 1, (11, 'packcostcor'): 1, (11, 'surfAcor'): 1, (12, 'kwcor'): 1, (12, 'diacor'): 1, (12, 'heightcor'): 1, (12, 'packcostcor'): 1, (12, 'surfAcor'): 1, (13, 'kwcor'): 0.9801, (13, 'diacor'): 1.0201, (13, 'heightcor'): 1.0201, (13, 'packcostcor'): 1.0201, (13, 'surfAcor'): 1.0201, (14, 'kwcor'): 1, (14, 'diacor'): 1, (14, 'heightcor'): 1, (14, 'packcostcor'): 1, (14, 'surfAcor'): 1, (15, 'kwcor'): 1, (15, 'diacor'): 1, (15, 'heightcor'): 1, (15, 'packcostcor'): 1, (15, 'surfAcor'): 1}}
+=======================================================================
+\\\\\\\\\\\  Solution Log  ///////////////////////////////////
+EVERY NLP OBJECTIVE FUNCTION SOLUTION AT EVERY ITERATION LOGGED
+=======================================================================
+{0: 540597.5206032861, 1: 540590.2191792743}
+=======================================================================
+\\\\\\\\\\\  MINLP TAC Solution Log  ///////////////////////
+EVERY MINLP OBJECTIVE FUNCTION SOLUTION AT EVERY ITERATION LOGGED
+=======================================================================
+{0: 447740.01891530806, 1: 447675.1523190463}
+=======================================================================
+\\\\\\\\\\\  Exchanger log  ///////////////////////
+How many binary variables were selected in every iteration
+=======================================================================
+{0: 4, 1: 4}
+=======================================================================
+\\\\\\\\\\\  Capital costs for MINLP Solution Log  ///////////////////////
+            EVERY MINLP Capital cost logged               
+=======================================================================
+{0: 18900.169702256215, 1: 18825.3313451159}
+=======================================================================
+\\\\\\\\\\\  capital costs nlp Solution Log  ///////////////////////
+EVERY NLP OBJECTIVE FUNCTION SOLUTION AT EVERY ITERATION LOGGED
+=======================================================================
+{0: 112246.06617205494, 1: 112238.76474804309}
+=======================================================================
+\\\\\\\\\\\  exchanger failed during the NLP solution ///////////////////////
+Whether an NLP failed AT EVERY ITERATION LOGGED
+=======================================================================
+{0: False, 1: False}
+=======================================================================
+\\\\\\\\\\\  UTILITIES Solution Log  ///////////////////////
+         UTILITY COSTS AT EACH ITERATION LOGGED         
+=======================================================================
+{0: 308351.4544312312, 1: 308351.45443123125}
+=======================================================================
+=======================================================================
+=======================================================================
+CONVERGENCE ACHIEVED AFTER  1  iterations
+Best network found at iteration:  1
+Optimal solution for NLP:  540590.2191792743
+Hopefully the optimal solution is somewhere in the jumbled mess above
+                                                                                                                                                                                                                                                                                                                      [4;33mReloaded modules[24m: library.MassExchanger[0m

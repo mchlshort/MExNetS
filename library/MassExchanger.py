@@ -84,119 +84,89 @@ class mass_exchanger(object):
             results (solver results): returns the solved model and results from the solve.
             
         """
-        solver= SolverFactory('ipopt')
+        #solver=SolverFactory('gams')
         options={}
+        #results = solver.solve(m,tee=True, solver = 'conopt')
         try:
-            results = solver.solve(m,tee=False, options=options)
-            #m.load(results)
-
-            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                print("successfully solved")
-            elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                print("First solve was infeasible")
-                options1 = {}
-                options1['mu_strategy'] = 'adaptive'
-                results = solver.solve(m,tee=False, options=options1)
+            solver=SolverFactory('gams')
+            options={}
+            m1 = m
+            results = solver.solve(m1,tee=True, solver = 'conopt')
+        except:
+            print("conopt failed")
+            print("CONOPT assumed unsuccessful... IPOPT it is")
+            solver= SolverFactory('ipopt')
+            options={}
+            try:
+                results = solver.solve(m,tee=False, options=options)
+                #m.load(results)
+    
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                    print("Second solve was infeasible")
-                    options2 = {}
-                    options2['mu_init'] = 1e-6
-                    #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
-                    results = solver.solve(m,tee=False, options=options2) 
+                    print("First solve was infeasible")
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
                     elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                         print("Second solve was infeasible")
-                        options3 = {}
-                        options3['mu_init'] = 1e-6
-                        options['bound_push'] =1e-6
-                        results = solver.solve(m,tee=False, options=options3)
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
+                        results = solver.solve(m,tee=False, options=options2) 
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
-                        #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        #    solver = SolverFactory('./../../BARON/baron')
-                        #    results = solver.solve(m,tee=True)
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status:",  results.solver.status)
+                                #results = m
                         else:
                             print("Cannot determine cause of fault")
-                            print("Solver Status:",  results.solver.status)
-                            results = m
+                            print("Solver Status: ",  results.solver.status)
+                            #results = m
                     else:
                         print("Cannot determine cause of fault")
-                        print("Solver Status: ",  results.solver.status)
-                        results = m
-                else:
-                    print("Cannot determine cause of fault")
-                    print("Solver Status: ",  results.solver.status)  
-                    results = m                      
-            else:
-                print("Cannot determine cause of fault")
-                print("Solver Status: ",  results.solver.status)
-                results = m
-        except:
-            print("Something failed during the solve process!")
-            try:
-                options1 = {}
-                options1['mu_strategy'] = 'adaptive'
-                results = solver.solve(m,tee=False, options=options1)
-                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                    print("successfully solved")
-                elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                    print("Second solve was infeasible")
-                    options2 = {}
-                    options2['mu_init'] = 1e-6
-                    #options['bound_push'] =1e-5
-                    results = solver.solve(m,tee=False, options=options2) 
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options3 = {}
-                        options3['mu_init'] = 1e-6
-                        options3['bound_push'] =1e-6
-                        results = solver.solve(m,tee=False, options=options3)
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        #    solver = SolverFactory('./../../BARON/baron')
-                        #    results = solver.solve(m,tee=True)    
-                        else:
-                            print("Cannot determine cause of fault")
-                            print ("Solver Status: ",  results.solver.status)
-                            results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  results.solver.status)
-                        results = m
+                        print("Solver Status: ",  results.solver.status)  
+                        #results = m                      
                 else:
                     print("Cannot determine cause of fault")
                     print("Solver Status: ",  results.solver.status)
-                    results = m
+                    #results = m
             except:
-                print("Something failed again during the solve")
+                print("Something failed during the solve process!")
                 try:
-                    
-                    options4 = {}
-                    options4['mu_init'] = 1e-6
-                    options4['bound_push'] =1e-6
-                    results = solver.solve(m,tee=False, options=options3)
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
                     elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
                         print("Second solve was infeasible")
-                        options4 = {}
-                        options4['mu_init'] = 1e-6
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
                         #options['bound_push'] =1e-5
-                        results = solver.solve(m,tee=False, options=options4) 
+                        results = solver.solve(m,tee=False, options=options2) 
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
                         elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
                             print("Second solve was infeasible")
-                            options4 = {}
-                            options4['mu_init'] = 1e-5
-                            options4['bound_push'] =1e-5
-                            results = solver.solve(m,tee=False, options=options4)
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options3['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
                             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                                 print("successfully solved")
                             #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
@@ -214,23 +184,369 @@ class mass_exchanger(object):
                         print("Cannot determine cause of fault")
                         print("Solver Status: ",  results.solver.status)
                         results = m
-                    
                 except:
+                    print("Something failed again during the solve")
                     try:
-                        print("Something failed again again during the solve")
+                        
                         options4 = {}
-                        options4['mu_init'] = 1e-5
-                        options4['bound_push'] =1e-5
-                        results = solver.solve(m,tee=False, options=options4)
+                        options4['mu_init'] = 1e-6
+                        options4['bound_push'] =1e-6
+                        results = solver.solve(m,tee=False, options=options3)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options4 = {}
+                            options4['mu_init'] = 1e-6
+                            #options['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4) 
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                print("Second solve was infeasible")
+                                options4 = {}
+                                options4['mu_init'] = 1e-5
+                                options4['bound_push'] =1e-5
+                                results = solver.solve(m,tee=False, options=options4)
+                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                    print("successfully solved")
+                                elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                    solver = SolverFactory('baron')
+                                    results = solver.solve(m,tee=True)    
+                                else:
+                                    print("Cannot determine cause of fault")
+                                    print ("Solver Status: ",  results.solver.status)
+                                    results = "Failed epically"
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status: ",  results.solver.status)
+                                results = "Failed epically"
                         else:
                             print("Cannot determine cause of fault")
-                            print ("Solver Status: ",  results.solver.status)
-                            results = "Failed epically"  
+                            print("Solver Status: ",  results.solver.status)
+                            results = "Failed epically"
+                        
                     except:
+                        try:
+                            print("Something failed again again during the solve")
+                            options4 = {}
+                            options4['mu_init'] = 1e-5
+                            options4['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = "Failed epically"  
+                        except:
+                            results = "Failed epically"
+                            pass
+
+        print("This is to see why we are still solving with ipopt")
+        
+        if results == "Failed epically":
+            print("CONOPT assumed unsuccessful... IPOPT it is")
+            solver= SolverFactory('ipopt')
+            options={}
+            try:
+                results = solver.solve(m,tee=False, options=options)
+                #m.load(results)
+    
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                    print("First solve was infeasible")
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible")
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
+                        results = solver.solve(m,tee=False, options=options2) 
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status:",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)  
+                        results = m                      
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  results.solver.status)
+                    results = m
+            except:
+                print("Something failed during the solve process!")
+                try:
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible")
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #options['bound_push'] =1e-5
+                        results = solver.solve(m,tee=False, options=options2) 
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options3['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)    
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)
                         results = m
-                        results = "Failed epically"
+                except:
+                    print("Something failed again during the solve")
+                    try:
+                        
+                        options4 = {}
+                        options4['mu_init'] = 1e-6
+                        options4['bound_push'] =1e-6
+                        results = solver.solve(m,tee=False, options=options3)
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options4 = {}
+                            options4['mu_init'] = 1e-6
+                            #options['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4) 
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                print("Second solve was infeasible")
+                                options4 = {}
+                                options4['mu_init'] = 1e-5
+                                options4['bound_push'] =1e-5
+                                results = solver.solve(m,tee=False, options=options4)
+                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                    print("successfully solved")
+                                #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                #    solver = SolverFactory('./../../BARON/baron')
+                                #    results = solver.solve(m,tee=True)    
+                                else:
+                                    print("Cannot determine cause of fault")
+                                    print ("Solver Status: ",  results.solver.status)
+                                    results = m
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status: ",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                        
+                    except:
+                        try:
+                            print("Something failed again again during the solve")
+                            options4 = {}
+                            options4['mu_init'] = 1e-5
+                            options4['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = "Failed epically"  
+                        except:
+                            results = m
+                            results = "Failed epically"
+        elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+            print("successfully solved with CONOPT")
+        elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+            print("successfully solved using IPOPT")
+        else:
+            print("CONOPT assumed unsuccessful... IPOPT it is")
+            solver= SolverFactory('ipopt')
+            options={}
+            try:
+                results = solver.solve(m,tee=False, options=options)
+                #m.load(results)
+    
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                    print("First solve was infeasible")
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible")
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
+                        results = solver.solve(m,tee=False, options=options2) 
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status:",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)  
+                        results = m                      
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  results.solver.status)
+                    results = m
+            except:
+                print("Something failed during the solve process!")
+                try:
+                    options1 = {}
+                    options1['mu_strategy'] = 'adaptive'
+                    results = solver.solve(m,tee=False, options=options1)
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible")
+                        options2 = {}
+                        options2['mu_init'] = 1e-6
+                        #options['bound_push'] =1e-5
+                        results = solver.solve(m,tee=False, options=options2) 
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options3 = {}
+                            options3['mu_init'] = 1e-6
+                            options3['bound_push'] =1e-6
+                            results = solver.solve(m,tee=False, options=options3)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            #    solver = SolverFactory('./../../BARON/baron')
+                            #    results = solver.solve(m,tee=True)    
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)
+                        results = m
+                except:
+                    print("Something failed again during the solve")
+                    try:
+                        
+                        options4 = {}
+                        options4['mu_init'] = 1e-6
+                        options4['bound_push'] =1e-6
+                        results = solver.solve(m,tee=False, options=options3)
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            print("Second solve was infeasible")
+                            options4 = {}
+                            options4['mu_init'] = 1e-6
+                            #options['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4) 
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                print("Second solve was infeasible")
+                                options4 = {}
+                                options4['mu_init'] = 1e-5
+                                options4['bound_push'] =1e-5
+                                results = solver.solve(m,tee=False, options=options4)
+                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                    print("successfully solved")
+                                #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                #    solver = SolverFactory('./../../BARON/baron')
+                                #    results = solver.solve(m,tee=True)    
+                                else:
+                                    print("Cannot determine cause of fault")
+                                    print ("Solver Status: ",  results.solver.status)
+                                    results = m
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status: ",  results.solver.status)
+                                results = m
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status)
+                            results = m
+                        
+                    except:
+                        try:
+                            print("Something failed again again during the solve")
+                            options4 = {}
+                            options4['mu_init'] = 1e-5
+                            options4['bound_push'] =1e-5
+                            results = solver.solve(m,tee=False, options=options4)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            else:
+                                print("Cannot determine cause of fault")
+                                print ("Solver Status: ",  results.solver.status)
+                                results = "Failed epically"  
+                        except:
+                            results = m
+                            results = "Failed epically"
         return results
         
     def Construct_pyomo_model(self):
@@ -278,7 +594,7 @@ class mass_exchanger(object):
         m.cRs = Var(m.tau,within = NonNegativeReals)
         m.cLs = Var(m.tau,within = NonNegativeReals)
         d = self.ME_inits["diameter"]*self.ME_inits["diacor"]
-        m.diameter = Var(initialize =d, within=NonNegativeReals)
+        m.diameter = Var(initialize =d, bounds = (0.0001, None))
 
         #DIFFERENTIAL VAR
         m.dheight = DerivativeVar(m.h)
@@ -353,6 +669,7 @@ class mass_exchanger(object):
         print("Hi")
         #q = m.FlowRm.value*(m.cRs[0].value-m.cRs[1].value)
         #print("mass exchanged R:  ", q )
+        m.height.pprint()
         #q = m.FlowLm.value*(m.cLs[0].value-m.cLs[1].value)
         #print("mass exchanged L:  ", q )
         success_solve = bool
@@ -365,7 +682,9 @@ class mass_exchanger(object):
             if isinstance(results, pyomo.core.base.PyomoModel.ConcreteModel):
                 print("model did not solve correctly, so it is skipped")
                 success_solve = False
-            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+            elif (results.solver.status == SolverStatus.ok) and ((results.solver.termination_condition == TerminationCondition.optimal)):
+                success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
                 success_solve=True
             else:
                 #Should add way to deal with unsolved NLPs (increase elements?)
@@ -388,9 +707,9 @@ class mass_exchanger(object):
             success_solve (bool): passed from previous solve and tells the model whether it should provide 
                                     a different initial point as the previous model failed (from pre-solved clone above)
             m2 (clone of concrete pyomo model): clone of previous NLP model from before the solve statement. Used if 
-                                            previous model did not solve correctly
             
         Returns:
+                                            previous model did not solve correctly
             m (Concrete pyomo model): final solution.
             results (solver results): ipopt solver output.
             pre_solve_clone (clone of concrete model before solve statement): should only be used if solve failed
@@ -401,8 +720,12 @@ class mass_exchanger(object):
         #=========================================
         #m.tau = ContinuousSet(bounds=(0,1))
         #m.h = Var(m.tau)
+        
+        #To get inits we clone the solved model
+        old_solve_clone = m.clone()
+        
         if success_solve:
-            height_init=m.height.value
+            height_init=old_solve_clone.height.value
         else:
             height_init=m2.height.value
             
@@ -413,7 +736,7 @@ class mass_exchanger(object):
         flux_init = {}
         if success_solve:
             for h in m.h:
-                flux_init[h]=m.flux[h].value
+                flux_init[h]=old_solve_clone.flux[h].value
         else:
             for h in m.h:
                 flux_init[h]=m2.flux[h].value
@@ -424,7 +747,7 @@ class mass_exchanger(object):
         cRs_init = {}
         if success_solve:
             for h in m.h:
-                cRs_init[h]=m.cRs[h].value 
+                cRs_init[h]=old_solve_clone.cRs[h].value 
         else:
             for h in m.h:
                 cRs_init[h]=m2.cRs[h].value 
@@ -434,7 +757,7 @@ class mass_exchanger(object):
         cLs_init = {}
         if success_solve:
             for h in m.h:
-                cLs_init[h]=m.cLs[h].value  
+                cLs_init[h]=old_solve_clone.cLs[h].value  
         else:
             for h in m.h:
                 cLs_init[h]=m2.cLs[h].value
@@ -443,11 +766,11 @@ class mass_exchanger(object):
         #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
         
         if success_solve:
-            diameter_init=m.diameter.value
+            diameter_init=old_solve_clone.diameter.value
         else:
             diameter_init=m2.diameter.value
         m.del_component(m.diameter)
-        m.diameter = Var(initialize = diameter_init, within = NonNegativeReals)
+        m.diameter = Var(initialize = diameter_init, bounds = (0.000001,None))
 
         #m.del_component(m.dheight)
         #m.dheight = DerivativeVar(m.h)
@@ -528,7 +851,7 @@ class mass_exchanger(object):
         def init_velocityL(m):
             return (m.FlowLVlat/m.area.value)
         
-        m.VelocityR = Var(initialize = init_velocityR, bounds = (0.000001,200))
+        m.VelocityR = Var(initialize = init_velocityR, bounds = (0.000000001,200))
         m.VelocityL = Var(initialize = init_velocityL, bounds = (0.000000001,200))
         
         #========================================
@@ -678,6 +1001,8 @@ class mass_exchanger(object):
                 success_solve = False
             elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+                success_solve=True
             else:
                 #Should add way to deal with unsolved NLPs (increase elements?)
                 print("NLP1 failed.")
@@ -711,19 +1036,23 @@ class mass_exchanger(object):
         #=========================================
         #Variables from Previous NLP
         #=========================================
+        #To get inits we clone the solved model
+        old_solve_clone = m.clone()
+        
+        
         if success_solve:
-            height_init=m.height.value
+            height_init=old_solve_clone.height.value
         else:
             height_init=m2.height.value
             
         m.del_component(m.height)
-        m.height = Var(initialize = height_init,within=NonNegativeReals)
+        m.height = Var(initialize = height_init,bounds = (0.0000001,None))
         
         
         flux_init = {}
         if success_solve:
             for h in m.h:
-                flux_init[h]=m.flux[h].value
+                flux_init[h]=old_solve_clone.flux[h].value
         else:
             for h in m.h:
                 flux_init[h]=m2.flux[h].value
@@ -734,7 +1063,7 @@ class mass_exchanger(object):
         cRs_init = {}
         if success_solve:
             for h in m.h:
-                cRs_init[h]=m.cRs[h].value 
+                cRs_init[h]=old_solve_clone.cRs[h].value 
         else:
             for h in m.h:
                 cRs_init[h]=m2.cRs[h].value 
@@ -744,7 +1073,7 @@ class mass_exchanger(object):
         cLs_init = {}
         if success_solve:
             for h in m.h:
-                cLs_init[h]=m.cLs[h].value  
+                cLs_init[h]=old_solve_clone.cLs[h].value  
         else:
             for h in m.h:
                 cLs_init[h]=m2.cLs[h].value
@@ -753,11 +1082,11 @@ class mass_exchanger(object):
         #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
         
         if success_solve:
-            diameter_init=m.diameter.value
+            diameter_init=old_solve_clone.diameter.value
         else:
             diameter_init=m2.diameter.value
         m.del_component(m.diameter)
-        m.diameter = Var(initialize = diameter_init, within = NonNegativeReals)
+        m.diameter = Var(initialize = diameter_init, bounds = (0.000001,None))
 
         #m.del_component(m.dheight)
         #m.dheight = DerivativeVar(m.h)
@@ -767,7 +1096,7 @@ class mass_exchanger(object):
         #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
         area_init = 0
         if success_solve:
-            area_init=m.area.value
+            area_init=old_solve_clone.area.value
         else:
             area_init=m2.area.value
             
@@ -776,31 +1105,31 @@ class mass_exchanger(object):
 
         koga_init = 0
         if success_solve:
-            koga_init=m.koga.value
+            koga_init=old_solve_clone.koga.value
         else:
             koga_init=m2.koga.value
             
         m.del_component(m.koga)
-        m.koga = Var(initialize = koga_init, bounds = (0.00000001,None))
+        m.koga = Var(initialize = koga_init, bounds = (0.0000000001,None))
         
         VelocityR_init = 0
         if success_solve:
-            VelocityR_init=m.VelocityR.value
+            VelocityR_init=old_solve_clone.VelocityR.value
         else:
             VelocityR_init=m2.VelocityR.value
             
         VelocityR_init=m.VelocityR.value
         m.del_component(m.VelocityR)
-        m.VelocityR = Var(initialize =VelocityR_init, bounds = (0.000001,200))
+        m.VelocityR = Var(initialize =VelocityR_init, bounds = (0.0000000000001,200))
         
         VelocityL_init = 0
         if success_solve:
-            VelocityL_init=m.VelocityL.value
+            VelocityL_init=old_solve_clone.VelocityL.value
         else:
             VelocityL_init=m2.VelocityL.value
         
         m.del_component(m.VelocityL)
-        m.VelocityL = Var(initialize = VelocityL_init, bounds = (0.000000001,200)) 
+        m.VelocityL = Var(initialize = VelocityL_init, bounds = (0.000000000001,200)) 
        
         #=========================================
         #NEW Parameters
@@ -811,19 +1140,19 @@ class mass_exchanger(object):
         #=========================================
         #NEW Variables
         #=========================================
-        m.packfact = Var(initialize=2000, bounds = (0.0,1000000))
+        m.packfact = Var(initialize=120, bounds = (20.0,100000))
         
         ReLini = m.RHOL*m.VelocityL.value*0.05/m.vis.value
         ReGini = m.RHOG*m.VelocityR.value*0.05/m.visRich.value
         
-        m.ReL = Var(initialize = ReLini,within=NonNegativeReals)
-        m.ReG = Var(initialize = ReGini,within=NonNegativeReals)
+        m.ReL = Var(initialize = ReLini,bounds = (0.000000001,100000))
+        m.ReG = Var(initialize = ReGini,bounds = (0.000000001,100000))
                 
         Floodini = 249.089/0.3048*0.12*((m.packfact.value*0.3048)**0.7)
         FloodActini = 22.3*(m.packfact.value)*(m.vis**0.2)*((m.VelocityR.value)**2)*((10**(0.035*m.VelocityL.value))/(9.81*m.RHOG))
 
-        m.Flood= Var(initialize = Floodini, within=NonNegativeReals)
-        m.FloodAct= Var(initialize = FloodActini, within=NonNegativeReals)
+        m.Flood= Var(initialize = Floodini, bounds = (0.000000001,10000000))
+        m.FloodAct= Var(initialize = FloodActini, bounds = (0.000000001,10000000))
 
         #========================================
         #OLD CONSTRAINTS
@@ -922,8 +1251,8 @@ class mass_exchanger(object):
         m.Flood1 = Constraint(rule = Flood1_) 
         
         def Flood2_(m):
-            return m.FloodAct == (94*(((m.ReL**1.11)/(m.ReG**1.8))+4.4))*(((6*(1-m.porosity*m.poroCor))/(m.de*m.PartSizeCor*((m.porosity*m.poroCor)**3))))*m.RHOG*(m.VelocityR**2);
-                                                                                                
+            return m.FloodAct == (94*((m.ReL**1.11)/(m.ReG**1.8))+4.4)*6*(1-m.porosity*m.poroCor)/(m.de*m.PartSizeCor*((m.porosity*m.poroCor)**3))*m.RHOG*(m.VelocityR**2)
+                                                                               
         m.Flood2 = Constraint(rule = Flood2_)
         
         def Flood3_(m):
@@ -965,7 +1294,8 @@ class mass_exchanger(object):
         #w=m.AF*pi*(m.diameter()**2)/4*m.height()*m.PackCost
         #print(m.FixCost, "    ",q,"   ", w)
         #m.CapCost.pprint()
-        #m.height.pprint()
+        m.height.pprint()
+        #m.heightp.pprint()
         #m.diameter.pprint()
         #m.ReG.pprint()
         #m.ReL.pprint()
@@ -993,6 +1323,8 @@ class mass_exchanger(object):
                 print("model did not solve correctly, so it is skipped")
                 success_solve = False
             elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
                 success_solve=True
             else:
                 #Should add way to deal with unsolved NLPs (increase elements?)
@@ -1028,19 +1360,25 @@ class mass_exchanger(object):
         #=========================================
         #Variables from Previous NLP
         #=========================================
+        
+        old_solve_clone = m.clone()
+        
         if success_solve:
-            height_init=m.height.value
+            print("This is the test")
+            print(old_solve_clone.height.value)
+            print(m.height.value)
+            height_init=old_solve_clone.height.value
         else:
             height_init=m2.height.value
             
         m.del_component(m.height)
-        m.height = Var(initialize = height_init,within=NonNegativeReals)
+        m.height = Var(initialize = height_init,bounds = (0.0000001,None))
         
         
         flux_init = {}
         if success_solve:
             for h in m.h:
-                flux_init[h]=m.flux[h].value
+                flux_init[h]=old_solve_clone.flux[h].value
         else:
             for h in m.h:
                 flux_init[h]=m2.flux[h].value
@@ -1051,7 +1389,7 @@ class mass_exchanger(object):
         cRs_init = {}
         if success_solve:
             for h in m.h:
-                cRs_init[h]=m.cRs[h].value 
+                cRs_init[h]=old_solve_clone.cRs[h].value 
         else:
             for h in m.h:
                 cRs_init[h]=m2.cRs[h].value 
@@ -1061,7 +1399,7 @@ class mass_exchanger(object):
         cLs_init = {}
         if success_solve:
             for h in m.h:
-                cLs_init[h]=m.cLs[h].value  
+                cLs_init[h]=old_solve_clone.cLs[h].value  
         else:
             for h in m.h:
                 cLs_init[h]=m2.cLs[h].value
@@ -1070,11 +1408,11 @@ class mass_exchanger(object):
         #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
         
         if success_solve:
-            diameter_init=m.diameter.value
+            diameter_init=old_solve_clone.diameter.value
         else:
             diameter_init=m2.diameter.value
         m.del_component(m.diameter)
-        m.diameter = Var(initialize = diameter_init, within = NonNegativeReals)
+        m.diameter = Var(initialize = diameter_init, bounds = (0.0000001, None))
 
         #m.del_component(m.dheight)
         #m.dheight = DerivativeVar(m.h)
@@ -1084,7 +1422,7 @@ class mass_exchanger(object):
         #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
         area_init = 0
         if success_solve:
-            area_init=m.area.value
+            area_init=old_solve_clone.area.value
         else:
             area_init=m2.area.value
             
@@ -1093,7 +1431,7 @@ class mass_exchanger(object):
 
         koga_init = 0
         if success_solve:
-            koga_init=m.koga.value
+            koga_init=old_solve_clone.koga.value
         else:
             koga_init=m2.koga.value
             
@@ -1102,26 +1440,27 @@ class mass_exchanger(object):
         
         VelocityR_init = 0
         if success_solve:
-            VelocityR_init=m.VelocityR.value
+            VelocityR_init=old_solve_clone.VelocityR.value
         else:
             VelocityR_init=m2.VelocityR.value
             
-        VelocityR_init=m.VelocityR.value
+        #VelocityR_init=m.VelocityR.value
+        print("The velocityR init is :", VelocityR_init )
         m.del_component(m.VelocityR)
-        m.VelocityR = Var(initialize =VelocityR_init, within = NonNegativeReals)
+        m.VelocityR = Var(initialize = VelocityR_init, bounds =(0.0000001, None))
         
         VelocityL_init = 0
         if success_solve:
-            VelocityL_init=m.VelocityL.value
+            VelocityL_init=old_solve_clone.VelocityL.value
         else:
             VelocityL_init=m2.VelocityL.value
         
         m.del_component(m.VelocityL)
-        m.VelocityL = Var(initialize = VelocityL_init,within = NonNegativeReals) 
+        m.VelocityL = Var(initialize = VelocityL_init,bounds =(0.0000001, None)) 
         
         ReL_init=0
         if success_solve:
-            ReL_init=m.ReL.value
+            ReL_init=old_solve_clone.ReL.value
         else:
             ReL_init=m2.ReL.value
             
@@ -1130,7 +1469,7 @@ class mass_exchanger(object):
         
         ReG_init=0
         if success_solve:
-            ReG_init=m.ReG.value
+            ReG_init=old_solve_clone.ReG.value
         else:
             ReG_init=m2.ReG.value
 
@@ -1139,7 +1478,7 @@ class mass_exchanger(object):
 
         Flood_init=0
         if success_solve:
-            Flood_init=m.Flood.value
+            Flood_init=old_solve_clone.Flood.value
         else:
             Flood_init=m2.Flood.value
 
@@ -1148,7 +1487,7 @@ class mass_exchanger(object):
 
         FloodAct_init=0
         if success_solve:
-            FloodAct_init=m.FloodAct.value
+            FloodAct_init=old_solve_clone.FloodAct.value
         else:
             FloodAct_init=m2.FloodAct.value
 
@@ -1157,12 +1496,12 @@ class mass_exchanger(object):
         
         packfact_init=0
         if success_solve:
-            packfact_init=m.packfact.value
+            packfact_init=old_solve_clone.packfact.value
         else:
             packfact_init=m2.packfact.value
             
         m.del_component(m.packfact)
-        m.packfact = Var(initialize = packfact_init, within = NonNegativeReals)
+        m.packfact = Var(initialize = packfact_init, bounds = (0, None))
 
         #=========================================
         #NEW Parameters
@@ -1177,7 +1516,7 @@ class mass_exchanger(object):
 
         p = m.ap.value*m.surfacor.value*(1-exp(-1.45*((0.075/m.surften.value)**0.75)*((m.RHOL.value*m.VelocityR.value/(m.vis.value*m.ap.value))**0.1)*((m.ap.value*(m.VelocityR.value**2)/9.81)**(-0.05))*((m.RHOL.value*(m.VelocityR.value**2)/(m.ap.value*m.surften.value))**0.2)))
         p = m.ap.value*m.surfacor.value*(1-exp(-1.45*((0.075/m.surften.value)**0.75)*((m.RHOL.value*m.VelocityL.value/(m.vis.value*m.ap.value))**0.1)*(((m.ap.value*((m.RHOL.value*m.VelocityL.value)**2))/((m.RHOL.value**2)*9.81))**(-0.05))*((((m.RHOL.value*m.VelocityL.value)**2)/((m.RHOL.value**2)*m.ap.value*m.surften.value))**0.2)))
-
+        print("Ai initial value=", p)
         m.ai = Var(initialize = p, within = NonNegativeReals)
         
         #========================================
@@ -1249,7 +1588,7 @@ class mass_exchanger(object):
         
         m.del_component(m.Flood2)
         def Flood2_(m):
-            return m.FloodAct == (94*(((m.ReL**1.11)/(m.ReG**1.8))+4.4))*6*(1-0.92)/(0.05*(0.92**3))*m.RHOG*(m.VelocityR**2)
+            return m.FloodAct ==(94*((m.ReL**1.11)/(m.ReG**1.8))+4.4)*6*(1-m.porosity*m.poroCor)/(m.de*m.PartSizeCor*((m.porosity*m.poroCor)**3))*m.RHOG*(m.VelocityR**2)
                                                                                                 
         m.Flood2 = Constraint(rule = Flood2_)
         
@@ -1282,7 +1621,7 @@ class mass_exchanger(object):
         m.del_component(m.loverdlo)
         
         def loverdlo_(m):
-            return m.height >= 1*m.diameter
+            return m.height >= 0.1*m.diameter
             
         m.loverdlo = Constraint(rule=loverdlo_)
 
@@ -1299,8 +1638,8 @@ class mass_exchanger(object):
         m.ReynoldsL = Constraint(rule = ReynoldsL_) 
         
         def Aid_(m):
-            return m.ai ==  m.ap*m.surfacor*(1-exp(-1.45*((0.075/m.surften)**0.75)*((m.RHOL*m.VelocityR/(m.vis*m.ap))**0.1)*((m.ap*((m.VelocityR)**2)/9.81)**(-0.05))*((((m.RHOL*m.VelocityR)**2)/(m.ap*m.surften))**0.2)))
-
+            return m.ai ==  m.ap*m.surfacor*(1-exp(-1.45*((0.075/m.surften)**0.75)*((m.RHOL*m.VelocityR/(m.vis*m.ap))**0.1)*((m.ap*((m.VelocityR)**2)/9.81)**(-0.05))*((((m.RHOL*(m.VelocityR)**2))/(m.ap*m.surften))**0.2)))
+            
         m.Aid = Constraint(rule = Aid_) 
 
         #========================================
@@ -1332,21 +1671,27 @@ class mass_exchanger(object):
         q= m.AF*23805*(m.diameter**0.57)*1.15*m.height()
         w=m.AF*pi*(m.diameter()**2)/4*m.height()*m.PackCost
         #print(m.FixCost, "    ",q,"   ", w)
-        #m.height.pprint()
-        #m.diameter.pprint()
-        #m.FloodAct.pprint()
-        #m.Flood.pprint()  
+        m.height.pprint()
+        m.diameter.pprint()
         #m.ai.pprint()
+        m.FloodAct.pprint()
+        m.Flood.pprint()  
+        m.ai.pprint()
         #m.ap.pprint()
-        #m.packfact.pprint()
-        #m.VelocityR.pprint()
-        #m.VelocityL.pprint()
-        #m.koga.pprint()
-        #m.ReL.pprint()
-        #m.ReG.pprint()
-        #m.cRs.pprint()
-        #m.cLs.pprint()
-        #m.display()
+        m.packfact.pprint()
+        m.VelocityR.pprint()
+        m.VelocityL.pprint()
+        m.koga.pprint()
+        #m.packsize.pprint()
+        m.PackCost.pprint()
+        #m.SpecAreaPacking.pprint()
+        m.ReL.pprint()
+        m.ReG.pprint()
+        #m.packVoid.pprint()
+        print(value(m.cRs[0]))
+        print(value(m.cRs[1]))
+        print(value(m.cLs[0]))
+        print(value(m.cLs[1]))
         print(results)
         #results.pprint
         #q = m.FlowRm.value*(m.cRs[0].value-m.cRs[1].value)
@@ -1364,6 +1709,8 @@ class mass_exchanger(object):
                 print("model did not solve correctly, so it is skipped")
                 success_solve = False
             elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
                 success_solve=True
             else:
                 #Should add way to deal with unsolved NLPs (increase elements?)
@@ -1398,19 +1745,21 @@ class mass_exchanger(object):
         #=========================================
         #Variables from Previous NLP
         #=========================================
+        old_solve_clone = m.clone()
+        
         if success_solve:
-            height_init=m.height.value
+            height_init=old_solve_clone.height.value
         else:
             height_init=m2.height.value
             
         m.del_component(m.height)
-        m.height = Var(initialize = height_init,within=NonNegativeReals)
+        m.height = Var(initialize = height_init,bounds = (0.0000001,None))
         
         
         flux_init = {}
         if success_solve:
             for h in m.h:
-                flux_init[h]=m.flux[h].value
+                flux_init[h]=old_solve_clone.flux[h].value
         else:
             for h in m.h:
                 flux_init[h]=m2.flux[h].value
@@ -1421,7 +1770,7 @@ class mass_exchanger(object):
         cRs_init = {}
         if success_solve:
             for h in m.h:
-                cRs_init[h]=m.cRs[h].value 
+                cRs_init[h]=old_solve_clone.cRs[h].value 
         else:
             for h in m.h:
                 cRs_init[h]=m2.cRs[h].value 
@@ -1431,7 +1780,7 @@ class mass_exchanger(object):
         cLs_init = {}
         if success_solve:
             for h in m.h:
-                cLs_init[h]=m.cLs[h].value  
+                cLs_init[h]=old_solve_clone.cLs[h].value  
         else:
             for h in m.h:
                 cLs_init[h]=m2.cLs[h].value
@@ -1440,11 +1789,11 @@ class mass_exchanger(object):
         #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
         
         if success_solve:
-            diameter_init=m.diameter.value
+            diameter_init=old_solve_clone.diameter.value
         else:
             diameter_init=m2.diameter.value
         m.del_component(m.diameter)
-        m.diameter = Var(initialize = diameter_init, within = NonNegativeReals)
+        m.diameter = Var(initialize = diameter_init, bounds = (0.00000001, None))
 
         #m.del_component(m.dheight)
         #m.dheight = DerivativeVar(m.h)
@@ -1454,7 +1803,7 @@ class mass_exchanger(object):
         #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
         area_init = 0
         if success_solve:
-            area_init=m.area.value
+            area_init=old_solve_clone.area.value
         else:
             area_init=m2.area.value
             
@@ -1463,7 +1812,7 @@ class mass_exchanger(object):
 
         koga_init = 0
         if success_solve:
-            koga_init=m.koga.value
+            koga_init=old_solve_clone.koga.value
         else:
             koga_init=m2.koga.value
             
@@ -1472,17 +1821,17 @@ class mass_exchanger(object):
         
         VelocityR_init = 0
         if success_solve:
-            VelocityR_init=m.VelocityR.value
+            VelocityR_init=old_solve_clone.VelocityR.value
         else:
             VelocityR_init=m2.VelocityR.value
             
-        VelocityR_init=m.VelocityR.value
+        #VelocityR_init=m.VelocityR.value
         m.del_component(m.VelocityR)
-        m.VelocityR = Var(initialize =VelocityR_init, within = NonNegativeReals)
+        m.VelocityR = Var(initialize =VelocityR_init, bounds=(0.00000000001,None))
         
         VelocityL_init = 0
         if success_solve:
-            VelocityL_init=m.VelocityL.value
+            VelocityL_init=old_solve_clone.VelocityL.value
         else:
             VelocityL_init=m2.VelocityL.value
         
@@ -1491,7 +1840,7 @@ class mass_exchanger(object):
         
         ReL_init=0
         if success_solve:
-            ReL_init=m.ReL.value
+            ReL_init=old_solve_clone.ReL.value
         else:
             ReL_init=m2.ReL.value
             
@@ -1500,16 +1849,16 @@ class mass_exchanger(object):
         
         ReG_init=0
         if success_solve:
-            ReG_init=m.ReG.value
+            ReG_init=old_solve_clone.ReG.value
         else:
             ReG_init=m2.ReG.value
 
         m.del_component(m.ReG)
-        m.ReG = Var(initialize = ReG_init, within = NonNegativeReals)
+        m.ReG = Var(initialize = ReG_init, bounds = (0.00000001,None))
 
         Flood_init=0
         if success_solve:
-            Flood_init=m.Flood.value
+            Flood_init=old_solve_clone.Flood.value
         else:
             Flood_init=m2.Flood.value
 
@@ -1518,7 +1867,7 @@ class mass_exchanger(object):
 
         FloodAct_init=0
         if success_solve:
-            FloodAct_init=m.FloodAct.value
+            FloodAct_init=old_solve_clone.FloodAct.value
         else:
             FloodAct_init=m2.FloodAct.value
 
@@ -1527,16 +1876,16 @@ class mass_exchanger(object):
         
         packfact_init=0
         if success_solve:
-            packfact_init=m.packfact.value
+            packfact_init=old_solve_clone.packfact.value
         else:
             packfact_init=m2.packfact.value
             
         m.del_component(m.packfact)
-        m.packfact = Var(initialize = packfact_init, within = NonNegativeReals)
+        m.packfact = Var(initialize = packfact_init, bounds =(0,100000))
 
         ai_init=0
         if success_solve:
-            ai_init=m.ai.value
+            ai_init=old_solve_clone.ai.value
         else:
             ai_init=m2.ai.value
 
@@ -1547,9 +1896,9 @@ class mass_exchanger(object):
         #New Variables
         #=========================================      
         #These can have more thoughtful inits
-        m.packsize = Var(initialize = 0.02, within = NonNegativeReals)
+        m.packsize = Var(initialize = 0.05, bounds=(0.003, None))
         m.SpecAreaPacking = Var(initialize = ai_init, within = NonNegativeReals)
-        m.packVoid = Var(initialize=0.68,within = NonNegativeReals)
+        m.packVoid = Var(initialize=0.68,bounds = (0.5, None))
         
         m.del_component(m.PackCost)
         m.PackCost = Var(initialize = (self.ME_inits["packcost"]*self.ME_inits["packcostcor"]), within = NonNegativeReals)
@@ -1612,7 +1961,7 @@ class mass_exchanger(object):
         #Flooding equations
         m.del_component(m.Flood1)
         def Flood1_(m):
-            return m.Flood == 249.089/0.3048*0.12*((m.packfact*0.3048)**0.7)  
+            return m.Flood == 249.089/0.3048*(0.12*(m.packfact*0.3048)**0.7)  
         m.Flood1 = Constraint(rule = Flood1_) 
         
         m.del_component(m.Flood3)
@@ -1654,7 +2003,7 @@ class mass_exchanger(object):
 
         m.del_component(m.Flood2)
         def Flood2_(m):
-            return m.FloodAct ==(94*(((m.ReL**1.11)/(m.ReG**1.8))+4.4))*6*((1-m.packVoid)/(m.packsize*((m.packVoid)**3)))*m.RHOG*(m.VelocityR**2)
+            return m.FloodAct ==(94*((m.ReL**1.11)/(m.ReG**1.8))+4.4)*6*(1-m.packVoid)/(m.packsize*((m.packVoid)**3))*m.RHOG*(m.VelocityR**2)
         
         m.Flood2 = Constraint(rule = Flood2_)
 
@@ -1699,9 +2048,10 @@ class mass_exchanger(object):
         
         m.PackCostEq = Constraint(rule=PackCostEq_)   
         
+        
         def PackSizeCons_(m):
             return m.packsize *20 >= m.diameter
-
+        m.PackSizeCons = Constraint(rule=PackCostEq_)
         #========================================
         # OBJECTIVE and SOLVE
         #======================================== 
@@ -1738,6 +2088,8 @@ class mass_exchanger(object):
                 success_solve = False
             elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+                success_solve=True
             else:
                 #Should add way to deal with unsolved NLPs (increase elements?)
                 print("NLP1 failed.")
@@ -1748,7 +2100,7 @@ class mass_exchanger(object):
        
         q= m.AF*23805*(m.diameter**0.57)*1.15*m.height()
         w=m.AF*pi*(m.diameter()**2)/4*m.height()*m.PackCost
-        print(m.FixCost, "    ",q,"   ", w)
+        print(m.FixCost, "shell",q,"packing   ", w)
         #m.CapCost.pprint()
         m.height.pprint()
         m.diameter.pprint()
@@ -1767,6 +2119,10 @@ class mass_exchanger(object):
         m.ReL.pprint()
         m.ReG.pprint()
         m.packVoid.pprint()
+        print(value(m.cRs[0]))
+        print(value(m.cRs[1]))
+        print(value(m.cLs[0]))
+        print(value(m.cLs[1]))
         #m.display()
         print('=============================================================================================')
         print(results)
@@ -1805,7 +2161,7 @@ class mass_exchanger(object):
             height_init=m2.height.value
             
         m.del_component(m.height)
-        m.height = Var(initialize = height_init,within=NonNegativeReals)
+        m.height = Var(initialize = height_init,bounds = (0.0000001,None))
         
         
         flux_init = {}
@@ -1845,7 +2201,7 @@ class mass_exchanger(object):
         else:
             diameter_init=m2.diameter.value
         m.del_component(m.diameter)
-        m.diameter = Var(initialize = diameter_init, within = NonNegativeReals)
+        m.diameter = Var(initialize = diameter_init, bounds = (0.0001, None))
 
         #m.del_component(m.dheight)
         #m.dheight = DerivativeVar(m.h)
@@ -1877,9 +2233,9 @@ class mass_exchanger(object):
         else:
             VelocityR_init=m2.VelocityR.value
             
-        VelocityR_init=m.VelocityR.value
+        #VelocityR_init=m.VelocityR.value
         m.del_component(m.VelocityR)
-        m.VelocityR = Var(initialize =VelocityR_init, within = NonNegativeReals)
+        m.VelocityR = Var(initialize =VelocityR_init, bounds = (0.000000000001,None))
         
         VelocityL_init = 0
         if success_solve:
@@ -2054,7 +2410,7 @@ class mass_exchanger(object):
         m.del_component(m.loverdlo)
         
         def loverdlo_(m):
-            return m.height >= 0.05*m.diameter
+            return m.height >= 0.5*m.diameter
             
         m.loverdlo = Constraint(rule=loverdlo_)
        
@@ -2074,7 +2430,7 @@ class mass_exchanger(object):
 
         m.del_component(m.Flood2)
         def Flood2_(m):
-            return m.FloodAct ==(94*(((m.ReL**1.11)/(m.ReG**1.8))+4.4))*6*((1-m.packVoid)/(m.packsize*((m.packVoid)**3)))*m.RHOG*(m.VelocityR**2)
+            return m.FloodAct ==(94*((m.ReL**1.11)/(m.ReG**1.8))+4.4)*6*(1-m.packVoid)/(m.packsize*((m.packVoid)**3))*m.RHOG*(m.VelocityR**2)
         
         m.Flood2 = Constraint(rule = Flood2_)
 
@@ -2094,11 +2450,13 @@ class mass_exchanger(object):
 
         m.Aid = Constraint(rule = Aid_) 
 
+        m.del_component(m.packingFactorEq)
         def packingFactorEq_(m):
             return m.packfact == (2.0034)*(m.packsize**(-1.564))
         
         m.packingFactorEq = Constraint(rule=packingFactorEq_)
         
+        m.del_component(m.AreaofPackingEq)
         def AreaofPackingEq_(m):
             return m.SpecAreaPacking == (5.0147)*(m.packsize**(-0.978))
         
@@ -2109,19 +2467,22 @@ class mass_exchanger(object):
         
         #m.PackingDensityEq = Constraint(rule=PackingDensityEq_)
         
+        m.del_component(m.PackVoidEq)
         def PackVoidEq_(m):
             return m.packVoid == 0.0569*log(m.packsize)+0.9114
         
         m.PackVoidEq = Constraint(rule=PackVoidEq_)
         
+        m.del_component(m.PackCostEq)
         def PackCostEq_(m):
             return m.PackCost == 397431*(m.packsize**(2)) - 53449*(m.packsize) + 2366.1
         
         m.PackCostEq = Constraint(rule=PackCostEq_)   
         
-        def PackSizeCons_(m):
-            return m.packsize *10 >= m.diameter
-
+        #m.del_component(m.m.del_component(m.Obj4))
+        #def PackSizeCons_(m):
+        #    return m.packsize *10 >= m.diameter
+        m.del_component(m.PackSizeCons)
         #========================================
         # OBJECTIVE and SOLVE
         #======================================== 
@@ -2157,6 +2518,8 @@ class mass_exchanger(object):
                 print("model did not solve correctly, so it is skipped")
                 success_solve = False
             elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
                 success_solve=True
             else:
                 #Should add way to deal with unsolved NLPs (increase elements?)

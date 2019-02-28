@@ -23,8 +23,8 @@ import timeit
 import sys
 #import csv
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-from MassExchanger import *
-from MENS_MINLP import *
+from library.MassExchanger import *
+from library.MENS_MINLP import *
 
 __author__ = "Michael Short"
 __copyright__ = "Copyright 2018"
@@ -243,6 +243,7 @@ class HybridStrategy(object):
         for i in MENS_model.i:
             for j in MENS_model.j:
                 for k in MENS_model.k:
+                    print("do we get here?")
                     if MENS_model.y[i,j,k].value==1 and MENS_model.M[i,j,k].value!=0 and count in exchanger_models:
                         r=exchanger_models[count].Obj4()
                         nlp_exshelval += value(exchanger_models[count].AF)*23805*(value(exchanger_models[count].diameter)**0.57)*1.15*value(exchanger_models[count].height) 
@@ -258,10 +259,17 @@ class HybridStrategy(object):
         print("NLP MEX pack costs: ", nlp_packcost) 
         print("NLP MEX cap costs: ", capval) 
         minlpcapcost=0 
+        minlpshellcost=0
+        minlppackcost=0
         for i in MENS_model.i:
             for j in MENS_model.j:
                 for k in MENS_model.k:
-                    minlpcapcost += value(MENS_model.AF)*23805*((value(MENS_model.diacor[i,j,k])*value(MENS_model.dia[i,j,k]))**0.57)*1.15*value(MENS_model.heightcor[i,j,k])*value(MENS_model.height[i,j,k])                       
+                    minlpshellcost += value(MENS_model.AF)*23805*((value(MENS_model.diacor[i,j,k])*value(MENS_model.dia[i,j,k]))**0.57)*1.15*value(MENS_model.heightcor[i,j,k])*value(MENS_model.height[i,j,k]) 
+                    minlppackcost += value(MENS_model.AF)*numpy.pi*((value(MENS_model.dia[i,j,k])*value(MENS_model.diacor[i,j,k]))**2)/4*value(MENS_model.height[i,j,k])*value(MENS_model.heightcor[i,j,k])*value(MENS_model.packcost[i,j,k])*value(MENS_model.packcostcor[i,j,k])                      
+        
+        print("MINLP shell costs:", minlpshellcost)
+        print("MINLP pack costs:", minlppackcost)
+        minlpcapcost=minlppackcost+minlpshellcost
         print("MINLP cap costs:", minlpcapcost)
         
         fixcosts = 0
@@ -320,26 +328,42 @@ class HybridStrategy(object):
         
         # second we compare the correction factors 
         stop_flag2 = False
+        stop_dict = dict()
         if self.iter_count>=2:
             stop_flag2 = True
             for i in new_cors:
-                print(i)
+
                 comp = new_cors[i]/previous_corrections[i]
-                print(comp)
+
                 if comp >= 1 + tol:
-                    stop_flag2 = False
-                    print(stop_flag1,stop_flag2)
+                    stop_dict[i] = False
+
                 elif comp <= 1 - tol:
-                    stop_flag2 = False
-                    print(stop_flag1,stop_flag2)
+                    stop_dict[i] = False
+
                 else:
-                    top_flag2 = True  
+                    stop_dict[i] = True
                     
+        for k,v in stop_dict.items():
+            if v == False:
+                stop_flag2 = False
+                
+        print("Stop_flag 1 = difference between MINLP and NLP", stop_flag1)   
+        print("Stop_flag 2 = difference between correction factors", stop_flag2)          
         if stop_flag2 == True or stop_flag1 == True:
-            print("There was no change in correction facotrs between consecutive runs. This means that the solution was found")
+            print("There was no change in correction factors between consecutive runs. This means that the solution was found")
             return True
         else:
             return False
+        
+    def cut_generator(self, cut_type):
+        '''This function will serve to generate the cuts to the MINLP problem based on the previous solution.
+        These cuts will rely on whether the optimization problem is solved with a global solver such as BARON, 
+        or whether a local solution was obtained. The options need to be supplied as a dictionary with the keys
+        being the option name and the value being True or False. The types of cuts that we can add, will include:
+            cut_type (dict): dictionary that admit the following keywords as keys:
+                'bin_cut'
+        '''
         
         
     def run_hybrid_strategy(self, max_iter=None, cor_filter_size=None,rich_data=None,lean_data=None, correction_factors = None, parameter_data=None, stream_properties = None, tol = 0.02, exname = None):
@@ -473,7 +497,8 @@ class HybridStrategy(object):
                             FlowM[i] = MENS_solved.M[i,j,k].value/(MENS_solved.cr[i,k].value-MENS_solved.cr[i,(k+1)].value)
                             FlowM[j] = MENS_solved.M[i,j,k].value/(MENS_solved.cl[j,k].value-MENS_solved.cl[j,(k+1)].value)
                             ME_inits = self._obtain_initializations(MENS_solved,i,j,k)   #, me_inits=ME_inits
-                            mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties)
+                            nfe = 100
+                            mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
                             ME1, success1, presolve_1 = mx.Construct_pyomo_model()
                             ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
                             ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
@@ -489,7 +514,7 @@ class HybridStrategy(object):
                                     success = success6
                                 else:
                                     print("The initial exchanger solution attempt failed. Increasing FEs")
-                                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=400)
+                                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=(nfe*4),ncp = 3)
                                     ME1, success1, presolve_1 = mx.Construct_pyomo_model()
                                     ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
                                     ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
@@ -517,6 +542,8 @@ class HybridStrategy(object):
                                     exchanger_models[m]=ME5
                                 elif (ME5results.solver.status == SolverStatus.ok) and (ME5results.solver.termination_condition == TerminationCondition.optimal):
                                     exchanger_models[m]=ME5
+                                elif (ME5results.solver.status == SolverStatus.ok) and (ME5results.solver.termination_condition == TerminationCondition.locallyOptimal):
+                                    exchanger_models[m]=ME5
                             else:
                                 #Should add way to deal with unsolved NLPs (increase elements?)
                                 print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
@@ -530,9 +557,11 @@ class HybridStrategy(object):
                     
                         m+=1
             self.iter_count = ic
-            stop = self._check_convergence(MENS_solved,exchanger_models,m)
-            
-            self.corrections=self._get_correction_factors(MENS_solved,exchanger_models)      
+            stop = self._check_convergence(MENS_solved,exchanger_models,m,tol = self.tol)
+            print("These are the previous corrections")
+            print(self.corrections)
+            self.corrections=self._get_correction_factors(MENS_solved,exchanger_models)    
+            print("These are the current corrections")
             print(self.corrections)
             
             if stop:
