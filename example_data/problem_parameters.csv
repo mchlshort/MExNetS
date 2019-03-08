@@ -4,7 +4,7 @@ omega,0.0001
 AF,0.2
 ACH,618
 fixcost,30000
-EMAC,0.000001
+EMAC,0.00000001
 diameter,1
 packcost,1900
 SurfA,300

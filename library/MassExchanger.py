@@ -1501,7 +1501,7 @@ class mass_exchanger(object):
             packfact_init=m2.packfact.value
             
         m.del_component(m.packfact)
-        m.packfact = Var(initialize = packfact_init, bounds = (0, None))
+        m.packfact = Var(initialize = packfact_init, bounds = (1, None))
 
         #=========================================
         #NEW Parameters
@@ -1881,7 +1881,7 @@ class mass_exchanger(object):
             packfact_init=m2.packfact.value
             
         m.del_component(m.packfact)
-        m.packfact = Var(initialize = packfact_init, bounds =(0,100000))
+        m.packfact = Var(initialize = packfact_init, bounds =(1,100000))
 
         ai_init=0
         if success_solve:
@@ -2289,7 +2289,7 @@ class mass_exchanger(object):
             packfact_init=m2.packfact.value
             
         m.del_component(m.packfact)
-        m.packfact = Var(initialize = packfact_init, within = NonNegativeReals)
+        m.packfact = Var(initialize = packfact_init, bounds = (0.00001, None ))
 
         ai_init=0
         if success_solve:
@@ -2410,9 +2410,9 @@ class mass_exchanger(object):
         m.del_component(m.loverdlo)
         
         def loverdlo_(m):
-            return m.height >= 0.5*m.diameter
+            return m.height >= 0.000001*m.diameter
             
-        m.loverdlo = Constraint(rule=loverdlo_)
+        #m.loverdlo = Constraint(rule=loverdlo_)
        
         m.del_component(m.TRateVap)
 

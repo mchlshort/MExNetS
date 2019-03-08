@@ -417,9 +417,15 @@ class MENS(object):
                 pass
         else:
             raise RuntimeError("correction factors need to be inputted as a dictionary or set to None")
+            
+        model = ConcreteModel()
+        #Setting the data to belong to the model
+        model._rich_data=None
+        model._rich_data = self._rich_data
+        model._lean_data = self._lean_data
         
         #print("self._correction_factors = ", self._correction_factors)
-        model = ConcreteModel()
+        
 
         #==============
         #   SCALARS
@@ -1350,10 +1356,22 @@ class MENS(object):
             #print(model.L[j].value)
         #print(l_init)
         #model.del_component(model.L)
+        model.del_component(model.avlean)
+        model.avlean = Var(model.j, initialize=0.3, within=NonNegativeReals)
         
         model.L1 = Var(model.j, initialize=l_init,bounds = L_bounds)
         #model.L.pprint()
     
+    
+        #Available mass in lean stream j
+        model.del_component(model.AvLean) 
+        def AvLean_(model,j):
+            a = (self._lean_data.at[j,'Cout'])-(self._lean_data.at[j,'Cin'])
+            return model.avlean[j] == model.L1[j]*(a)
+
+        model.AvLean = Constraint(model.j, rule=AvLean_)
+        
+        
         model.del_component(model.Total_Mass_Rich) 
         def Total_Mass_Rich_(model,i):   
             f=(self._rich_data.at[i,'F'])*((self._rich_data.at[i,'Cin'])-(self._rich_data.at[i,'Cout'])) 
