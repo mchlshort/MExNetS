@@ -91,7 +91,9 @@ class mass_exchanger(object):
             solver=SolverFactory('gams')
             options={}
             m1 = m
+
             results = solver.solve(m1,tee=False, solver = 'conopt')
+
         except:
             print("conopt failed")
             print("CONOPT assumed unsuccessful... IPOPT it is")
@@ -161,6 +163,7 @@ class mass_exchanger(object):
                         results = solver.solve(m,tee=False, options=options2) 
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
+
                         elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
                             print("Second solve was infeasible")
                             options3 = {}
@@ -596,7 +599,9 @@ class mass_exchanger(object):
         m.cRs = Var(m.tau,within = NonNegativeReals)
         m.cLs = Var(m.tau,within = NonNegativeReals)
         d = self.ME_inits["diameter"]*self.ME_inits["diacor"]
+
         m.diameter = Param(initialize =d)
+
 
         #DIFFERENTIAL VAR
         #m.dheight = DerivativeVar(m.h)
@@ -750,7 +755,7 @@ class mass_exchanger(object):
         
         if success_solve:
             height_init=old_solve_clone.height.value
-            print("is this between WARNING1")
+
         else:
             height_init=m2.height.value
             print("should mean didn't success solve")
@@ -761,7 +766,9 @@ class mass_exchanger(object):
         
         flux_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 flux_init[h]=old_solve_clone.flux[h].value
         else:
             for h in m.tau:
@@ -772,6 +779,7 @@ class mass_exchanger(object):
 
         cRs_init = {}
         if success_solve:
+
             for h in m.tau:
                 cRs_init[h]=old_solve_clone.cRs[h].value 
         else:
@@ -782,7 +790,9 @@ class mass_exchanger(object):
 
         cLs_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 cLs_init[h]=old_solve_clone.cLs[h].value  
         else:
             for h in m.tau:
@@ -792,10 +802,12 @@ class mass_exchanger(object):
         #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
         
         if success_solve:
+
             if old_solve_clone.diameter.value == 0:
                 diameter_init=1
             else:
                 diameter_init=old_solve_clone.diameter.value
+
         else:
             if m2.diameter.value == 0:
                 diameter_init=1
@@ -886,6 +898,7 @@ class mass_exchanger(object):
                 return (m.FlowRVlat/m.area.value)
         
         def init_velocityL(m):
+
             if m.area.value == 0:
                 return 5
             else:
@@ -893,6 +906,7 @@ class mass_exchanger(object):
         print("is this between WARNING")
         m.VelocityR = Var(initialize = init_velocityR, bounds = (0.0001,10000))
         m.VelocityL = Var(initialize = init_velocityL, bounds = (0.0001,10000))
+
         
         #========================================
         #OLD CONSTRAINTS
@@ -1089,13 +1103,13 @@ class mass_exchanger(object):
         else:
             height_init=m2.height.value
             
-        #m.del_component(m.height)
-        #m.height = Var(initialize = height_init,bounds = (0.0000001,None))
         
         
         flux_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 flux_init[h]=old_solve_clone.flux[h].value
         else:
             for h in m.tau:
@@ -1106,7 +1120,9 @@ class mass_exchanger(object):
 
         cRs_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 cRs_init[h]=old_solve_clone.cRs[h].value 
         else:
             for h in m.tau:
@@ -1116,7 +1132,9 @@ class mass_exchanger(object):
 
         cLs_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 cLs_init[h]=old_solve_clone.cLs[h].value  
         else:
             for h in m.tau:
@@ -1130,7 +1148,9 @@ class mass_exchanger(object):
         else:
             diameter_init=m2.diameter.value
         m.del_component(m.diameter)
+
         m.diameter = Var(initialize = 0.35, bounds = (0.0001,None))
+
 
         #m.del_component(m.dheight)
         #m.dheight = DerivativeVar(m.h)
@@ -1154,7 +1174,9 @@ class mass_exchanger(object):
             koga_init=m2.koga.value
             
         m.del_component(m.koga)
+
         m.koga = Var(initialize = 0.05, bounds = (0.0000000001,None))
+
         
         VelocityR_init = 0
         if success_solve:
@@ -1164,7 +1186,9 @@ class mass_exchanger(object):
             
         VelocityR_init=m.VelocityR.value
         m.del_component(m.VelocityR)
+
         m.VelocityR = Var(initialize = VelocityR_init, bounds = (0.00000001,15))
+
         
         VelocityL_init = 0
         if success_solve:
@@ -1173,7 +1197,9 @@ class mass_exchanger(object):
             VelocityL_init=m2.VelocityL.value
         
         m.del_component(m.VelocityL)
+
         m.VelocityL = Var(initialize =  VelocityL_init, bounds = (0.0000001,100)) 
+
        
         #=========================================
         #NEW Parameters
@@ -1184,19 +1210,25 @@ class mass_exchanger(object):
         #=========================================
         #NEW Variables
         #=========================================
+
         m.packfact = Var(initialize=120, bounds = (80.0,10000))
+
         
         ReLini = m.RHOL*m.VelocityL.value*0.05/m.vis.value
         ReGini = m.RHOG*m.VelocityR.value*0.05/m.visRich.value
         
+
         m.ReL = Var(initialize = ReLini,bounds = (0.00001,None))
         m.ReG = Var(initialize = ReGini,bounds = (0.00001,None))
+
                 
         Floodini = 249.089/0.3048*0.12*((m.packfact.value*0.3048)**0.7)
         FloodActini = 22.3*(m.packfact.value)*(m.vis**0.2)*((m.VelocityR.value)**2)*((10**(0.035*m.VelocityL.value))/(9.81*m.RHOG))
 
+
         m.Flood= Var(initialize = Floodini, bounds = (0.000000001,None))
         m.FloodAct= Var(initialize = FloodActini, bounds = (0.000000001,None))
+
 
         #========================================
         #OLD CONSTRAINTS
@@ -1363,6 +1395,7 @@ class mass_exchanger(object):
         #m.CapCost.pprint()
         m.height.pprint()
         #m.heightp.pprint()
+
         m.diameter.pprint()
         m.ReG.pprint()
         m.ReL.pprint()
@@ -1373,6 +1406,7 @@ class mass_exchanger(object):
         m.packfact.pprint()
         m.koga.pprint()
         m.de.pprint()
+
         #m.display()
         #print(results)
         #results.pprint
@@ -1449,7 +1483,9 @@ class mass_exchanger(object):
         
         flux_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 flux_init[h]=old_solve_clone.flux[h].value
         else:
             for h in m.tau:
@@ -1460,7 +1496,9 @@ class mass_exchanger(object):
 
         cRs_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 cRs_init[h]=old_solve_clone.cRs[h].value 
         else:
             for h in m.h:
@@ -1470,7 +1508,9 @@ class mass_exchanger(object):
 
         cLs_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 cLs_init[h]=old_solve_clone.cLs[h].value  
         else:
             for h in m.tau:
@@ -1519,7 +1559,9 @@ class mass_exchanger(object):
         #VelocityR_init=m.VelocityR.value
         print("The velocityR init is :", VelocityR_init )
         m.del_component(m.VelocityR)
+
         m.VelocityR = Var(initialize = VelocityR_init, bounds =(0.001, 20))
+
         
         VelocityL_init = 0
         if success_solve:
@@ -1528,7 +1570,9 @@ class mass_exchanger(object):
             VelocityL_init=m2.VelocityL.value
         
         m.del_component(m.VelocityL)
+
         m.VelocityL = Var(initialize = VelocityL_init,bounds =(0.001, 20)) 
+
         
         ReL_init=0
         if success_solve:
@@ -1573,7 +1617,9 @@ class mass_exchanger(object):
             packfact_init=m2.packfact.value
             
         m.del_component(m.packfact)
+
         m.packfact = Var(initialize = packfact_init, bounds = (1, 10000))
+
 
         #=========================================
         #NEW Parameters
@@ -1683,9 +1729,11 @@ class mass_exchanger(object):
         
         m.del_component(m.Flood2)
         def Flood2_(m):
+
             return m.FloodAct ==(94*((m.ReL**1.11)/(m.ReG**1.8))+4.4)*6*(1-m.porosity)/(m.de*((m.porosity)**3))*m.RHOG*(m.VelocityR**2)
         # NOTE that 0.92 is actually the voidage and 0.05 is the m.de ... These are from my GAMS code and work well for inits
         #                        (94*((ReLfinal(i,j,k)**1.11)/(ReGfinal(i,j,k)**1.8))+4.4)*6*(1-0.92)/(0.05*(0.92**3))*RHOG(i,j)*(velocityRfinal(i,j,k)**2);                                                                  
+
         m.Flood2 = Constraint(rule = Flood2_)
         
         m.del_component(m.Flood3)
@@ -1713,7 +1761,9 @@ class mass_exchanger(object):
         m.del_component(m.loverdlo)
         
         def loverdlo_(m):
+
             return m.height >= 2*m.diameter
+
             
         m.loverdlo = Constraint(rule=loverdlo_)
 
@@ -1770,7 +1820,9 @@ class mass_exchanger(object):
         m.FloodAct.pprint()
         m.Flood.pprint()  
         m.ai.pprint()
+
         m.ap.pprint()
+
         m.packfact.pprint()
         m.VelocityR.pprint()
         m.VelocityL.pprint()
@@ -1781,11 +1833,13 @@ class mass_exchanger(object):
         m.ReL.pprint()
         m.ReG.pprint()
         #m.packVoid.pprint()
+
         print("All inlet and outlet concs:")
         print(m.cRs[0].value, self.rich_in[self.rich_stream_name])
         print(m.cRs[1].value, self.rich_out[self.rich_stream_name])
         print(m.cLs[0].value, self.rich_in[self.lean_stream_name])
         print(m.cLs[1].value, self.rich_out[self.lean_stream_name])
+
         print(results)
         #m.display()
         #results.pprint
@@ -1848,12 +1902,16 @@ class mass_exchanger(object):
             height_init=m2.height.value
             
         m.del_component(m.height)
+
         m.height = Var(initialize = height_init,bounds = (0.1,None))
+
         
         
         flux_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 flux_init[h]=old_solve_clone.flux[h].value
         else:
             for h in m.tau:
@@ -1864,7 +1922,9 @@ class mass_exchanger(object):
 
         cRs_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 cRs_init[h]=old_solve_clone.cRs[h].value 
         else:
             for h in m.tau:
@@ -1874,7 +1934,9 @@ class mass_exchanger(object):
 
         cLs_init = {}
         if success_solve:
+
             for h in m.tau:
+
                 cLs_init[h]=old_solve_clone.cLs[h].value  
         else:
             for h in m.tau:
@@ -1888,7 +1950,9 @@ class mass_exchanger(object):
         else:
             diameter_init=m2.diameter.value
         m.del_component(m.diameter)
+
         m.diameter = Var(initialize = diameter_init, bounds = (0.0000001, 3))
+
 
         #m.del_component(m.dheight)
         #m.dheight = DerivativeVar(m.h)
@@ -1922,7 +1986,9 @@ class mass_exchanger(object):
             
         #VelocityR_init=m.VelocityR.value
         m.del_component(m.VelocityR)
+
         m.VelocityR = Var(initialize =VelocityR_init, bounds=(0.00001,None))
+
         
         VelocityL_init = 0
         if success_solve:
@@ -1949,7 +2015,9 @@ class mass_exchanger(object):
             ReG_init=m2.ReG.value
 
         m.del_component(m.ReG)
+
         m.ReG = Var(initialize = ReG_init, bounds = (1,None))
+
 
         Flood_init=0
         if success_solve:
@@ -1976,7 +2044,9 @@ class mass_exchanger(object):
             packfact_init=m2.packfact.value
             
         m.del_component(m.packfact)
+
         m.packfact = Var(initialize = packfact_init, bounds =(40,4000))
+
 
         ai_init=0
         if success_solve:
@@ -1991,8 +2061,10 @@ class mass_exchanger(object):
         #New Variables
         #=========================================      
         #These can have more thoughtful inits
+
         m.packsize = Var(initialize = 0.05, bounds=(0.005, None))
         m.SpecAreaPacking = Var(initialize = ai_init, bounds=(5, None))
+
         m.packVoid = Var(initialize=0.68,bounds = (0.5, None))
         
         m.del_component(m.PackCost)
@@ -2100,7 +2172,9 @@ class mass_exchanger(object):
 
         m.del_component(m.Flood2)
         def Flood2_(m):
+
             return m.FloodAct ==(94*((m.ReL**1.11)/(m.ReG**1.8))+4.4)*6*(1-m.packVoid)/(m.packsize*((m.packVoid)**3))*m.RHOG*((m.VelocityR)**2)
+
         
         m.Flood2 = Constraint(rule = Flood2_)
 
@@ -2148,7 +2222,8 @@ class mass_exchanger(object):
         
         def PackSizeCons_(m):
             return m.packsize *20 >= m.diameter
-        #m.PackSizeCons = Constraint(rule=PackSizeCons_)
+
+
         #========================================
         # OBJECTIVE and SOLVE
         #======================================== 
@@ -2237,7 +2312,9 @@ class mass_exchanger(object):
         q= m.AF*23805*(m.diameter**0.57)*1.15*m.height()
         w=m.AF*pi*(m.diameter()**2)/4*m.height()*m.PackCost
         print(m.FixCost, "shell",q,"packing   ", w)
+
         print("results from 5th NLP")
+
         #m.CapCost.pprint()
         m.height.pprint()
         m.diameter.pprint()
@@ -2256,6 +2333,7 @@ class mass_exchanger(object):
         m.ReL.pprint()
         m.ReG.pprint()
         m.packVoid.pprint()
+
         print("All inlet and outlet concs:")
         print(m.cRs[0].value, self.rich_in[self.rich_stream_name])
         print(m.cRs[1].value, self.rich_out[self.rich_stream_name])
@@ -2265,6 +2343,7 @@ class mass_exchanger(object):
         m.nvariables()
         print("number of constraints")
         m.nconstraints()
+
         #m.display()
         print('=============================================================================================')
         print(results)
@@ -2624,7 +2703,7 @@ class mass_exchanger(object):
         #m.del_component(m.m.del_component(m.Obj4))
         #def PackSizeCons_(m):
         #    return m.packsize *10 >= m.diameter
-        #m.del_component(m.PackSizeCons)
+
         #========================================
         # OBJECTIVE and SOLVE
         #======================================== 

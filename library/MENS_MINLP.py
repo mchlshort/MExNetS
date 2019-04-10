@@ -70,6 +70,7 @@ class MENS(object):
         self._stream_properties = stream_properties
         self.BARONsolved = False
         self.DICOPTsolved = False
+
         self.stages = stages
         
         if correction_factors == None:
@@ -742,6 +743,7 @@ class MENS(object):
                     
         #opt = SolverFactory('bonmin',executable='./../../../../cygwin64/home/Michael/Bonmin-1.8.6/build/bin/bonmin')
         #opt = SolverFactory('./../../Bonmin/build/bin/bonmin')
+
         try:
             if self.BARONsolved == True:
                 print("Solved using one of the global solvers")
@@ -2135,7 +2137,9 @@ class MENS(object):
             model.dcin.pprint()
             model.dcout.pprint()
             model.y.pprint()
+
             print(model.TACeqn())
+            
         model.baronsolved = False
         if self.BARONsolved == True:
             model.baronsolved = True
