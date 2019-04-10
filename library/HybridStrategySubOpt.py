@@ -23,8 +23,9 @@ import timeit
 import sys
 #import csv
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-from library.MassExchanger import *
-from library.MENS_MINLP import *
+from library.MassExchangerManualColloc import *
+from library.MENS_MINLPauto import *
+from library.SubOptMENS import *
 
 __author__ = "Michael Short"
 __copyright__ = "Copyright 2018"
@@ -158,7 +159,7 @@ class HybridStrategy(object):
             for j in MENS_model.j:
                 for k in MENS_model.k:
                     
-                    if MENS_model.y[i,j,k].value==1 and MENS_model.M[i,j,k].value!=0 and m in ME_model:
+                    if MENS_model.y[i,j,k]==1 and MENS_model.M[i,j,k].value!=0 and m in ME_model:
                         if ME_model[m].success== True:
                             #should possibly have a way here to tell whether the exchanger model solved correctly
                             #if it didn't then we should set the correction to 1 for this iteration
@@ -244,7 +245,7 @@ class HybridStrategy(object):
             for j in MENS_model.j:
                 for k in MENS_model.k:
                     print("do we get here?")
-                    if MENS_model.y[i,j,k].value==1 and MENS_model.M[i,j,k].value!=0 and count in exchanger_models:
+                    if MENS_model.y[i,j,k]==1 and MENS_model.M[i,j,k].value!=0 and count in exchanger_models:
                         r=exchanger_models[count].Obj4()
                         nlp_exshelval += value(exchanger_models[count].AF)*23805*(value(exchanger_models[count].diameter)**0.57)*1.15*value(exchanger_models[count].height) 
                         nlp_packcost += value(exchanger_models[count].AF)*pi*(value(exchanger_models[count].diameter)**2)/4*value(exchanger_models[count].height)*value(exchanger_models[count].PackCost)
@@ -315,6 +316,7 @@ class HybridStrategy(object):
         
         self.diff_NLP_MINLP_log[self.iter_count]=per_diff
         stop_flag1 = False
+
         if abs(per_diff) <= tol*100:
             stop_flag1 = True
         
@@ -350,8 +352,8 @@ class HybridStrategy(object):
                 
         print("Stop_flag 1 = difference between MINLP and NLP", stop_flag1)   
         print("Stop_flag 2 = difference between correction factors", stop_flag2)          
-        if stop_flag2 == True or stop_flag1 == True:
-            print("There was no change in correction factors between consecutive runs. This means that the solution was found")
+        if stop_flag2 == True or stop_flag1 == True and self.best_objective_real != None:
+            print("either flag is true. This means that the solution was found")
             return True
         else:
             return False
@@ -366,7 +368,7 @@ class HybridStrategy(object):
         '''
         
         
-    def run_hybrid_strategy(self, max_iter=None, cor_filter_size=None,rich_data=None,lean_data=None, correction_factors = None, parameter_data=None, stream_properties = None, tol = 0.02, exname = None):
+    def run_hybrid_strategy(self, max_iter=None, cor_filter_size=None,rich_data=None,lean_data=None, correction_factors = None, parameter_data=None, stream_properties = None, tol = 0.02, exname = None, non_iso = True, stages = None, superstruct = 'SBS'):
         """Starts the hybrid strategy iterative procedure by solving MINLP and NLP problems
         
         This function will be called by the user when they want to run the 
@@ -386,6 +388,9 @@ class HybridStrategy(object):
             parameter_data (pandas DataFrame): DataFrame of problem-specific parameters.
             tol (int,optional):             default = 0.02. Number that represents the maximum change of correction factors required between 
                                             iterations to terminate the program 
+            non_iso (bool, optional):       True/False for whether to solve the suboptimization with non-isocompositional mixing. Default = True
+            stages (int, optional):         Number of stages for the stagewise superstructure
+            superstructure (str,optional):  The type of superstructure to be used. SBS and SWS currently supported
         
         Returns:
             print that tells the user that the iterations have ended
@@ -399,6 +404,19 @@ class HybridStrategy(object):
         else:
             raise RuntimeError("Must input an integer or leave to default")
             
+        if isinstance(stages, int):
+            pass
+        elif stages == None:
+            print("No stages set so default is chosen i.e. max(process streams)+1")
+            stages = None
+        else:
+            raise RuntimeError("Must input an integer or leave to default for stages")
+        
+        if isinstance(non_iso, bool):
+            pass
+        else:
+            raise RuntimeError("Must input an integer or leave to default for stages")
+        
         self.cor_filter_size = cor_filter_size    
         if isinstance(self.cor_filter_size, (int, float)):
             pass
@@ -407,12 +425,21 @@ class HybridStrategy(object):
             self.cor_filter_size=0.5
         else:
             raise RuntimeError("Must input a number or leave to default")
+        print(type(superstruct))
+        print(superstruct)
+        if not isinstance(superstruct, str):
+            raise RuntimeError("Must input superstructure type as string")
+        #elif superstruct != 'SBS' or superstruct != 'SWS':
+        #    raise RuntimeError("Must input superstructure type as string as 'SWS' or 'SBS'")
+        else:
+            pass
+        
         print('User-defined tolerance for correction factors: ', tol)
         print('User-defined maximum number of iterations: ', max_iter)
         print('User-defined correction factor filter: ', self.cor_filter_size)
         self.tol = tol
         #initialize the MENS class here with the data from files. Replace this with values from provide_problem_data eventually
-        Ex1MEN = MENS(rich_data=rich_data,lean_data=lean_data, correction_factors = correction_factors, parameter_data=parameter_data, stream_properties = stream_properties)
+        Ex1MEN = MENS(rich_data=rich_data,lean_data=lean_data, correction_factors = correction_factors, parameter_data=parameter_data, stream_properties = stream_properties, stages = stages, superstruct = superstruct)
 
         #begin the iterative procedure
         for ic in range(max_iter):
@@ -423,8 +450,8 @@ class HybridStrategy(object):
             print("------------------------------------------------------------------------------------------------------------------------------------")
             
             #these values are the initial values used to select matches between the NLP initialization of the MINLP and the MINLP
-            min_height=0.1
-            min_mass_ex = 1e-6
+            min_height=0.01
+            min_mass_ex = 1e-7
             #initialize the MINLP with the NLP
             MEN_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
             print("MEN_init")
@@ -446,7 +473,7 @@ class HybridStrategy(object):
             
             if (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
                 #change for a while loop with a max iter
-                for i in range(50):
+                for i in range(20):
                     print("MINLP didn't solve, attempting new matches")  
                     mh=min_height/((i+1)*4)
                     #print("mh",mh)
@@ -468,12 +495,69 @@ class HybridStrategy(object):
                 print("The first solve of the MINLP is feasible")
             print(MENS_solved)
             print(results)
+            MENS_solved.height.pprint()
+            MENS_solved.M.pprint()
+            MENS_solved.L1.pprint()
+            MENS_solved.cr.pprint()
+            MENS_solved.cl.pprint()
+            MENS_solved.dcin.pprint()
+            MENS_solved.dcout.pprint()
+            MENS_solved.y.pprint()
+            print("Original objective func")
+            print(MENS_solved.TACeqn())
+            orig_ob = MENS_solved.TACeqn()
+            con = True
             if  (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations): 
                 print("The MINLP model for iteration ", ic, "failed to solve. Without a valid network model the pragram will terminate")
                 print("The current best solution for the NLP was found at iteration: ", self.best_net_iter)
                 print("Optimal solution for NLP: ", self.best_objective_real) 
+                con = False
                 sys.exit()
 
+            #Now we build the NLP from the MINLP solution
+            orig=True
+            if non_iso:
+                MENS_solved1 =MENS_solved.clone()
+                MENS_solvedclone = MENS_solved1
+                Ex1TR=SubOptMENS(MENS_solvedclone)
+                MENS_solvedsub, results = Ex1TR.run_suboptimization()
+                MENS_solvedsub.height.pprint()
+                MENS_solvedsub.M.pprint()
+                MENS_solvedsub.L1.pprint()
+                MENS_solvedsub.avlean.pprint()
+                MENS_solvedsub.cr.pprint()
+                MENS_solvedsub.cl.pprint()
+                MENS_solvedsub.dcin.pprint()
+                MENS_solvedsub.dcout.pprint()
+                MENS_solvedsub.Flrich.pprint()
+                MENS_solvedsub.Flean.pprint()
+                #MENS_solved.flv.pprint()
+                MENS_solvedsub.clin.pprint()
+                MENS_solvedsub.crin.pprint()
+                MENS_solvedsub.y.pprint()
+                if  (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations): 
+                    print("The MINLP model for iteration ", ic, "failed to solve. Without a valid network model the pragram will terminate")
+                    print("The current best solution for the NLP was found at iteration: ", self.best_net_iter)
+                    print("Optimal solution for NLP: ", self.best_objective_real) 
+                    if con == False:
+                        sys.exit()
+                    con = True
+                print("Subopt objective func")
+                print(MENS_solvedsub.TACeqn())
+                print("Original objective func")
+                print(MENS_solved.TACeqn())
+                orig = False
+                if con == True:
+                    if MENS_solvedsub.TACeqn() < MENS_solved.TACeqn():
+                        orig = False
+                        print("SUBOPT with non isocomp is better")
+                        #Replace original model with sub
+                        MENS_solved = MENS_solvedsub
+                    else:
+                        orig = True
+                        print("ORIGINAL MINLP BETTER THAN SUBOPT, so orig is chosen")
+                
+                print(orig_ob)
             #m is the counter for all possible matches and also is the key for correction factors
             m = 0
             exchanger_models=dict()
@@ -483,27 +567,41 @@ class HybridStrategy(object):
                 for j in MENS_solved.j:
                     for k in MENS_solved.k:
                     
-                        if MENS_solved.y[i,j,k].value==1 and MENS_solved.M[i,j,k].value!=0:
+                        if MENS_solved.y[i,j,k]==1 and MENS_solved.M[i,j,k].value!=0:
                             print("SETTING UP THE PROBLEM FOR MATCH [i,j,k] = ", i,j,k)
                             CRin_Side = {}
-                            CRin_Side[i] = MENS_solved.cr[i,k].value
-                            CRin_Side[j] = MENS_solved.cl[j,k].value
+                            if orig == True:
+                                CRin_Side[i] = MENS_solved.cr[i,k].value
+                                CRin_Side[j] = MENS_solved.cl[j,k].value                                
+                            else:
+                                CRin_Side[i] = MENS_solved.cr[i,k].value
+                                CRin_Side[j] = MENS_solved.clin[i,j,k].value
 
-                            CRout_Side = {}
-                            CRout_Side[i] = MENS_solved.cr[i,(k+1)].value
-                            CRout_Side[j] = MENS_solved.cl[j,(k+1)].value
+                            CRout_Side = {}                            
+                            if orig == True:
+                                CRout_Side[i] = MENS_solved.cr[i,(k+1)].value
+                                CRout_Side[j] = MENS_solved.cl[j,(k+1)].value                                
+                            else:
+                                CRout_Side[i] = MENS_solved.crin[i,j,(k+1)].value
+                                CRout_Side[j] = MENS_solved.cl[j,(k+1)].value
 
                             FlowM = {}
-                            FlowM[i] = MENS_solved.M[i,j,k].value/(MENS_solved.cr[i,k].value-MENS_solved.cr[i,(k+1)].value)
-                            FlowM[j] = MENS_solved.M[i,j,k].value/(MENS_solved.cl[j,k].value-MENS_solved.cl[j,(k+1)].value)
+                            if orig == True:
+                                FlowM[i] = MENS_solved.M[i,j,k].value/(MENS_solved.cr[i,k].value-MENS_solved.cr[i,(k+1)].value)
+                                FlowM[j] = MENS_solved.M[i,j,k].value/(MENS_solved.cl[j,k].value-MENS_solved.cl[j,(k+1)].value)                                
+                            else:
+                                FlowM[i] = MENS_solved.M[i,j,k].value/(MENS_solved.cr[i,k].value-MENS_solved.crin[i,j,(k+1)].value)
+                                FlowM[j] = MENS_solved.M[i,j,k].value/(MENS_solved.clin[i,j,k].value-MENS_solved.cl[j,(k+1)].value)
+                            
                             ME_inits = self._obtain_initializations(MENS_solved,i,j,k)   #, me_inits=ME_inits
-                            nfe = 100
-                            mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
+                            nfe = 200
+                            mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j, rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates = FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
                             ME1, success1, presolve_1 = mx.Construct_pyomo_model()
                             ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
                             ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
                             ME4, success4, presolve_4 = mx.Construct_pyomo_model_4(ME3, success3, presolve_3)
                             ME5, ME5results, presolve_5, success = mx.Construct_pyomo_model_5(ME4, success4, presolve_4)
+                            
                             if success == False:
                                 print("5th NLP has failed for this match. Relaxing bounds on the L / D ratio")
                                 ME6, ME6results, presolve_6, success6 = mx.Construct_pyomo_model_6(ME5, success, presolve_5)
@@ -514,7 +612,7 @@ class HybridStrategy(object):
                                     success = success6
                                 else:
                                     print("The initial exchanger solution attempt failed. Increasing FEs")
-                                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=(nfe*4),ncp = 3)
+                                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=(nfe),ncp = 3)
                                     ME1, success1, presolve_1 = mx.Construct_pyomo_model()
                                     ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
                                     ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
