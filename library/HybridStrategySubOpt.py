@@ -453,7 +453,7 @@ class HybridStrategy(object):
             min_height=0.01
             min_mass_ex = 1e-7
             #initialize the MINLP with the NLP
-            MEN_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
+            MEN_init, success_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
             print("MEN_init")
             MEN_init.height.pprint()
             MEN_init.M.pprint()
@@ -464,8 +464,10 @@ class HybridStrategy(object):
             MEN_init.dcout.pprint()
             MEN_init.y.pprint()
             #attempt to solve the first MINLP
-            MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init, min_height_from_nlp=min_height)
-            
+            if success_init == True:
+                MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init, min_height_from_nlp=min_height)
+            else:
+                MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init)
             #the aim of this loop is to make the MINLP more robust by changing which heights from the NLP are included in the MINLP
             #not sure how rigorous this really is as it only changes the selected matches by lowering the heights and masses
             #exchanged between the NLP and MINLP. Exits the program if no solution is found to MINLP.
@@ -508,15 +510,14 @@ class HybridStrategy(object):
             orig_ob = MENS_solved.TACeqn()
             con = True
             if  (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations): 
-                print("The MINLP model for iteration ", ic, "failed to solve. Without a valid network model the pragram will terminate")
+                print("The MINLP model for iteration ", ic, "failed to solve. Without a valid network model the program will terminate")
                 print("The current best solution for the NLP was found at iteration: ", self.best_net_iter)
                 print("Optimal solution for NLP: ", self.best_objective_real) 
                 con = False
-                sys.exit()
 
             #Now we build the NLP from the MINLP solution
             orig=True
-            if non_iso:
+            if non_iso and con:
                 MENS_solved1 =MENS_solved.clone()
                 MENS_solvedclone = MENS_solved1
                 Ex1TR=SubOptMENS(MENS_solvedclone)
@@ -567,7 +568,7 @@ class HybridStrategy(object):
                 for j in MENS_solved.j:
                     for k in MENS_solved.k:
                     
-                        if MENS_solved.y[i,j,k]==1 and MENS_solved.M[i,j,k].value!=0:
+                        if MENS_solved.y[i,j,k]==1 and MENS_solved.M[i,j,k].value!=0 and con:
                             print("SETTING UP THE PROBLEM FOR MATCH [i,j,k] = ", i,j,k)
                             CRin_Side = {}
                             if orig == True:
@@ -646,16 +647,22 @@ class HybridStrategy(object):
                                 #Should add way to deal with unsolved NLPs (increase elements?)
                                 print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
                                 pass
-                        else:
+                        elif con ==True:
                             print("MATCH: ", m, " match ", i, "with ", j, " is not a selected match in ", k)
                             if m in exchanger_models:
                                 pass
                             else:
                                 exchanger_models[m]=None
-                    
+                       
+                        else:
+                            pass
+                                           
                         m+=1
             self.iter_count = ic
-            stop = self._check_convergence(MENS_solved,exchanger_models,m,tol = self.tol)
+            if con == True:
+                stop = self._check_convergence(MENS_solved,exchanger_models,m,tol = self.tol)
+            else:
+                stop = True
             print("These are the previous corrections")
             print(self.corrections)
             self.corrections=self._get_correction_factors(MENS_solved,exchanger_models)    

@@ -17,7 +17,7 @@ import os
 import inspect
 import numpy
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-from MassExchangerManualColloc import *
+from library.MassExchangerManualColloc import *
 
 __author__ = "Michael Short"
 __copyright__ = "Copyright 2018"
@@ -2184,13 +2184,15 @@ class MENS(object):
         #opt = SolverFactory('./../../Couenne/build/bin/couenne')
         #opt = SolverFactory('./../../BARON/baron')
         #opt = SolverFactory('bonmin')
-        model.display()
+        #model.display()
         #options = {}
         #options['max_iter'] =20000
 
         #opt = SolverFactory('ipopt')
         #instance = model.create_instance()
         #model.write("MENS_nlp_nl.nl", format=ProblemFormat.nl)
+        model_clone_before_solve = model.clone()
+        
         results= self.solve_until_feas_NLP(model)
         model.display()
         #results = opt.solve(model)
@@ -2220,6 +2222,7 @@ class MENS(object):
                 model.dcout.pprint()
                 model.y.pprint()
                 print(model.TACeqn())
+                success = True
                 print("Successful solution of initialization problem")
             elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
                 model.height.pprint()
@@ -2232,7 +2235,8 @@ class MENS(object):
                 model.dcout.pprint()
                 model.y.pprint()
                 print(model.TACeqn())
-                print("Successful solution of initialization problem")    
+                print("Successful solution of initialization problem")  
+                success = True
             else:
                 print("INITIALIZATION FAILED")
                 model.height.pprint()
@@ -2245,10 +2249,13 @@ class MENS(object):
                 model.dcout.pprint()
                 model.y.pprint()
                 print(model.TACeqn())
+                success = False
+                model = model_clone_before_solve
             print("THIS IS THE END OF THE NLP INITIALIZATION")
         except:
             print("THE NLP initialization FAILED, problem may be infeasible!")
-        return model
+        
+        return model, success
     
     def MINLP_MENS_full(self, model, min_height_from_nlp=None, min_mass_ex_from_nlp=None):
         """MINLP optimization model building and solving.
@@ -2294,7 +2301,7 @@ class MENS(object):
                             model.ih [i,j,k] = model.height[i,j,k].value
                     else:
                         print("no min height from NLP set, so it is assumed to be 0.1")
-                        if model.height[i,j,k].value <= 0.002:
+                        if model.height[i,j,k].value <= 0.0000002:
                             model.ih [i,j,k] = 0
                             model.arex[i,j,k] = 0
                         else:
