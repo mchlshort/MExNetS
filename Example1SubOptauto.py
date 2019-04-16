@@ -20,8 +20,8 @@ import time
 import timeit
 import sys
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-from library.MassExchangerManualColloc import *
-from library.MENS_MINLPauto import *
+#from library.MassExchangerManualColloc import *
+#from library.MENS_MINLPauto import *
 from library.HybridStrategySubOpt import *
 
 __author__ = "Michael Short"
@@ -34,9 +34,16 @@ __email__ = "shortm@andrew.cmu.edu"
 __status__ = "Development"
 
 start = timeit.default_timer()   
-example_name = 'Ex1ManualColloc1'
+example_name = 'Ex1NewTrybigCor0.5'
 
-         
+# in the polished version we need to have here the tweakable params
+# omega and EMAT
+# additionally, we can have options to run the FE analysis or not (seeing how many elements we need)
+
+# We also should ahve solver options to only use BARON or DICOPT and to point to them for the user
+
+# There should also be options for different cuts to be added
+       
 sys.stdout = open(example_name+'.txt','w')
 dataDirectory = os.path.abspath(
     os.path.join( os.path.dirname(os.path.abspath(inspect.getfile(
@@ -60,7 +67,7 @@ stages = 3
 Example1 = HybridStrategy()
 #p_data = Example1.provide_problem_data(rich_data=Rich_data,lean_data=Lean_data, parameter_data=problem_parameters, stream_properties = stream_properties)
 
-Example1.run_hybrid_strategy(cor_filter_size=0.05, max_iter=2,rich_data=Rich_data,lean_data=Lean_data, correction_factors = None, parameter_data=problem_parameters, stream_properties = stream_properties, exname = example_name, tol = 0.00001, non_iso = True, stages = stages, superstruct = 'SBS')
+Example1.run_hybrid_strategy(cor_filter_size=0.5, max_iter=300,rich_data=Rich_data,lean_data=Lean_data, correction_factors = None, parameter_data=problem_parameters, stream_properties = stream_properties, exname = example_name, tol = 0.00001, non_iso = True, stages = stages, superstruct = 'SBS')
 #MEN_init = Ex1MEN.NLP_MENS_init() 
 stop = timeit.default_timer()
 ex_time = stop - start 

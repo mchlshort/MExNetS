@@ -20,8 +20,8 @@ import time
 import timeit
 import sys
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-from library.MassExchanger import *
-from library.MENS_MINLPauto import *
+#from library.MassExchanger import *
+#from library.MENS_MINLPauto import *
 from library.HybridStrategySubOpt import *
 
 __author__ = "Michael Short"
@@ -34,7 +34,7 @@ __email__ = "shortm@andrew.cmu.edu"
 __status__ = "Development"
 
 start = timeit.default_timer()   
-example_name = 'Ex2SBSauto'
+example_name = 'Ex2SBSauto2345'
 
          
 sys.stdout = open(example_name+'.txt','w')
@@ -59,7 +59,7 @@ stages = 2
 Example1 = HybridStrategy()
 #p_data = Example1.provide_problem_data(rich_data=Rich_data,lean_data=Lean_data, parameter_data=problem_parameters, stream_properties = stream_properties)
 
-Example1.run_hybrid_strategy(cor_filter_size=0.05, max_iter=1,rich_data=Rich_data,lean_data=Lean_data, correction_factors = None, parameter_data=problem_parameters, stream_properties = stream_properties, exname = example_name, tol = 0.00001, stages = stages)
+Example1.run_hybrid_strategy(cor_filter_size=0.01, max_iter=5,rich_data=Rich_data,lean_data=Lean_data, correction_factors = None, parameter_data=problem_parameters, stream_properties = stream_properties, exname = example_name, tol = 0.00001, stages = stages)
 #MEN_init = Ex1MEN.NLP_MENS_init() 
 stop = timeit.default_timer()
 ex_time = stop - start 
