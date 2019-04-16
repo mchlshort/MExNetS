@@ -17,7 +17,7 @@ import os
 import inspect
 import numpy
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-from library.MassExchangerManualColloc import *
+from library.MassExchanger import *
 
 __author__ = "Michael Short"
 __copyright__ = "Copyright 2018"
@@ -1045,7 +1045,7 @@ class MENS(object):
         return results
 
     #should possibly include more solvers, solver options and user options to choose exe location and solver
-    def solve_until_feas_MINLP(self,m):
+    def solve_until_feas_MINLP_BARON(self,m):
         """The solve function for the MINLP.
         
         This function solves the MINLP Pyomo model using Bonmin. It has many try and except statements
@@ -1325,11 +1325,298 @@ class MENS(object):
             #raise Exception("Could not find a valid model to continue iterations")
             return results
         else:        
-            return results              
+            return results        
+        
+    def solve_until_feas_MINLP(self,m):
+        """The solve function for the MINLP.
+        
+        This function solves the MINLP Pyomo model using DICOPT first as it gives the fastest solution times.
+        It has many try and except statements in case the solver fails to find a solution and throws an exception 
+        rather than an infeasible or sub-optimal solution. We also try to use many different solver options to 
+        solve the problem. Ensures that the iterative procedure does not exit if an infeasible model is found and increases the likelihood that a feasible 
+        solution is found. This is the first algorithm's solve procedure as it cannot guarantee 
+        
+        Args:
+            m (pyomo model, concrete): the pyomo model of the MEN with all potential matches selected
+            
+        returns:
+            results (solver results): returns the solved model and results from the solve.
+            
+        """
+        opt = SolverFactory('baron')
+        options={}
+        #options['bonmin.algorithm']='B-BB'
+        #BARON SECTION
+        try:
+            if self.BARONsolved == True:
+                print("Solved using one of the global solvers")
+            else:
+                print("==================ATTEMPTING TO SOLVE WITH DICOPT==========================")
+                solver=SolverFactory('gams')
+                options={}
+                m1 = m
+                results = solver.solve(m1,tee=False, solver = 'dicopt')
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                    self.DICOPTsolved = True
+                
+                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                    print("First solve was infeasible, solving with feasibility pump")
+                    options['feaspump']= 2
+                    results = opt.solve(m,options = options,tee=False)
+                
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                        self.DICOPTsolved = True
+                    
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible, solving with changed match options")
+                        options1['optcr']= 0.05
+                        results = opt.solve(m,options = options1,tee=False)
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                            self.DICOPTsolved = True
+                    
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status) 
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)     
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  results.solver.status)        
+        except:
+             print("Could not solve with DICOPT")
+        
+        print("==================ATTEMPTING TO SOLVE WITH BARON==========================")
+        try:
+            if self.DICOPTsolved == True:
+                print("Solved using DICOPT")
+            else:
+                options['MaxTime'] = 1000
+                results = opt.solve(m,options = options,tee=True)
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                    self.BARONsolved = True
+                    
+                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                    print("First solve was infeasible, solving with changed match options")
+                    options['EpsR']= 0.02
+                    results = opt.solve(m,options = options,tee=True)
+                    
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                        self.BARONsolved = True
+                    
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible, solving with changed match options")
+                        options['EpsR']= 0.05
+                        results = opt.solve(m,options = options,tee=False)
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                            self.BARONsolved = True
+                        
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status) 
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)     
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  results.solver.status)        
+        except:
+             print("Could not solve with BARON")
+                    
+                    
+        #opt = SolverFactory('bonmin',executable='./../../../../cygwin64/home/Michael/Bonmin-1.8.6/build/bin/bonmin')
+        #opt = SolverFactory('./../../Bonmin/build/bin/bonmin')
+            
+        try:
+            if self.BARONsolved == True or self.DICOPTsolved:
+                print("Solved using either Dicopt or Baron")
+            else:
+                print("==================ATTEMPTING TO SOLVE WITH GAMS BARON==========================")
+                solver=SolverFactory('gams')
+                options={}
+                m1 = m
+                results = solver.solve(m1,tee=True, solver = 'baron')
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                    self.BARONsolved = True
+                
+                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                    print("First solve was infeasible, solving with changed match options")
+                    options['EpsR']= 0.02
+                    results = opt.solve(m,options = options,tee=True)
+                    
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                        self.BARONsolved = True
+                    
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("Second solve was infeasible, solving with changed match options")
+                        options['EpsR']= 0.05
+                        results = opt.solve(m,options = options,tee=False)
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                            self.BARONsolved = True
+
+                    
+                        else:
+                            print("Cannot determine cause of fault")
+                            print("Solver Status: ",  results.solver.status) 
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  results.solver.status)     
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  results.solver.status)        
+        except:
+             print("Could not solve with DICOPT")   
+             
+             
+        try:
+            if self.BARONsolved == True or self.DICOPTsolved:
+                print("Solved using either Dicopt or Baron")
+            else:
+                print("==================ATTEMPTING TO SOLVE WITH BARON WITH BAD GAP==========================")
+                solver=SolverFactory('baron')
+                options={}
+                options['MaxTime'] = 1000
+                options['EpsR']= 0.1
+                m1 = m
+                results = solver.solve(m1,tee=True, solver = 'baron')
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                    self.BARONsolved = True
+                    
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  results.solver.status)        
+        except:
+             print("Could not solve with DICOPT")            
+
+             
+        print("BARONsolved:", self.BARONsolved)
+        print("DICOPTsolved:", self.DICOPTsolved)
+        
+        if self.BARONsolved == True:
+            print("Solved using one of the global solvers")
+        elif self.DICOPTsolved == True:
+            print("Solved using DICOPT")
+        else:
+            opt = SolverFactory('./../../../Bonmin/build/bin/bonmin')
+            options={}
+            options['bonmin.algorithm']='B-BB'
+            
+            #This can probably be greatly improved
+            
+            print("==================ATTEMPTING TO SOLVE WITH BONMIN==========================")
+            try:
+                results = opt.solve(m,options = options,tee=False)
+                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    print("successfully solved")
+                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                    print("First solve was infeasible, solving with changed match options")
+                    options={}
+                    options['mu_strategy'] = 'monotone'
+                    options['mu_init'] = 1e-6
+                    options['bonmin.algorithm']='B-BB'
+                    options['bonmin.allowable_fraction_gap']= 0.05
+                    results = opt.solve(m,options = options,tee=False)
+                    
+                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                        print("successfully solved")
+                        
+                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        print("First solve was infeasible, solving with changed match options")
+                        options1={}
+                        options1['mu_strategy'] = 'monotone'
+                        options1['mu_init'] = 1e-5
+                        options1['bound_relax_factor'] = 0
+                        options1['bonmin.algorithm']='B-BB'
+                        options1['bonmin.num_resolve_at_root']=5
+                        results = opt.solve(m,options = options1,tee=False)
+                        
+                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                            print("successfully solved")
+                            
+                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            options2['mu_strategy'] = 'monotone'
+                            options2['mu_init'] = 1e-5
+                            options2['bound_relax_factor'] = 0
+                            options2['bonmin.algorithm']='B-BB'
+                            options2['bonmin.num_resolve_at_node']=5
+                            results = opt.solve(m,options = options2,tee=False)
+                            
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("successfully solved")
+                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                options3['mu_strategy'] = 'monotone'
+                                options3['mu_init'] = 1e-5
+                                options3['bound_push'] = 1e-5
+                                #options3['bound_relax_factor'] = 0
+                                options3['bonmin.algorithm']='B-BB'
+                                results = opt.solve(m, options = options3, tee=False)
+                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                    print("successfully solved")
+                                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                    options4['mu_strategy'] = 'monotone'
+                                    options4['mu_init'] = 1e-5
+                                    options4['bound_push'] = 1e-5
+                                    #options3['bound_relax_factor'] = 0
+                                    options4['bonmin.algorithm']='B-Hyb'
+                                    options4['bonmin.pump_for_minlp']='yes'
+                                    options4['pump_for_minlp.time_limit']=90
+                                    options4['pump_for_minlp.solution_limit']= 7
+                                    results = opt.solve(m, options = options4, tee=False)
+                                    if(results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                        print("successfully solved")
+                                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                        options11['bonmin.algorithm']='B-OA'
+                                        results = opt.solve(m, options = options4, tee=False)
+                                        if(results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                            print("successfully solved")
+                                        else:
+                                            print("Cannot determine cause of fault")
+                                            print("Solver Status: ",  result.solver.status)
+                                    else:
+                                        print("Cannot determine cause of fault")
+                                        print("Solver Status: ",  result.solver.status)
+                                else:
+                                    print("Cannot determine cause of fault")
+                                    print("Solver Status: ",  result.solver.status)
+                            
+                                    
+                            else:
+                                print("Cannot determine cause of fault")
+                                print("Solver Status: ",  result.solver.status)
+                    else:
+                        print("Cannot determine cause of fault")
+                        print("Solver Status: ",  result.solver.status)
+                    #results = m    
+                        
+                else:
+                    print("Cannot determine cause of fault")
+                    print("Solver Status: ",  result.solver.status)
+                    #results = m
+    
+            except:
+                print("First try encountered an error") 
+                results = opt.solve(m,options = options,tee=True)
+        
+        if (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
+            print("The MINLP problem could not be solved")
+            #raise Exception("Could not find a valid model to continue iterations")
+            return results
+        else:        
+            return results            
     #==========================================================
     #        FIRST NLP FOR INITIALIZATION OF MINLP
     #==========================================================
-    def NLP_MENS_init(self, correction_factors=None):
+    def NLP_MENS_init(self, correction_factors=None, omega = None):
         """This function performs an NLP suboptimization with all user-defined matches selected.
         
         This is then used to initialize the MINLP optimization. Currently utilizes IPOPT to perform the
@@ -1346,7 +1633,7 @@ class MENS(object):
         """
         if correction_factors == None:
             print("No correction factors provided, so all assumed to equal 1")
-            
+                    
         elif isinstance(correction_factors,dict):
             if bool(correction_factors) == True:
                 self._correction_factors = {}
@@ -1369,16 +1656,7 @@ class MENS(object):
         model.nrps = len(self._rich_data.index)
         model.nlut = len(self._lean_data.index)
         
-        if self.superstructure == 'SBS':
-            model.nstages = (model.nlut+model.nrps)-1
-        elif self.superstructure == 'SWS':
-            if self.stages == None:
-                #if we do not have explicitly defined stages we just use Yee and Grossmann's heuristic
-                self.stages = max(model.nlut,model.nrps)
-                model.nstages = self.stages
-            else:
-                model.nstages = self.stages
-        #max(model.nlut,model.nrps)+1
+        
         
         #==============
         #   SETS
@@ -1391,7 +1669,7 @@ class MENS(object):
 
         #Composition superstructure locations
         #will have number of stages = to largest of number of utilities or rps
-        model.k = RangeSet((model.nstages+1))
+
         #model.stages = RangeSet(model.nstages+1)
 
         #Stream Data
@@ -1403,15 +1681,35 @@ class MENS(object):
         #================================
         #IDEA IS TO AUTOMATE THE SUPERSTRUCTURE GENERATION and include in init
         # THIS IS SBS
+        if self.superstructure == 'SBS':
+            model.nstages = (model.nlut+model.nrps)-1
+        elif self.superstructure == 'SWS':
+            if self.stages == None:
+                #if we do not have explicitly defined stages we just use Yee and Grossmann's heuristic
+                self.stages = max(model.nlut,model.nrps)
+                model.nstages = self.stages
+            else:
+                model.nstages = self.stages
+        #max(model.nlut,model.nrps)+1
+        
+        #model.k = RangeSet((model.nstages+1))        
+        
+        
         if self.superstructure == 'SBS':                
             count = 0
             supply_dict = {}
             for i in model.i:
-                supply_dict[count] = self._rich_data.at[i,'Cin']
-                count += 1
+                if self._rich_data.at[i,'Cin'] in supply_dict.values():
+                    pass
+                else: 
+                    supply_dict[count] = self._rich_data.at[i,'Cin']
+                    count += 1
             for j in model.j:
-                supply_dict[count] = self._lean_data.at[j,'Cin']    
-                count += 1
+                if self._lean_data.at[j,'Cin'] in supply_dict.values():
+                    pass
+                else:
+                    supply_dict[count] = self._lean_data.at[j,'Cin']    
+                    count += 1
             vals = sorted(supply_dict.values(), reverse=True)
             print(vals)
             
@@ -1421,6 +1719,8 @@ class MENS(object):
                 ckval[i+1] = vals[i]
             
             print(ckval)
+            model.k = RangeSet((len(ckval)))
+            model.nstages = len(ckval) - 1
             model.ck =Param(model.k, initialize = ckval)
             
             model.ckr_first = Param(model.i,model.k,initialize = 0.0,mutable=True)
@@ -1574,13 +1874,17 @@ class MENS(object):
                 return False
         model.st = Param(model.k, initialize = m_stage)
         model.stages = Param(model.k, initialize = m_stage)
-        
+        model.stages.pprint()
+        model.last.pprint()
         parameters = dict()
         for i in self._parameters.index:
             parameters[i] = self._parameters.at[i,'value']
         #BIG-M vale for Big-M constraint
         # THIS SHOULD BE EXTERNAL AND WE SHOULD GENERATE IT.Start some big val and decrease
-        model.omega = Param (model.i,model.j, initialize=parameters['omega'])
+        if omega == None:
+            model.omega = Param (model.i,model.j, initialize=parameters['omega'])
+        else:
+            model.omega = Param (model.i,model.j, initialize=omega)
         
         #Problem-specific parameters
         #Still need to implement CHECKs FOR THEIR PRESENCE
@@ -2208,7 +2512,7 @@ class MENS(object):
         #model.dcin.pprint()
         #model.dcout.pprint()
         print("THIS IS THE END OF THE NLP INITIALIZATION")
-        
+        success = bool
         print(results)
         try:
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -2254,10 +2558,11 @@ class MENS(object):
             print("THIS IS THE END OF THE NLP INITIALIZATION")
         except:
             print("THE NLP initialization FAILED, problem may be infeasible!")
+            success = False
         
         return model, success
     
-    def MINLP_MENS_full(self, model, min_height_from_nlp=None, min_mass_ex_from_nlp=None):
+    def MINLP_MENS_full(self, model, min_height_from_nlp=None, min_mass_ex_from_nlp=None, omega = None):
         """MINLP optimization model building and solving.
         
         This is the function that is called to solve the full MINLP model for MENS including binary variables
@@ -2286,7 +2591,13 @@ class MENS(object):
         
         #This section is where the initial heights are filtered and the smaller set of binary variables
         #are chosen based on the values from the NLP
-        
+        if omega == None:
+            pass
+        else:
+            model.del_component(model.omega)
+            model.omega = Param (model.i,model.j, initialize=omega)
+            
+            
         model.ih = {}
         for i in model.i:
             for j in model.j:
@@ -2300,7 +2611,7 @@ class MENS(object):
                             model.arex [i,j,k] =1
                             model.ih [i,j,k] = model.height[i,j,k].value
                     else:
-                        print("no min height from NLP set, so it is assumed to be 0.1")
+                        print("no min height from NLP set, so it is assumed to be 0.000001")
                         if model.height[i,j,k].value <= 0.0000002:
                             model.ih [i,j,k] = 0
                             model.arex[i,j,k] = 0

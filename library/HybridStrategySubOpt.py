@@ -23,7 +23,7 @@ import timeit
 import sys
 #import csv
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-from library.MassExchangerManualColloc import *
+from library.MassExchanger import *
 from library.MENS_MINLPauto import *
 from library.SubOptMENS import *
 
@@ -159,11 +159,11 @@ class HybridStrategy(object):
             for j in MENS_model.j:
                 for k in MENS_model.k:
                     
-                    if MENS_model.y[i,j,k]==1 and MENS_model.M[i,j,k].value!=0 and m in ME_model:
+                    if MENS_model.y[i,j,k]>=0.99 and MENS_model.M[i,j,k].value!=0 and m in ME_model:
                         if ME_model[m].success== True:
                             #should possibly have a way here to tell whether the exchanger model solved correctly
                             #if it didn't then we should set the correction to 1 for this iteration
-                            kw_c = ME_model[m].koga.value/(MENS_model.kya[i,j,k].value*MENS_model.kwcor[i,j,k])
+                            kw_c = ME_model[m].koga.value/(MENS_model.kw*MENS_model.kwcor[i,j,k])
                             kwcor = self._apply_cor_filter(kw_c)
                             corrections[m,"kwcor"]=kwcor*MENS_model.kwcor[i,j,k]
                             dia_c = ME_model[m].diameter.value/(MENS_model.dia[i,j,k]*MENS_model.diacor[i,j,k])
@@ -245,7 +245,7 @@ class HybridStrategy(object):
             for j in MENS_model.j:
                 for k in MENS_model.k:
                     print("do we get here?")
-                    if MENS_model.y[i,j,k]==1 and MENS_model.M[i,j,k].value!=0 and count in exchanger_models:
+                    if MENS_model.y[i,j,k]>=0.99 and MENS_model.M[i,j,k].value!=0 and count in exchanger_models:
                         r=exchanger_models[count].Obj4()
                         nlp_exshelval += value(exchanger_models[count].AF)*23805*(value(exchanger_models[count].diameter)**0.57)*1.15*value(exchanger_models[count].height) 
                         nlp_packcost += value(exchanger_models[count].AF)*pi*(value(exchanger_models[count].diameter)**2)/4*value(exchanger_models[count].height)*value(exchanger_models[count].PackCost)
@@ -464,6 +464,7 @@ class HybridStrategy(object):
             MEN_init.dcout.pprint()
             MEN_init.y.pprint()
             #attempt to solve the first MINLP
+            currentOmega = MEN_init.omega
             if success_init == True:
                 MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init, min_height_from_nlp=min_height)
             else:
@@ -477,22 +478,35 @@ class HybridStrategy(object):
                 #change for a while loop with a max iter
                 for i in range(20):
                     print("MINLP didn't solve, attempting new matches")  
-                    mh=min_height/((i+1)*4)
+                    mh=min_height/((i+1)*5)
                     #print("mh",mh)
                     MEN_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
                     MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init,min_height_from_nlp=(mh))
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("MINLP solved")
                         break
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
-                        print("MINLP didn't solve, attempting new matches")  
-                        mm=min_mass_ex/((i+1)*10)
-                        #print("mm", mm)
-                        MEN_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
-                        MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init,min_height_from_nlp=(mh),min_mass_ex_from_nlp=mm)
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("MINLP solved")
-                            break
+                    #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
+                    #    print("MINLP didn't solve, attempting new matches")  
+                    #    mm=min_mass_ex/((i+1)*10)
+                    #    #print("mm", mm)
+                    #    MEN_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
+                    #    MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init,min_height_from_nlp=(mh),min_mass_ex_from_nlp=mm)
+                    #    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                    #        print("MINLP solved")
+                    #        break
+                    for i in range(50):
+                        if (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
+                            print("MINLP didn't solve, attempting new matches with diff omega")
+                            omegaNew = currentOmega/1.5
+                            MEN_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections, omega = omegaNew)
+                            MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init, omega=omegaNew)
+                            
+                            print("new Omega", omegaNew)
+                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                                print("MINLP solved")
+                                break
+                            else: 
+                                currentOmega = omegaNew 
             else:
                 print("The first solve of the MINLP is feasible")
             print(MENS_solved)
@@ -568,7 +582,7 @@ class HybridStrategy(object):
                 for j in MENS_solved.j:
                     for k in MENS_solved.k:
                     
-                        if MENS_solved.y[i,j,k]==1 and MENS_solved.M[i,j,k].value!=0 and con:
+                        if MENS_solved.y[i,j,k]>=0.99 and MENS_solved.M[i,j,k].value!=0 and con:
                             print("SETTING UP THE PROBLEM FOR MATCH [i,j,k] = ", i,j,k)
                             CRin_Side = {}
                             if orig == True:

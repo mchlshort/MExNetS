@@ -18,9 +18,9 @@ import os
 import inspect
 import numpy as np
 import sys
-#import library.MassExchanger
-#import library.MENS_MINLPauto
-#import library.HybridStrategyTR
+import library.MassExchangerManualColloc
+import library.MENS_MINLPauto
+import library.HybridStrategySubOpt
 
 __author__ = "Michael Short"
 __copyright__ = "Copyright 2018"
@@ -725,6 +725,8 @@ class SubOptMENS(object):
         model.del_component(model.Log_DC_RPS_LPS_LS)
         model.del_component(model.Log_DC_RPS_LPS_LS_index)
         model.del_component(model.Log_DC_RPS_LPS_LS_index_index_0)
+        model.stages.pprint()
+        model.k.pprint()
         def Log_DC_RPS_LPS_LS_(model,i,j,k):
             if k in model.stages and model.y[i,j,(k)] == 1:
                 return model.dcout[i,j,(k+1)] <= model.crin[i,j,(k+1)] - model.cl[j,(k+1)]+\
