@@ -10,7 +10,7 @@ Mass Exchanger Networks, as published by Short, M., Isafiade, AJ., Biegler, LT.,
 Kravanja, Z., 2018, Synthesis of mass exchanger networks in a two-step hybrid 
 optimization strategy, Chem Eng Sci, 178, 118-135
 
-@author: shortm
+@author: mchlshort
 """
 from __future__ import division
 from pyomo.environ import *
@@ -27,7 +27,7 @@ from library.MENS_MINLP import *
 from library.SubOptMENS import *
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2018"
+__copyright__ = "Copyright 2019"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Adeniyi J. Isafiade"]
 __license__ = "GPL-3"
 __version__ = "0.9"

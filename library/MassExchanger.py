@@ -6,7 +6,7 @@ Created on Fri Jun  1 10:35:31 2018
 Individual Mass Exchanger optimization model in Pyomo. To be used in conjunction with the
 MENS package developed. 
 
-@author: shortm
+@author: mchlshort
 """
 
 from __future__ import division
@@ -22,7 +22,7 @@ import numpy as np
 import sys
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2018"
+__copyright__ = "Copyright 2019"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Isafiade, AJ."]
 __license__ = "GPL-3"
 __version__ = "0.9"

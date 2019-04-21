@@ -8,7 +8,7 @@ This is an example script that utilizes the functions and classes contained in
 the library folder in the main repository. The aim of this is to be able to read
 in the data and call all the necessary functions from outside the main classes.
 
-@author: shortm
+@author: mchlshort
 """
 from __future__ import division
 from pyomo.environ import *
@@ -30,7 +30,7 @@ __maintainer__ =  "Michael Short"
 __email__ = "shortm@andrew.cmu.edu"
 __status__ = "Development"
  
-example_name = 'Test_clean2'
+example_name = 'Test_clean3'
 
 # in the polished version we need to have here the tweakable params
 # omega and EMAT

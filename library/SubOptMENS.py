@@ -5,7 +5,7 @@ Created on Thu Feb 28 14:45:18 2019
 
 The Trust region optimization method for the mass exchanger network synthesis problem inside of the MExNetS package. 
 
-@author: shortm
+@author: mchlshort
 """
 
 from __future__ import division
@@ -18,9 +18,10 @@ import os
 import inspect
 import numpy as np
 import sys
+from library.FeasibleSolver import *
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2018"
+__copyright__ = "Copyright 2019"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Isafiade, AJ."]
 __license__ = "GPL-3"
 __version__ = "0.9"
@@ -46,127 +47,6 @@ class SubOptMENS(object):
         #check that args are actually of the right types
 
         self.minlp = model
-
-    def solve_until_feas_NLP(self,m):
-        """The solve function for the NLP.
-        
-        This function solves the NLP Pyomo model using ipopt. It has many try and except statements
-        in order to try to use many different solver options to solve the problem. Ensures that the iterative
-        procedure does not exit if an infeasible model is found and increases the likelihood that a feasible 
-        solution is found.
-        
-        Args:
-            m (pyomo model, concrete): the pyomo model of the MEN with all potential matches selected
-            
-        returns:
-            results (solver results): returns the solved model and results from the solve.
-            
-        """
-        solver= SolverFactory('ipopt')
-        options={}
-        try:
-            results = solver.solve(m,tee=False, options=options)
-
-            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                print("successfully solved")
-            elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                print("First solve was infeasible")
-                options1 = {}
-                options1['mu_strategy'] = 'adaptive'
-                results = solver.solve(m,tee=False, options=options1)
-                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                    print("successfully solved")
-                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                    print("Second solve was infeasible")
-                    options2 = {}
-                    options2['mu_init'] = 1e-6
-                    #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
-                    results = solver.solve(m,tee=False, options=options2) 
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options3 = {}
-                        options3['mu_init'] = 1e-6
-                        options['bound_push'] =1e-6
-                        results = solver.solve(m,tee=False, options=options3)
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        #    solver = SolverFactory('./../../BARON/baron')
-                        #    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        #        print("successfully solved")
-                        #    else:
-                        #         print("BARON failed to find a feasible solution")
-                        #    results = solver.solve(m,tee=False)
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status:",  result.solver.status)
-                            results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  result.solver.status)
-                        results = m
-                else:
-                    print("Cannot determine cause of fault")
-                    print("Solver Status: ",  result.solver.status)  
-                    results = m                      
-            else:
-                print("Cannot determine cause of fault")
-                print("Solver Status: ",  result.solver.status)
-                results = m
-        except:
-            print("Something failed during the solve process!")
-            try:
-                options1 = {}
-                options1['mu_strategy'] = 'adaptive'
-                results = solver.solve(m,tee=False, options=options1)
-                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                    print("successfully solved")
-                elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                    print("Second solve was infeasible")
-                    options2 = {}
-                    options2['mu_init'] = 1e-6
-                    #options['bound_push'] =1e-5
-                    results = solver.solve(m,tee=False, options=options2) 
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options3 = {}
-                        options3['mu_init'] = 1e-6
-                        options3['bound_push'] =1e-6
-                        results = solver.solve(m,tee=False, options=options3)
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            solver = SolverFactory('baron')
-                            results = solver.solve(m,tee=True)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            else:
-                                print("BARON failed to find a feasible solution")
-                        else:
-                            print("Cannot determine cause of fault")
-                            print ("Solver Status: ",  result.solver.status)
-                            results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  result.solver.status)
-                        results = m
-                else:
-                    print("Cannot determine cause of fault")
-                    print("Solver Status: ",  result.solver.status)
-                    results = m
-            except:
-                results = m
-        if (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
-            print("The initialization problem could not be solved")
-            m.pprint()
-            return results
-        else:        
-            return results
-
         
     def run_suboptimization(self):
         """this method builds the NLP formulation that will form the NLP suboptimization that relaxes
@@ -788,68 +668,18 @@ class SubOptMENS(object):
                 tac += model.L1[j]*model.AC[j]                    
             return tac
         model.TACeqn = Objective(rule = TACeq_, sense = minimize)
-        
-        options = {}
-        #options['max_iter'] =20000
-        #opt =SolverFactory('couenne',executable='./../../Couenne/build/bin/couenne')
-        #opt = SolverFactory('./../../Couenne/build/bin/couenne')
-        #opt = SolverFactory('baron',executable='./../../BARON/baron')
-        #opt = SolverFactory('./../../Bonmin/build/bin/bonmin')
-        #opt = SolverFactory('bonmin',executable='./../../../../cygwin64/home/Michael/Bonmin-1.8.6/build/bin/bonmin')
-        #opt = SolverFactory('ipopt')
-        #instance = model.create_instance()
-        #model.pprint()
-        #model.write("MENS_bin_nl.nl", format=ProblemFormat.nl)
-        #results = opt.solve(model,options = options,tee=True)
-        
-        #results = self.solve_until_feas_MINLP(model)
+
         #==================================================================================
         #   POSTPROCESSING AND DISPLAY AND RETURN
         #==================================================================================
-        #model.write(filename="MENS1", format = ProblemFormat.nl,io_options={"symbolic_solver_labels":True})
-        #results.pprint
-        
-        #display (model)
-        #model.display()
 
- 
-        #Use this line for solving:
-        # pyomo solve synheat.py --solver=./../../Couenne/build/bin/couenne
-        #opt = SolverFactory('./../../Couenne/build/bin/couenne')
-        #opt = SolverFactory('./../../BARON/baron')
-        #opt = SolverFactory('bonmin')
-        
-        #options = {}
-        #options['max_iter'] =20000
         print ("BEGINNING THE NLP SUBOPTIMIZATION")
-        #model.pprint()
-        #solver=SolverFactory('gams')
 
-        #results = solver.solve(model,tee=True, solver = 'baron')
-        #opt = SolverFactory('baron')
-        #instance = model.create_instance()
-        #model.write("MENS_nlp_nl.nl", format=ProblemFormat.nl)
-        
-        
-        #optTRF = SolverFactory('trustregion')
-        #optTRF.solve(m, [heightEx])
-        
-        
-        results= self.solve_until_feas_NLP(model)
-        #results = opt.solve(model)
-        #model.write(filename="MENS1", format = ProblemFormat.nl,io_options={"symbolic_solver_labels":True})
-        results.pprint
+        results = solve_until_feas_NLP(model)
+
         print(results)
-        print("SOLUTION TO MINLP PROBLEM!!!")
         print(model.TACeqn())
-        #model.display()
-        #model.height.pprint()
-        #model.M.pprint()
-        #model.L.pprint()
-        #model.cr.pprint()
-        #model.cl.pprint()
-        #model.dcin.pprint()
-        #model.dcout.pprint()
+
         print("THIS IS THE END OF THE NLP SUBOPTIMIZATION")
         
         return model, results

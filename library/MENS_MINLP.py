@@ -20,7 +20,7 @@ from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
 from library.FeasibleSolver import *
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2018"
+__copyright__ = "Copyright 2019"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Isafiade, AJ."]
 __license__ = "GPL-3"
 __version__ = "0.9"
@@ -948,27 +948,11 @@ class MENS(object):
         
         model.TACeqn = Objective(rule = TACeq_, sense = minimize)
 
-        #Use this line for solving:
-        # pyomo solve synheat.py --solver=./../../Couenne/build/bin/couenne
-        #opt = SolverFactory('./../../Couenne/build/bin/couenne')
-        #opt = SolverFactory('./../../BARON/baron')
-        #opt = SolverFactory('bonmin')
-        #model.display()
-        #options = {}
-        #options['max_iter'] =20000
 
-        #opt = SolverFactory('ipopt')
-        #instance = model.create_instance()
-        #model.write("MENS_nlp_nl.nl", format=ProblemFormat.nl)
         model_clone_before_solve = model.clone()
         
         results = solve_until_feas_NLP(model)
         model.display()
-        #results = opt.solve(model)
-        #model.write(filename="MENS1", format = ProblemFormat.nl,io_options={"symbolic_solver_labels":True})
-        #results.pprint
-        #print(results)
-        #model.display()
 
         print("THIS IS THE END OF THE NLP INITIALIZATION")
         success = bool
@@ -1428,28 +1412,10 @@ class MENS(object):
         
         model.TACeqn = Objective(rule = TACeq_, sense = minimize)
         
-        options = {}
-        #options['max_iter'] =20000
-        #opt =SolverFactory('couenne',executable='./../../Couenne/build/bin/couenne')
-        #opt = SolverFactory('./../../Couenne/build/bin/couenne')
-        #opt = SolverFactory('baron',executable='./../../BARON/baron')
-        #opt = SolverFactory('./../../Bonmin/build/bin/bonmin')
-        #opt = SolverFactory('bonmin',executable='./../../../../cygwin64/home/Michael/Bonmin-1.8.6/build/bin/bonmin')
-        #opt = SolverFactory('ipopt')
-        #instance = model.create_instance()
-        #model.pprint()
-        #model.write("MENS_bin_nl.nl", format=ProblemFormat.nl)
-        #results = opt.solve(model,options = options,tee=True)
-        
         results, solversolved, globalsol  = solve_until_feas_MINLP_DICOPT(model)
         #==================================================================================
         #   POSTPROCESSING AND DISPLAY AND RETURN
         #==================================================================================
-        #model.write(filename="MENS1", format = ProblemFormat.nl,io_options={"symbolic_solver_labels":True})
-        #results.pprint
-        
-        #display (model)
-        #model.display()
         print(results)
         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
             model.height.pprint()
