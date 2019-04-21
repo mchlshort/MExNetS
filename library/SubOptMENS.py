@@ -57,6 +57,7 @@ class SubOptMENS(object):
             
         Returns: 
             Solved NLP model
+            success_solved (bool): whether suboptimization is feasible or not
         
         """
         model = self.minlp
@@ -680,9 +681,33 @@ class SubOptMENS(object):
         print(results)
         print(model.TACeqn())
 
+        if results == "Failed epically":
+            print("The NLP suboptimization problem could not be solved")
+            
+        success_solve = bool
+
+        print("results type: ",type(results))
+        if results == 'failed epically':
+            print("The subopt could not be solved. This means that we resort to using the MINLP solution as it is.")
+            success_solve = False
+        elif not isinstance(results, str):
+            if isinstance(results, pyomo.core.base.PyomoModel.ConcreteModel):
+                print("model did not solve correctly, so it is skipped")
+                success_solve = False
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+                success_solve=True
+            else:
+                #Should add way to deal with unsolved NLPs (increase elements?)
+                print("NLP failed.")
+                success_solve = False
+        else:
+            success_solve = False
+        print("solve success = ", success_solve)
         print("THIS IS THE END OF THE NLP SUBOPTIMIZATION")
         
-        return model, results
+        return model, results, success_solve
         
         
         

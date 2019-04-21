@@ -534,7 +534,7 @@ class HybridStrategy(object):
                 MENS_solved1 =MENS_solved.clone()
                 MENS_solvedclone = MENS_solved1
                 Ex1TR=SubOptMENS(MENS_solvedclone)
-                MENS_solvedsub, results = Ex1TR.run_suboptimization()
+                MENS_solvedsub, results, success_subopt = Ex1TR.run_suboptimization()
                 MENS_solvedsub.height.pprint()
                 MENS_solvedsub.M.pprint()
                 MENS_solvedsub.L1.pprint()
@@ -549,20 +549,24 @@ class HybridStrategy(object):
                 MENS_solvedsub.clin.pprint()
                 MENS_solvedsub.crin.pprint()
                 MENS_solvedsub.y.pprint()
-                if  (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations): 
-                    print("The MINLP model for iteration ", ic, "failed to solve. Without a valid network model the pragram will terminate")
+                if success_subopt == False: 
+                    print("The NLP subopt model for iteration ", ic, "failed to solve. Without a valid network model the original MINLP is taken as solution")
                     print("The current best solution for the NLP was found at iteration: ", self.best_net_iter)
                     print("Optimal solution for NLP: ", self.best_objective_real) 
                     if con == False:
                         sys.exit()
                     con = True
                 print("Subopt objective func")
-                print(MENS_solvedsub.TACeqn())
+                if success_subopt == True:
+                    print(MENS_solvedsub.TACeqn())
+                    subobj = MENS_solvedsub.TACeqn()
+                else:
+                    subobj = 1000000000000000
                 print("Original objective func")
                 print(MENS_solved.TACeqn())
                 orig = False
                 if con == True:
-                    if MENS_solvedsub.TACeqn() < MENS_solved.TACeqn():
+                    if subobj < MENS_solved.TACeqn():
                         orig = False
                         print("SUBOPT with non isocomp is better")
                         #Replace original model with sub
@@ -580,8 +584,13 @@ class HybridStrategy(object):
             for i in MENS_solved.i:
                 for j in MENS_solved.j:
                     for k in MENS_solved.k:
-                    
-                        if MENS_solved.y[i,j,k]>=0.99 and MENS_solved.M[i,j,k].value!=0 and con:
+                        yvals = {}
+                        if orig == True:
+                            yvals[i,j,k] = value(MENS_solved.y[i,j,k])                            
+                        else:
+                            yvals[i,j,k] = MENS_solved.y[i,j,k]
+                            
+                        if yvals[i,j,k]>=0.99 and MENS_solved.M[i,j,k].value!=0 and con:
                             print("SETTING UP THE PROBLEM FOR MATCH [i,j,k] = ", i,j,k)
                             CRin_Side = {}
                             if orig == True:

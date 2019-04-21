@@ -2116,36 +2116,22 @@ class mass_exchanger(object):
         ME5, ME5results, presolve_5, success = self.full_exchanger_model()
         
         if success == False:
-            ME1, success1, presolve_1 = mx.Construct_pyomo_model()
-            ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
-            ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
-            ME4, success4, presolve_4 = mx.Construct_pyomo_model_4(ME3, success3, presolve_3)
-            ME5, ME5results, presolve_5, success = mx.Construct_pyomo_model_5(ME4, success4, presolve_4)
+            ME1, success1, presolve_1 = self.Construct_pyomo_model()
+            ME2, success2, presolve_2 = self.Construct_pyomo_model_2(ME1, success1, presolve_1)
+            ME3, success3, presolve_3 = self.Construct_pyomo_model_3(ME2, success2, presolve_2)
+            ME4, success4, presolve_4 = self.Construct_pyomo_model_4(ME3, success3, presolve_3)
+            ME5, ME5results, presolve_5, success = self.Construct_pyomo_model_5(ME4, success4, presolve_4)
             
             if success == False:
                 print("5th NLP has failed for this match. Relaxing bounds on the L / D ratio")
-                ME6, ME6results, presolve_6, success6 = mx.Construct_pyomo_model_6(ME5, success, presolve_5)
+                ME6, ME6results, presolve_6, success6 = self.Construct_pyomo_model_6(ME5, success, presolve_5)
                 
                 if success6 == True:
                     ME5 = ME6
                     ME5results = ME6results
                     success = success6
                 else:
-                    print("The initial exchanger solution attempt failed. Increasing FEs")
-                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=(nfe),ncp = 3)
-                    ME1, success1, presolve_1 = mx.Construct_pyomo_model()
-                    ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
-                    ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
-                    ME4, success4, presolve_4 = mx.Construct_pyomo_model_4(ME3, success3, presolve_3)
-                    ME5, ME5results, presolve_5, success = mx.Construct_pyomo_model_5(ME4, success4, presolve_4)
-                    ME6, ME6results, presolve_6, success6 = mx.Construct_pyomo_model_6(ME5, success, presolve_5)
-                
-                    if success6 == True:
-                        ME5 = ME6
-                        ME5results = ME6results
-                        success = success6
-                    else:
-                        print("This exchanger is doomed")
+                    success = False
         else:
             print("We found a solution to the exchanger on the first try with lazy inits!")
             
