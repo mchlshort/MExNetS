@@ -30,7 +30,7 @@ __maintainer__ =  "Michael Short"
 __email__ = "shortm@andrew.cmu.edu"
 __status__ = "Development"
  
-example_name = 'Test_clean3'
+example_name = 'Test_clean1'
 
 # in the polished version we need to have here the tweakable params
 # omega and EMAT
@@ -67,10 +67,11 @@ Example1 = HybridStrategy()
 #A future call to set the problem data up. More sense than a loooong arg list as below
 #p_data = Example1.provide_problem_data(rich_data=Rich_data,lean_data=Lean_data, parameter_data=problem_parameters, stream_properties = stream_properties)
 
-Example1.run_hybrid_strategy(cor_filter_size=0.5, max_iter=2,rich_data=Rich_data,lean_data=Lean_data, correction_factors = None, parameter_data=problem_parameters, stream_properties = stream_properties, exname = example_name, tol = 0.00001, non_iso = True, stages = stages, superstruct = ss)
+Example1.run_hybrid_strategy(cor_filter_size=0.5, max_iter=50,rich_data=Rich_data,lean_data=Lean_data, correction_factors = None, parameter_data=problem_parameters, stream_properties = stream_properties, exname = example_name, tol = 0.00001, non_iso = True, stages = stages, superstruct = ss)
 
 stop = time.clock()
 ex_time = stop - start 
 
 print("Total time: ", ex_time )
 sys.stdout.close()
+sys.exit()
