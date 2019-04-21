@@ -608,29 +608,38 @@ class HybridStrategy(object):
                                 FlowM[j] = MENS_solved.M[i,j,k].value/(MENS_solved.clin[i,j,k].value-MENS_solved.cl[j,(k+1)].value)
                             
                             ME_inits = self._obtain_initializations(MENS_solved,i,j,k)   #, me_inits=ME_inits
-                            nfe = 200
-                            mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j, rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates = FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
-
-                            ME5, ME5results = mx.find_detailed_exchanger_design()
-                            print(ME5results)
-                            print("ME5 results type: ",type(ME5results))
-                            print(ME5.success)
-                            if ME5results == 'failed epically':
-                                print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
-                                exchanger_models[m]=ME5
-                                #exchanger_models[m].success = False
-                            elif not isinstance(ME5results, str):
-                                if isinstance(ME5results, pyomo.core.base.PyomoModel.ConcreteModel):
-                                    print("model did not solve correctly, so it is skipped")
+                            
+                            count = 10
+                            while count >= 1:
+                                nfe = 200/count
+                                print("solving for ", nfe, "number of elements")
+                                mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j, rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates = FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
+    
+                                ME5, ME5results = mx.find_detailed_exchanger_design()
+                                print(ME5results)
+                                print("ME5 results type: ",type(ME5results))
+                                print(ME5.success)
+                                if ME5results == 'failed epically':
+                                    print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
                                     exchanger_models[m]=ME5
-                                elif (ME5results.solver.status == SolverStatus.ok) and (ME5results.solver.termination_condition == TerminationCondition.optimal):
-                                    exchanger_models[m]=ME5
-                                elif (ME5results.solver.status == SolverStatus.ok) and (ME5results.solver.termination_condition == TerminationCondition.locallyOptimal):
-                                    exchanger_models[m]=ME5
-                            else:
-                                #Should add way to deal with unsolved NLPs (increase elements?)
-                                print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
-                                pass
+                                    #exchanger_models[m].success = False
+                                elif not isinstance(ME5results, str):
+                                    if isinstance(ME5results, pyomo.core.base.PyomoModel.ConcreteModel):
+                                        print("model did not solve correctly, so it is skipped")
+                                        exchanger_models[m]=ME5
+                                    elif (ME5results.solver.status == SolverStatus.ok) and (ME5results.solver.termination_condition == TerminationCondition.optimal):
+                                        exchanger_models[m]=ME5
+                                    elif (ME5results.solver.status == SolverStatus.ok) and (ME5results.solver.termination_condition == TerminationCondition.locallyOptimal):
+                                        exchanger_models[m]=ME5
+                                else:
+                                    #Should add way to deal with unsolved NLPs (increase elements?)
+                                    print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
+                                    pass
+                                if ME5.success == False:
+                                    print("try to increase number of FEs")
+                                elif ME5.success == True:
+                                    break
+                                count = count - 1
                         elif con ==True:
                             print("MATCH: ", m, " match ", i, "with ", j, " is not a selected match in ", k)
                             if m in exchanger_models:

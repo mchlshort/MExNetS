@@ -204,7 +204,7 @@ def solve_until_feas_NLP(m):
                         results = "Failed epically"
                         pass
 
-    print("This is to see why we are still solving with ipopt")
+    #print("This is to see why we are still solving with ipopt")
     
     if results == "Failed epically":
         print("CONOPT assumed unsuccessful... IPOPT it is")
@@ -353,7 +353,7 @@ def solve_until_feas_NLP(m):
                             print ("Solver Status: ",  results.solver.status)
                             results = "Failed epically"  
                     except:
-                        results = m
+                        #results = m
                         results = "Failed epically"
     elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
         print("successfully solved with CONOPT")
