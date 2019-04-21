@@ -18,9 +18,6 @@ import os
 import inspect
 import numpy as np
 import sys
-import library.MassExchangerManualColloc
-import library.MENS_MINLPauto
-import library.HybridStrategySubOpt
 
 __author__ = "Michael Short"
 __copyright__ = "Copyright 2018"

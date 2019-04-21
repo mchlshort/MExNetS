@@ -15,14 +15,11 @@ from pyomo.environ import *
 import pandas as pd
 import os
 import inspect
-import numpy
 import time
-import timeit
+import numpy
 import sys
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
-#from library.MassExchangerManualColloc import *
-#from library.MENS_MINLPauto import *
-from library.HybridStrategySubOpt import *
+from library.HybridStrategy import *
 
 __author__ = "Michael Short"
 __copyright__ = "Copyright 2018"
@@ -32,18 +29,19 @@ __version__ = "0.9"
 __maintainer__ =  "Michael Short"
 __email__ = "shortm@andrew.cmu.edu"
 __status__ = "Development"
-
-start = timeit.default_timer()   
-example_name = 'Ex1NewTrybigCor0.5'
+ 
+example_name = 'Test_clean'
 
 # in the polished version we need to have here the tweakable params
 # omega and EMAT
 # additionally, we can have options to run the FE analysis or not (seeing how many elements we need)
 
-# We also should ahve solver options to only use BARON or DICOPT and to point to them for the user
+# We also should have solver options to only use BARON or DICOPT and to point to them for the user
 
 # There should also be options for different cuts to be added
-       
+
+start = time.clock()   
+    
 sys.stdout = open(example_name+'.txt','w')
 dataDirectory = os.path.abspath(
     os.path.join( os.path.dirname(os.path.abspath(inspect.getfile(
@@ -62,16 +60,17 @@ filenameSP = os.path.join(dataDirectory,'stream_properties.csv')
 stream_properties = read_stream_data(filenameSP)  
 
 stages = 3
-#ss = 'SBS'
-#Ex1MEN = MENS(rich_data=Rich_data,lean_data=Lean_data, correction_factors = None)
+ss = 'SBS'
+
 Example1 = HybridStrategy()
+
+#A future call to set the problem data up. More sense than a loooong arg list as below
 #p_data = Example1.provide_problem_data(rich_data=Rich_data,lean_data=Lean_data, parameter_data=problem_parameters, stream_properties = stream_properties)
 
-Example1.run_hybrid_strategy(cor_filter_size=0.5, max_iter=300,rich_data=Rich_data,lean_data=Lean_data, correction_factors = None, parameter_data=problem_parameters, stream_properties = stream_properties, exname = example_name, tol = 0.00001, non_iso = True, stages = stages, superstruct = 'SBS')
-#MEN_init = Ex1MEN.NLP_MENS_init() 
-stop = timeit.default_timer()
+Example1.run_hybrid_strategy(cor_filter_size=0.5, max_iter=2,rich_data=Rich_data,lean_data=Lean_data, correction_factors = None, parameter_data=problem_parameters, stream_properties = stream_properties, exname = example_name, tol = 0.00001, non_iso = True, stages = stages, superstruct = ss)
+
+stop = time.clock()
 ex_time = stop - start 
 
-print("timeit says: ", ex_time )
+print("Total time: ", ex_time )
 sys.stdout.close()
-#MENS = Ex1MEN.MINLP_MENS_full(MEN_init) 
