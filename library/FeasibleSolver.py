@@ -17,7 +17,6 @@ It may be clumsy, but it works!
 """
 
 from __future__ import division
-from math import pi
 from pyomo.environ import *
 from pyomo.dae import *
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition, SolverStatus
@@ -57,6 +56,7 @@ def solve_until_feas_NLP(m):
         solver= SolverFactory('ipopt')
         options={}
         try:
+            options['max_cpu_time'] = 1e+05
             results = solver.solve(m,tee=False, options=options)
             #m.load(results)
 
@@ -65,6 +65,7 @@ def solve_until_feas_NLP(m):
             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                 print("First solve was infeasible")
                 options1 = {}
+                options1['max_cpu_time'] = 1e+05
                 options1['mu_strategy'] = 'adaptive'
                 results = solver.solve(m,tee=False, options=options1)
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -72,6 +73,7 @@ def solve_until_feas_NLP(m):
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                     print("Second solve was infeasible")
                     options2 = {}
+                    options2['max_cpu_time'] = 1e+05
                     options2['mu_init'] = 1e-6
                     #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
                     results = solver.solve(m,tee=False, options=options2) 
@@ -537,7 +539,7 @@ def solve_until_feas_MINLP_BARON(m):
     print("==================ATTEMPTING TO SOLVE WITH BARON==========================")
     try:
         options['MaxTime'] = 1000
-        results = opt.solve(m,options = options,tee=True)
+        results = opt.solve(m,options = options,tee=False)
         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
             print("successfully solved")
             BARONsolved = True
@@ -546,7 +548,7 @@ def solve_until_feas_MINLP_BARON(m):
         elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
             print("First solve was infeasible, solving with changed match options")
             options['EpsR']= 0.02
-            results = opt.solve(m,options = options,tee=True)
+            results = opt.solve(m,options = options,tee=False)
             
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
@@ -583,7 +585,7 @@ def solve_until_feas_MINLP_BARON(m):
             solver=SolverFactory('gams')
             options={}
             m1 = m
-            results = solver.solve(m1,tee=True, solver = 'dicopt')
+            results = solver.solve(m1,tee=False, solver = 'dicopt')
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
                 DICOPTsolved = True
@@ -591,7 +593,7 @@ def solve_until_feas_MINLP_BARON(m):
             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                 print("First solve was infeasible, solving with feasibility pump")
                 options['feaspump']= 2
-                results = opt.solve(m,options = options,tee=False)
+                results = opt.solve(m,options = options,tee=False, solver = 'dicopt')
             
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
@@ -599,8 +601,9 @@ def solve_until_feas_MINLP_BARON(m):
                 
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                     print("Second solve was infeasible, solving with changed match options")
+                    options1 = {}
                     options1['optcr']= 0.05
-                    results = opt.solve(m,options = options1,tee=False)
+                    results = opt.solve(m,options = options1,tee=False, solver = 'dicopt')
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
                         DICOPTsolved = True
@@ -625,7 +628,7 @@ def solve_until_feas_MINLP_BARON(m):
             solver=SolverFactory('gams')
             options={}
             m1 = m
-            results = solver.solve(m1,tee=True, solver = 'baron')
+            results = solver.solve(m1,tee=False, solver = 'baron')
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
                 BARONsolved = True
@@ -634,7 +637,7 @@ def solve_until_feas_MINLP_BARON(m):
             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                 print("First solve was infeasible, solving with changed match options")
                 options['EpsR']= 0.02
-                results = opt.solve(m,options = options,tee=True, solver = 'baron')
+                results = opt.solve(m,options = options,tee=False, solver = 'baron')
                 
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
@@ -671,7 +674,7 @@ def solve_until_feas_MINLP_BARON(m):
             options['MaxTime'] = 1000
             options['EpsR']= 0.1
             m1 = m
-            results = solver.solve(m1,tee=True, options = options)
+            results = solver.solve(m1,tee=False, options = options)
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
                 BARONsolved = True
@@ -692,14 +695,14 @@ def solve_until_feas_MINLP_BARON(m):
         print("Solved using DICOPT")
     else:
         #Need to add bonmin to PATH!
-        opt = SolverFactory('gams')
+        opt = SolverFactory('bonmin')
         options={}
         options['bonmin.algorithm']='B-BB'
         
         #This can probably be greatly improved        
         print("==================ATTEMPTING TO SOLVE WITH BONMIN==========================")
         try:
-            results = opt.solve(m,options = options,tee=False, solver = 'bonmin')
+            results = opt.solve(m,options = options,tee=False)
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
                 BONMINsolved = True
@@ -711,7 +714,7 @@ def solve_until_feas_MINLP_BARON(m):
                 options['mu_init'] = 1e-6
                 options['bonmin.algorithm']='B-BB'
                 options['bonmin.allowable_fraction_gap']= 0.05
-                results = opt.solve(m,options = options,tee=False, solver = 'bonmin')
+                results = opt.solve(m,options = options,tee=False)
                 
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
@@ -730,6 +733,7 @@ def solve_until_feas_MINLP_BARON(m):
                         print("successfully solved")
                         BONMINsolved = True
                     elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        options2 = {}
                         options2['mu_strategy'] = 'monotone'
                         options2['mu_init'] = 1e-5
                         options2['bound_relax_factor'] = 0
@@ -741,6 +745,7 @@ def solve_until_feas_MINLP_BARON(m):
                             print("successfully solved")
                             BONMINsolved = True
                         elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            options3={}
                             options3['mu_strategy'] = 'monotone'
                             options3['mu_init'] = 1e-5
                             options3['bound_push'] = 1e-5
@@ -751,6 +756,7 @@ def solve_until_feas_MINLP_BARON(m):
                                 print("successfully solved")
                                 BONMINsolved = True
                             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                options4 = {}
                                 options4['mu_strategy'] = 'monotone'
                                 options4['mu_init'] = 1e-5
                                 options4['bound_push'] = 1e-5
@@ -764,32 +770,33 @@ def solve_until_feas_MINLP_BARON(m):
                                     print("successfully solved")
                                     BONMINsolved = True
                                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                    options11 = {}
                                     options11['bonmin.algorithm']='B-OA'
-                                    results = opt.solve(m, options = options4, tee=False)
+                                    results = opt.solve(m, options = options11, tee=False)
                                     if(results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                                         print("successfully solved")
                                         BONMINsolved = True
                                     else:
                                         print("Cannot determine cause of fault")
-                                        print("Solver Status: ",  result.solver.status)
+                                        print("Solver Status: ",  results.solver.status)
                                 else:
                                     print("Cannot determine cause of fault")
-                                    print("Solver Status: ",  result.solver.status)
+                                    print("Solver Status: ",  results.solver.status)
                             else:
                                 print("Cannot determine cause of fault")
-                                print("Solver Status: ",  result.solver.status)
+                                print("Solver Status: ",  results.solver.status)
                         
                                 
                         else:
                             print("Cannot determine cause of fault")
-                            print("Solver Status: ",  result.solver.status)
+                            print("Solver Status: ",  results.solver.status)
                 else:
                     print("Cannot determine cause of fault")
-                    print("Solver Status: ",  result.solver.status)  
+                    print("Solver Status: ",  results.solver.status)  
                     
             else:
                 print("Cannot determine cause of fault")
-                print("Solver Status: ",  result.solver.status)
+                print("Solver Status: ",  results.solver.status)
 
         except:
             print("First try encountered an error") 
@@ -842,7 +849,7 @@ def solve_until_feas_MINLP_DICOPT(m):
             solver=SolverFactory('gams')
             options={}
             m1 = m
-            results = solver.solve(m1,tee=True, solver = 'dicopt')
+            results = solver.solve(m1,tee=False, solver = 'dicopt')
             
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
@@ -851,7 +858,7 @@ def solve_until_feas_MINLP_DICOPT(m):
             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                 print("First solve was infeasible, solving with feasibility pump")
                 options['feaspump']= 2
-                results = opt.solve(m,options = options,tee=False)
+                results = opt.solve(m,options = options,tee=False, solver = 'dicopt')
             
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
@@ -859,8 +866,9 @@ def solve_until_feas_MINLP_DICOPT(m):
                 
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                     print("Second solve was infeasible, solving with changed match options")
+                    options1 = {}
                     options1['optcr']= 0.05
-                    results = opt.solve(m,options = options1,tee=False)
+                    results = opt.solve(m,options = options1,tee=False, solver = 'dicopt')
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
                         DICOPTsolved = True
@@ -883,7 +891,7 @@ def solve_until_feas_MINLP_DICOPT(m):
             print("Solved using DICOPT")
         else:
             options['MaxTime'] = 10000
-            results = opt.solve(m,options = options,tee=True)
+            results = opt.solve(m,options = options,tee=False)
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
                 BARONsolved = True
@@ -892,7 +900,7 @@ def solve_until_feas_MINLP_DICOPT(m):
             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                 print("First solve was infeasible, solving with changed match options")
                 options['EpsR']= 0.02
-                results = opt.solve(m,options = options,tee=True)
+                results = opt.solve(m,options = options,tee=False)
                 
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
@@ -926,7 +934,7 @@ def solve_until_feas_MINLP_DICOPT(m):
             solver=SolverFactory('gams')
             options={}
             m1 = m
-            results = solver.solve(m1,tee=True, solver = 'baron')
+            results = solver.solve(m1,tee=False, solver = 'baron')
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
                 BARONsolved = True
@@ -935,7 +943,7 @@ def solve_until_feas_MINLP_DICOPT(m):
             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                 print("First solve was infeasible, solving with changed match options")
                 options['EpsR']= 0.02
-                results = opt.solve(m,options = options,tee=True)
+                results = opt.solve(m,options = options,tee=False, solver = 'baron')
                 
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
@@ -944,7 +952,7 @@ def solve_until_feas_MINLP_DICOPT(m):
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                     print("Second solve was infeasible, solving with changed match options")
                     options['EpsR']= 0.05
-                    results = opt.solve(m,options = options,tee=False)
+                    results = opt.solve(m,options = options,tee=False, solver = 'baron')
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
                         BARONsolved = True
@@ -973,7 +981,7 @@ def solve_until_feas_MINLP_DICOPT(m):
             options['MaxTime'] = 1000
             options['EpsR']= 0.1
             m1 = m
-            results = solver.solve(m1,tee=True, solver = 'baron')
+            results = solver.solve(m1,tee=False)
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 print("successfully solved")
                 BARONsolved = True
@@ -1033,6 +1041,7 @@ def solve_until_feas_MINLP_DICOPT(m):
                         BONMINsolved= True
                         
                     elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                        options2 = {}
                         options2['mu_strategy'] = 'monotone'
                         options2['mu_init'] = 1e-5
                         options2['bound_relax_factor'] = 0
@@ -1044,6 +1053,7 @@ def solve_until_feas_MINLP_DICOPT(m):
                             print("successfully solved")
                             BONMINsolved= True
                         elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                            options3 = {}
                             options3['mu_strategy'] = 'monotone'
                             options3['mu_init'] = 1e-5
                             options3['bound_push'] = 1e-5
@@ -1054,6 +1064,7 @@ def solve_until_feas_MINLP_DICOPT(m):
                                 print("successfully solved")
                                 BONMINsolved= True
                             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
+                                options4 = {}
                                 options4['mu_strategy'] = 'monotone'
                                 options4['mu_init'] = 1e-5
                                 options4['bound_push'] = 1e-5
@@ -1074,25 +1085,25 @@ def solve_until_feas_MINLP_DICOPT(m):
                                         BONMINsolved= True
                                     else:
                                         print("Cannot determine cause of fault")
-                                        print("Solver Status: ",  result.solver.status)
+                                        print("Solver Status: ",  results.solver.status)
                                 else:
                                     print("Cannot determine cause of fault")
-                                    print("Solver Status: ",  result.solver.status)
+                                    print("Solver Status: ",  results.solver.status)
                             else:
                                 print("Cannot determine cause of fault")
-                                print("Solver Status: ",  result.solver.status)
+                                print("Solver Status: ",  results.solver.status)
                         
                                 
                         else:
                             print("Cannot determine cause of fault")
-                            print("Solver Status: ",  result.solver.status)
+                            print("Solver Status: ",  results.solver.status)
                 else:
                     print("Cannot determine cause of fault")
-                    print("Solver Status: ",  result.solver.status) 
+                    print("Solver Status: ",  results.solver.status) 
                     
             else:
                 print("Cannot determine cause of fault")
-                print("Solver Status: ",  result.solver.status)
+                print("Solver Status: ",  results.solver.status)
 
         except:
             print("First try encountered an error") 
@@ -1100,7 +1111,7 @@ def solve_until_feas_MINLP_DICOPT(m):
     
     if (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
         print("The MINLP problem could not be solved")
-
+        solversolved = None
         return results, solversolved, globalsol
     else:  
         solversolved = None
@@ -1108,6 +1119,8 @@ def solve_until_feas_MINLP_DICOPT(m):
             solversolved = 'baron'
         elif DICOPTsolved:
             solversolved = 'dicopt'
-        else:
+        elif BONMINsolved:
             solversolved = 'bonmin'
+        else:
+            print("it seems that we have been unable to solve the problem with any of our MINLP solvers")
         return results, solversolved, globalsol   

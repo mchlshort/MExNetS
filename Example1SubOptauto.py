@@ -30,7 +30,7 @@ __maintainer__ =  "Michael Short"
 __email__ = "shortm@andrew.cmu.edu"
 __status__ = "Development"
  
-example_name = 'Test_clean'
+example_name = 'Test_clean2'
 
 # in the polished version we need to have here the tweakable params
 # omega and EMAT

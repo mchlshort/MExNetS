@@ -20,7 +20,7 @@ import inspect
 import numpy
 import time
 import sys
-#import csv
+
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
 from library.MassExchanger import *
 from library.MENS_MINLP import *
@@ -450,7 +450,7 @@ class HybridStrategy(object):
             iter_time = time.clock()
             #these values are the initial values used to select matches between the NLP initialization of the MINLP and the MINLP
             min_height=0.01
-            min_mass_ex = 1e-7
+            #min_mass_ex = 1e-7
             #initialize the MINLP with the NLP
             MEN_init, success_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
             print("MEN_init")
@@ -610,40 +610,11 @@ class HybridStrategy(object):
                             ME_inits = self._obtain_initializations(MENS_solved,i,j,k)   #, me_inits=ME_inits
                             nfe = 200
                             mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j, rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates = FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
-                            ME1, success1, presolve_1 = mx.Construct_pyomo_model()
-                            ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
-                            ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
-                            ME4, success4, presolve_4 = mx.Construct_pyomo_model_4(ME3, success3, presolve_3)
-                            ME5, ME5results, presolve_5, success = mx.Construct_pyomo_model_5(ME4, success4, presolve_4)
-                            
-                            if success == False:
-                                print("5th NLP has failed for this match. Relaxing bounds on the L / D ratio")
-                                ME6, ME6results, presolve_6, success6 = mx.Construct_pyomo_model_6(ME5, success, presolve_5)
-                                
-                                if success6 == True:
-                                    ME5 = ME6
-                                    ME5results = ME6results
-                                    success = success6
-                                else:
-                                    print("The initial exchanger solution attempt failed. Increasing FEs")
-                                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=(nfe),ncp = 3)
-                                    ME1, success1, presolve_1 = mx.Construct_pyomo_model()
-                                    ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
-                                    ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
-                                    ME4, success4, presolve_4 = mx.Construct_pyomo_model_4(ME3, success3, presolve_3)
-                                    ME5, ME5results, presolve_5, success = mx.Construct_pyomo_model_5(ME4, success4, presolve_4)
-                                    ME6, ME6results, presolve_6, success6 = mx.Construct_pyomo_model_6(ME5, success, presolve_5)
-                                
-                                    if success6 == True:
-                                        ME5 = ME6
-                                        ME5results = ME6results
-                                        success = success6
-                                    else:
-                                        print("This exchanger is doomed")
-                                        
+
+                            ME5, ME5results = mx.find_detailed_exchanger_design()
                             print(ME5results)
                             print("ME5 results type: ",type(ME5results))
-                            ME5.success = success
+                            print(ME5.success)
                             if ME5results == 'failed epically':
                                 print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
                                 exchanger_models[m]=ME5

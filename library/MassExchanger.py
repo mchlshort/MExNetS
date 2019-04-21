@@ -14,6 +14,7 @@ from math import pi
 from pyomo.environ import *
 from pyomo.dae import *
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition, SolverStatus
+from library.FeasibleSolver import *
 import pandas as pd
 import os
 import inspect
@@ -84,7 +85,6 @@ class mass_exchanger(object):
             pre_solve_clone (clone of concrete model before solve statement): should only be used if solve failed
         """
         print("Setting up the 1st NLP subp-problem...")
-        print("Hi")
         m = ConcreteModel()
 
         #sets
@@ -250,7 +250,7 @@ class mass_exchanger(object):
         #options['bound_push'] =1e-5
         #options['mu_strategy'] = 'adaptive'
         presolved_clone = m.clone()
-        results = self.solve_until_feas(m)        
+        results = solve_until_feas_NLP(m)        
         #display(m)
         print(results)
 
@@ -583,7 +583,7 @@ class mass_exchanger(object):
         m.Obj1.activate()
         
         presolved_clone = m.clone()
-        results = self.solve_until_feas(m)
+        results = solve_until_feas_NLP(m)
         #========================================
         # POST PROCESSING AND PRINTING
         #========================================         
@@ -977,7 +977,7 @@ class mass_exchanger(object):
         #m.Obj2.activate()   
         #solver = SolverFactory('./../../BARON/baron')
         presolve_clone = m.clone()
-        results = self.solve_until_feas(m)
+        results = solve_until_feas_NLP(m)
         
         #========================================
         # POST PROCESSING AND PRINTING
@@ -1382,7 +1382,7 @@ class mass_exchanger(object):
         #solver= SolverFactory('ipopt')
         #results = solver.solve(m,tee=True)
         presolve_clone = m.clone()
-        results = self.solve_until_feas(m)
+        results = solve_until_feas_NLP(m)
         
         #========================================
         # POST PROCESSING AND PRINT
@@ -2118,7 +2118,7 @@ class mass_exchanger(object):
         #m.Obj3.deactivate()
         #m.Obj4.activate() 
         presolve_clone = m1.clone()
-        results = self.solve_until_feas(m1)
+        results = solve_until_feas_NLP(m1)
         #m.display()
         #========================================
         # POST PROCESSING AND PRINT
@@ -2196,6 +2196,7 @@ class mass_exchanger(object):
         #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
         #    print("The exchanger problem could not be solved")
             #raise Exception("Could not find a valid model to continue iterations")
+        m1.success = success_solve
         return m1, results, presolve_clone, success_solve
     
     def Construct_pyomo_model_6 (self,m, success_solve, m2):
@@ -2571,7 +2572,7 @@ class mass_exchanger(object):
         m.Obj4.activate() 
         m.height.pprint()
         presolve_clone = m.clone()
-        results = self.solve_until_feas(m)
+        results = solve_until_feas_NLP(m)
         #========================================
         # POST PROCESSING AND PRINT
         #======================================== 
@@ -2646,9 +2647,555 @@ class mass_exchanger(object):
         #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
         #    print("The exchanger problem could not be solved")
             #raise Exception("Could not find a valid model to continue iterations")
+        m.success = success_solve
         return m, results, presolve_clone, success_solve
-    
 
+    def full_exchanger_model(self):
+        """ Constructs the the 5th pyomo model of 5 from no initial values.
+        Contains all variables and model information.
+        
+        This will be attempted first to see whether the NLP initialization steps are necessary
+        
+        Args:
+            None
+            
+        Returns:
+            m (Concrete pyomo model): final solution.
+            results (solver results): ipopt solver output.
+            pre_solve_clone (clone of concrete model before solve statement): should only be used if solve failed
+            success_solve (bool): flag as to whether the model solved
+        
+        """
+        print("Setting up the full exchanger model from no inits")
+        #=========================================
+        #Variables from Previous NLP
+        #=========================================
+
+        m1 = ConcreteModel()
+        
+        #sets
+        m1.ii = RangeSet((self.nfe))
+        m1.jj = RangeSet((self.ncp))
+
+        #Table a(jj,jj) First order derivatives collocation matrix
+        a = {}
+        a[1,1] = 0.19681547722366
+        a[1,2] = 0.39442431473909
+        a[1,3] = 0.37640306270047
+        a[2,1] = -0.06553542585020
+        a[2,2] = 0.29207341166523
+        a[2,3] = 0.51248582618842
+        a[3,1] = 0.02377097434822
+        a[3,2] = -0.04154875212600
+        a[3,3] = 0.11111111111111
+        m1.a = Param(m1.jj,m1.jj, initialize = a)
+        
+        m1.ag = Param(initialize = 0.123)
+        
+        
+        m1.height = Var(initialize = 2,bounds = (0.15, None))
+        #=========================================
+        #Parameters
+        #=========================================
+        #I will fix these here for now, but the plan is to load these from a seperate file
+        #preferably for each component
+        rhog={}
+        rhol={}
+        m1.surft={}
+        m1.visR={}
+        m1.visL={}
+        count = 0
+        for i in self._stream_properties.stream:
+            if self._stream_properties.index[count]=='RHOG':
+                rhog[i]=self._stream_properties.iloc[count]['value']
+            if self._stream_properties.index[count]=='RHOL':
+                rhol[i]=self._stream_properties.iloc[count]['value']
+            if self._stream_properties.index[count]=='surften':
+                m1.surft[i]=self._stream_properties.iloc[count]['value']
+            if self._stream_properties.index[count]=='visRich':
+                m1.visR[i]=self._stream_properties.iloc[count]['value']
+            if self._stream_properties.index[count]=='vis':
+                m1.visL[i]=self._stream_properties.iloc[count]['value']
+            count+=1
+            
+        m1.de = Param(initialize=0.02)        
+        
+        #These need to come from data
+        m1.RHOG = Param(initialize = rhog[self.rich_stream_name])
+        m1.RHOL = Param(initialize = rhol[self.lean_stream_name])
+        #Henry for mol SO2 per mol H2O = 0.0234, but in this eg, it is already inc
+        m1.henry = Param(initialize = 1)
+        #print("mTHIS IS THE MASS_FLOWS", self.mass_flows)
+        m1.FlowRm = Param(initialize = self.mass_flows[self.rich_stream_name])
+        m1.FlowLm = Param (initialize = self.mass_flows[self.lean_stream_name])
+        #m.PackCost = Param(initialize = (self.ME_inits["packcost"]*self.ME_inits["packcostcor"]))
+        m1.AF = Param(initialize = 0.2)
+        m1.surften = Param(initialize = m1.surft[self.lean_stream_name])
+        m1.visRich = Param(initialize = m1.visR[self.rich_stream_name])
+        #m.visRich.pprint()
+        #m.de = Param(initialize=0.02)        
+        m1.vis = Param(initialize= m1.visL[self.lean_stream_name])
+        #These need to come from data
+        #m.RHOL.pprint()
+        #sys.exit()
+        #Henry for mol SO2 per mol H2O = 0.0234, but in this eg, it is already inc
+        #m.henry = Param(initialize = 1)
+        #m.FlowRm = Param(initialize = self.mass_flows['R1'])
+        #m.FlowLm = Param (initialize = self.mass_flows['L2'])
+        
+        FlowRVlat = self.mass_flows[self.rich_stream_name]/m1.RHOG
+        FlowLVlat = self.mass_flows[self.lean_stream_name]/m1.RHOL
+        FlowLVcor = (self.mass_flows[self.lean_stream_name]/self.mass_flows[self.rich_stream_name])*((m1.RHOG/m1.RHOL)**0.5)
+        
+        m1.FlowRVlat =Param(initialize=FlowRVlat)
+        m1.FlowLVlat =Param(initialize=FlowLVcor)
+        #=========================================
+        #Variables
+        #=========================================
+        flux_init = {}
+        for i in m1.ii:
+            for j in m1.jj:
+                flux_init[i,j]=-1e-4
+
+        cRs_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cRs_init[i,j]=0.001
+
+        cLs_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cLs_init[i,j]=0.001
+            
+        cL0_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cL0_init[i]= 0.001
+                                        
+        cR0_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cR0_init[i]= 0.001
+                    
+        h0_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                h0_init[i]=0.01
+                    
+        cdotR_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cdotR_init[i,j]=-1e-04
+                    
+        cdotL_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cdotL_init[i,j]= -1e-04
+                    
+        hs_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                hs_init[i,j]=0.1
+                    
+        #flux of the contaminant from vapour
+        m1.flux =Var(m1.ii,m1.jj, initialize = flux_init, bounds = (None, 0))
+        m1.cRs = Var(m1.ii,m1.jj,within = NonNegativeReals, initialize = cRs_init)
+        m1.cLs = Var(m1.ii,m1.jj,within = NonNegativeReals, initialize = cLs_init)
+        m1.cR0 = Var(m1.ii,within = NonNegativeReals, initialize = cR0_init)
+        m1.cL0 = Var(m1.ii,within = NonNegativeReals, initialize = cL0_init)
+        m1.h0 = Var(m1.ii,within = NonNegativeReals, initialize = h0_init)
+        
+        m1.cdotR = Var(m1.ii,m1.jj, initialize = cdotR_init)
+        m1.cdotL = Var(m1.ii,m1.jj, initialize = cdotL_init)
+        
+        m1.hs = Var(m1.ii,m1.jj,within = NonNegativeReals, initialize = hs_init)
+        
+        
+        d = 0.5
+        m1.diameter = Var(initialize =d, within = NonNegativeReals)
+
+        m1.area = Var(initialize = 0.25, within = NonNegativeReals)
+
+        m1.koga = Var(initialize = 0.04, within = NonNegativeReals)
+
+        m1.VelocityR = Var(initialize = 1, bounds=(0.00001,None))
+        
+        m1.VelocityL = Var(initialize = 1, bounds=(0.00001,None)) 
+        
+        m1.ReL = Var(initialize = 100, bounds = (0.00001,None)) 
+        
+        m1.ReG = Var(initialize = 100, bounds = (1,None))
+
+        m1.Flood = Var(initialize = 1000, within = NonNegativeReals)
+
+        m1.FloodAct = Var(initialize = 1000, within = NonNegativeReals)
+        
+        m1.packfact = Var(initialize = 2000, bounds =(40,4000))
+
+        m1.ai = Var(initialize = 150, within = NonNegativeReals) 
+        
+        m1.packsize = Var(initialize = 0.05, bounds=(0.005, None))
+        m1.SpecAreaPacking = Var(initialize =150, bounds=(5, None))
+        m1.packVoid = Var(initialize=0.68,bounds = (0.5, None))
+        
+        #m.del_component(m.PackCost)
+        m1.PackCost = Var(initialize = (self.ME_inits["packcost"]*self.ME_inits["packcostcor"]), within = NonNegativeReals)
+ 
+        #========================================
+        #CONSTRAINTS
+        #========================================
+
+        #Differential Equations
+        print(self.nfe)
+        def FECOLcr_(m, ii,jj):
+            return m1.cRs[ii,jj] ==  m1.cR0[ii] + m1.height/self.nfe*sum(m1.a[kk,jj]*m1.cdotR[ii,jj] for kk in m1.jj)
+        m1.FECOLcr = Constraint(m1.ii,m1.jj, rule = FECOLcr_)
+
+        def FECOLcl_(m, ii,jj):
+            return m1.cLs[ii,jj] ==  m1.cL0[ii] + m1.height/self.nfe*sum(m1.a[kk,jj]*m1.cdotL[ii,jj] for kk in m1.jj)
+        m1.FECOLcl = Constraint(m1.ii,m1.jj, rule = FECOLcl_)
+        
+        def FECOLch_(m, ii,jj):
+            return m1.hs[ii,jj] ==  m1.h0[ii] + m1.height/self.nfe*sum(m1.a[kk,jj] for kk in m1.jj)
+        m1.FECOLch = Constraint(m1.ii,m1.jj, rule = FECOLch_)
+        
+        #CONTINUITY EQUNS
+        def CONcR_(m, ii):
+            if ii == 1:
+                return Constraint.Skip
+            else:
+                return m1.cR0[ii] ==  m1.cR0[ii-1] + m1.height/self.nfe*sum(m1.cdotR[ii-1,jj]*m1.a[jj,3] for jj in m1.jj)
+        m1.CONcR = Constraint(m1.ii, rule = CONcR_)
+        
+        def CONcL_(m, ii):
+            if ii == 1:
+                return Constraint.Skip
+            else:
+                return m1.cL0[ii] ==  m1.cL0[ii-1] + m1.height/self.nfe*sum(m1.cdotL[ii-1,jj]*m1.a[jj,3] for jj in m1.jj)
+        m1.CONcL = Constraint(m1.ii, rule = CONcL_)
+        
+        def CONtt_(m, ii):
+            if ii == 1:
+                return Constraint.Skip
+            else:
+                return m1.h0[ii] ==  m1.h0[ii-1] + m1.height/self.nfe*sum(m1.a[jj,3] for jj in m1.jj)
+        m1.CONtt = Constraint(m1.ii, rule = CONtt_)
+        
+        # DIFFERENTIAL EQUATIONS
+        
+        def ODECL_(m, ii,jj):
+            return m1.cdotL[ii,jj] ==  m1.flux[ii,jj]/m1.FlowLm
+        m1.ODECL = Constraint(m1.ii,m1.jj, rule = ODECL_)
+        
+        
+        def ODECR_(m, ii,jj):
+            return m1.cdotR[ii,jj] ==  m1.flux[ii,jj]/m1.FlowRm
+        m1.ODECR = Constraint(m1.ii,m1.jj, rule = ODECR_)
+
+        #initial conditions
+        def _init1(m):
+            return m1.cR0[1] == self.rich_in[self.rich_stream_name]
+        m1.initcon1 = Constraint(rule=_init1)
+        def _init2(m):
+            return m1.cRs[self.nfe, 3] == self.rich_out[self.rich_stream_name]
+        m1.initcon2 = Constraint(rule=_init2)
+        def _init3(m):
+            return m1.cL0[1] == self.rich_in[self.lean_stream_name]
+        m1.initcon3 = Constraint(rule=_init3)
+        def _init4(m):
+            return m1.cLs[self.nfe, 3] == self.rich_out[self.lean_stream_name]
+        m1.initcon4 = Constraint(rule=_init4)        
+        def _init5(m):
+            return m1.h0[1] == 0
+        m1.initcon5 = Constraint(rule=_init5)  
+        
+        def loverdup_(m):
+            return m1.height <= 25*m1.diameter
+            
+        m1.loverdup = Constraint(rule=loverdup_)
+        
+        def loverdlo_(m):
+            return m1.height >= 2*m1.diameter
+            
+        m1.loverdlo = Constraint(rule=loverdlo_)
+
+        def TRateVap_(m, ii,jj):
+            return m1.flux[ii,jj] == -m1.koga*m1.ai*m1.area*(m1.cRs[ii,jj]-m1.henry*m1.cLs[ii,jj])
+        m1.TRateVap = Constraint(m1.ii,m1.jj, rule = TRateVap_)
+
+        #m.del_component(m.KogaEq)
+        def KogaEq_(m):
+            return m1.koga == (m1.VelocityR)/(m1.packVoid)*m1.ag*(((m1.packsize*m1.VelocityR)/(m1.packVoid*m1.visRich))**(-0.25))*(0.7**(-0.677))*(1)
+        m1.KogaEq = Constraint(rule=KogaEq_)
+
+        def VelocityREq_(m):
+            return m1.VelocityR*m1.area == m1.FlowRVlat
+            
+        m1.VelocityREq = Constraint(rule=VelocityREq_)
+
+        def VelocityLEq_(m):
+            return m1.VelocityL*m1.area == m1.FlowLVlat
+            
+        m1.VelocityLEq = Constraint(rule=VelocityLEq_)
+
+        def Flood1_(m):
+            return m1.Flood == 249.089/0.3048*0.12*((m1.packfact*0.3048)**0.7)  
+        m1.Flood1 = Constraint(rule = Flood1_) 
+        
+        def Flood3_(m):
+            return m1.Flood >=  m1.FloodAct
+        m1.Flood3 = Constraint(rule = Flood3_)
+        
+        def Flood2_(m):
+            return m1.FloodAct ==(94*((m1.ReL**1.11)/(m1.ReG**1.8))+4.4)*6*(1-m1.packVoid)/(m1.packsize*((m1.packVoid)**3))*m1.RHOG*((m1.VelocityR)**2)
+        
+        m1.Flood2 = Constraint(rule = Flood2_)
+
+        def ReynoldsG_(m):
+            return m1.ReG ==   m1.RHOG*m1.VelocityR/(m1.visRich*m1.SpecAreaPacking);
+        m1.ReynoldsG = Constraint(rule = ReynoldsG_) 
+        
+        def ReynoldsL_(m):
+            return m1.ReL ==   m1.RHOL*m1.VelocityL/(m1.vis*m1.ai);
+        m1.ReynoldsL = Constraint(rule = ReynoldsL_) 
+        
+        def Aid_(m):
+            return m1.ai ==  m1.SpecAreaPacking*(1-exp(-1.45*((0.075/m1.surften)**0.75)*((m1.RHOL*m1.VelocityR/(m1.vis*m1.SpecAreaPacking))**0.1)*((m1.SpecAreaPacking*(m1.VelocityR**2)/9.81)**(-0.05))*((m1.RHOL*(m1.VelocityR**2)/(m1.SpecAreaPacking*m1.surften))**0.2)));
+
+        m1.Aid = Constraint(rule = Aid_) 
+
+        def packingFactorEq_(m):
+            return m1.packfact == (2.0034)*(m1.packsize**(-1.564))
+        
+        m1.packingFactorEq = Constraint(rule=packingFactorEq_)
+        
+        def AreaofPackingEq_(m):
+            return m1.SpecAreaPacking == (5.0147)*(m1.packsize**(-0.978))
+        
+        m1.AreaofPackingEq = Constraint(rule=AreaofPackingEq_)  
+        
+        def AreaEq_(m):
+            return m1.area == pi/4*(m1.diameter**2)
+            
+        m1.AreaEq = Constraint(rule=AreaEq_)
+        
+        def PackVoidEq_(m):
+            return m1.packVoid == 0.0569*log(m1.packsize)+0.9114
+        
+        m1.PackVoidEq = Constraint(rule=PackVoidEq_)
+        
+        def PackCostEq_(m):
+            return m1.PackCost == 397431*(m1.packsize**(2)) - 53449*(m1.packsize) + 2366.1
+        
+        m1.PackCostEq = Constraint(rule=PackCostEq_)   
+        
+        
+        def PackSizeCons_(m):
+            return m1.packsize *20 >= m1.diameter
+        m1.PackSizeCons = Constraint(rule=PackSizeCons_)
+        #========================================
+        # OBJECTIVE and SOLVE
+        #======================================== 
+        #m.del_component(m.Obj3)        
+        '''
+        def Obj4_(model):
+           return model.koga
+       #m.AF*23805*(m.diameter**0.57)*1.15*m.height + m.AF*pi*(m.diameter**2)/4*m.height*m.PackCost
+       #capcost = m.AF*23805*(m.diameter.value**0.57)*1.15*m.height+\
+       #                         m.AF*pi*(m.diameter**2)/4*m.height*m.PackCost
+
+        m.Obj4 = Objective( rule = Obj4_,sense=maximize)
+        #m.Obj3.deactivate()
+        m.Obj4.activate() 
+        #m.height.pprint()
+        presolve_clone = m.clone()
+        results = self.solve_until_feas(m)
+        
+        print("The solve maximizing koga")
+        q= m.AF*23805*(m.diameter.value**0.57)*1.15*m.height.value
+        w=m.AF*pi*(m.diameter.value**2)/4*m.height.value*m.PackCost.value
+        print(m.FixCost, "shell",q,"packing   ", w)
+        
+        m.height.pprint()
+        m.diameter.pprint()
+        #m.ai.pprint()
+        m.FloodAct.pprint()
+        m.Flood.pprint()  
+        m.ai.pprint()
+        m.ap.pprint()
+        m.packfact.pprint()
+        m.VelocityR.pprint()
+        m.VelocityL.pprint()
+        m.koga.pprint()
+        m.packsize.pprint()
+        m.PackCost.pprint()
+        m.SpecAreaPacking.pprint()
+        m.ReL.pprint()
+        m.ReG.pprint()
+        m.packVoid.pprint()
+        '''
+        print("is this the correct mass exchanger unit?")
+        print("Solve with proper objective")
+        #m.del_component(m.Obj4)        
+        def Obj4_(model):
+           return m1.AF*23805*(m1.diameter**0.57)*1.15*m1.height + m1.AF*pi*(m1.diameter**2)/4*m1.height*m1.PackCost
+       #m.AF*23805*(m.diameter**0.57)*1.15*m.height+\
+       #                         m.AF*pi*(m.diameter**2)/4*m.height*m.PackCost
+
+        m1.Obj4 = Objective( rule = Obj4_,sense=minimize)
+        #m.Obj3.deactivate()
+        #m.Obj4.activate() 
+        presolve_clone = m1.clone()
+        results = solve_until_feas_NLP(m1)
+        #m.display()
+        #========================================
+        # POST PROCESSING AND PRINT
+        #======================================== 
+        #display(m)
+        
+        print(type(results))
+        if results == "Failed epically":
+            print("The exchanger problem could not be solved")
+            
+        success_solve = bool
+
+        print("results type: ",type(results))
+        if results == 'failed epically':
+            print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
+            success_solve = False
+        elif not isinstance(results, str):
+            if isinstance(results, pyomo.core.base.PyomoModel.ConcreteModel):
+                print("model did not solve correctly, so it is skipped")
+                success_solve = False
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+                success_solve=True
+            else:
+                #Should add way to deal with unsolved NLPs (increase elements?)
+                print("NLP1 failed.")
+                success_solve = False
+        else:
+            success_solve = False
+        print("solve success = ", success_solve) 
+       
+        q= m1.AF*23805*(m1.diameter**0.57)*1.15*m1.height()
+        w=m1.AF*pi*(m1.diameter()**2)/4*m1.height()*m1.PackCost
+        print( "shell",q,"packing   ", w)
+        print("results from 5th NLP")
+        #m.CapCost.pprint()
+        m1.height.pprint()
+        m1.diameter.pprint()
+        #m.ai.pprint()
+        m1.area.pprint()
+        m1.FloodAct.pprint()
+        m1.Flood.pprint()  
+        m1.ai.pprint()
+        #m.ap.pprint()
+        m1.packfact.pprint()
+        m1.VelocityR.pprint()
+        m1.VelocityL.pprint()
+        m1.koga.pprint()
+        m1.packsize.pprint()
+        m1.PackCost.pprint()
+        m1.SpecAreaPacking.pprint()
+        m1.ReL.pprint()
+        m1.ReG.pprint()
+        m1.packVoid.pprint()
+        print("All inlet and outlet concs:")
+        q = m1.FlowRm.value*(m1.cR0[1].value-m1.cRs[self.nfe,self.ncp].value)
+        print("mass exchanged R:  ", q )
+        
+        q = m1.FlowLm.value*(m1.cL0[1].value-m1.cLs[self.nfe, self.ncp].value)
+        print("mass exchanged L:  ", q )
+        print("All inlet and outlet concs:")
+        print(m1.cR0[1].value, self.rich_in[self.rich_stream_name])
+        print(m1.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        print(m1.cL0[1].value, self.rich_in[self.lean_stream_name])
+        print(m1.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        print("number of variables", m1.nvariables())
+        
+        print("number of constraints", m1.nconstraints())
+        
+        #m.display()
+        print('=============================================================================================')
+        print(results)
+        #m.load(results)
+        #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
+        #    print("The exchanger problem could not be solved")
+            #raise Exception("Could not find a valid model to continue iterations")
+        m1.success = success_solve
+        return m1, results, presolve_clone, success_solve
+    
+    def find_detailed_exchanger_design(self, FE_analysis = False):
+        """ finds the detailed exchanger design based on the inputs provided to the class
+        
+        It does so by first trying to solve the full problem without initializations from the other
+        functions. If it does find a feasible exchanger first time then it returns this. If not, the
+        full initialization scheme is used. If the option to perform the FE analysis is on then the
+        model will change the number of finite elements to determine what the best number of elements
+        for the particular boundary conditions.
+        
+        Args:
+            FE_analysis (bool, optional): when FE_analysis is on the FE analysis is performed on this exchanger
+            
+        Returns:
+            m (Concrete pyomo model): final solution.
+            results (solver results): ipopt solver output.
+            pre_solve_clone (clone of concrete model before solve statement): should only be used if solve failed
+            success_solve (bool): flag to tell whether we have a feasible exchanger
+        """
+        print("First trying to solve the exchanger with no initializations")
+        
+        ME5, ME5results, presolve_5, success = self.full_exchanger_model()
+        
+        if success == False:
+            ME1, success1, presolve_1 = mx.Construct_pyomo_model()
+            ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
+            ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
+            ME4, success4, presolve_4 = mx.Construct_pyomo_model_4(ME3, success3, presolve_3)
+            ME5, ME5results, presolve_5, success = mx.Construct_pyomo_model_5(ME4, success4, presolve_4)
+            
+            if success == False:
+                print("5th NLP has failed for this match. Relaxing bounds on the L / D ratio")
+                ME6, ME6results, presolve_6, success6 = mx.Construct_pyomo_model_6(ME5, success, presolve_5)
+                
+                if success6 == True:
+                    ME5 = ME6
+                    ME5results = ME6results
+                    success = success6
+                else:
+                    print("The initial exchanger solution attempt failed. Increasing FEs")
+                    mx2 = mass_exchanger(rich_stream_name = i, lean_stream_name=j,rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates=FlowM, me_inits = ME_inits, stream_properties = stream_properties,nfe=(nfe),ncp = 3)
+                    ME1, success1, presolve_1 = mx.Construct_pyomo_model()
+                    ME2, success2, presolve_2 = mx.Construct_pyomo_model_2(ME1, success1, presolve_1)
+                    ME3, success3, presolve_3 = mx.Construct_pyomo_model_3(ME2, success2, presolve_2)
+                    ME4, success4, presolve_4 = mx.Construct_pyomo_model_4(ME3, success3, presolve_3)
+                    ME5, ME5results, presolve_5, success = mx.Construct_pyomo_model_5(ME4, success4, presolve_4)
+                    ME6, ME6results, presolve_6, success6 = mx.Construct_pyomo_model_6(ME5, success, presolve_5)
+                
+                    if success6 == True:
+                        ME5 = ME6
+                        ME5results = ME6results
+                        success = success6
+                    else:
+                        print("This exchanger is doomed")
+        else:
+            print("We found a solution to the exchanger on the first try with lazy inits!")
+            
+        return ME5, ME5results
+            
+            
+        
+        
 '''
 CRin_Side = {}
 CRin_Side['R1'] = 0.07
