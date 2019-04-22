@@ -6,7 +6,7 @@ Created on Fri Jun  1 10:35:31 2018
 Individual Mass Exchanger optimization model in Pyomo. To be used in conjunction with the
 MENS package developed. 
 
-@author: shortm
+@author: mchlshort
 """
 
 from __future__ import division
@@ -14,16 +14,15 @@ from math import pi
 from pyomo.environ import *
 from pyomo.dae import *
 from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition, SolverStatus
+from library.FeasibleSolver import *
 import pandas as pd
 import os
 import inspect
 import numpy as np
 import sys
-from library.MENS_MINLPauto import *
-from library.HybridStrategySubOpt import *
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2018"
+__copyright__ = "Copyright 2019"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Isafiade, AJ."]
 __license__ = "GPL-3"
 __version__ = "0.9"
@@ -70,487 +69,7 @@ class mass_exchanger(object):
         self._stream_properties = stream_properties
         self.ncp = ncp
         self.nfe = nfe
-        
-    def solve_until_feas(self,m):
-        """The solve function for the NLP.
-        
-        This function solves the NLP Pyomo model using ipopt. It has many try and except statements
-        in order to try to use many different solver options to solve the problem. Ensures that the iterative
-        procedure does not exit if an infeasible model is found and increases the likelihood that a feasible 
-        solution is found.
-        
-        Args:
-            m (pyomo model, concrete): the pyomo model of the MEN with all potential matches selected
-            
-        returns:
-            results (solver results): returns the solved model and results from the solve.
-            
-        """
-        #solver=SolverFactory('gams')
-        options={}
-        #results = solver.solve(m,tee=True, solver = 'conopt')
-        try:
-            solver=SolverFactory('gams')
-            options={}
-            m1 = m
-            results = solver.solve(m1,tee=False, solver = 'conopt')
-        except:
-            print("conopt failed")
-            print("CONOPT assumed unsuccessful... IPOPT it is")
-            solver= SolverFactory('ipopt')
-            options={}
-            try:
-                results = solver.solve(m,tee=False, options=options)
-                #m.load(results)
-    
-                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                    print("successfully solved")
-                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                    print("First solve was infeasible")
-                    options1 = {}
-                    options1['mu_strategy'] = 'adaptive'
-                    results = solver.solve(m,tee=False, options=options1)
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options2 = {}
-                        options2['mu_init'] = 1e-6
-                        #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
-                        results = solver.solve(m,tee=False, options=options2) 
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options3 = {}
-                            options3['mu_init'] = 1e-6
-                            options['bound_push'] =1e-6
-                            results = solver.solve(m,tee=False, options=options3)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            #    solver = SolverFactory('./../../BARON/baron')
-                            #    results = solver.solve(m,tee=True)
-                            else:
-                                print("Cannot determine cause of fault")
-                                print("Solver Status:",  results.solver.status)
-                                #results = m
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            #results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  results.solver.status)  
-                        #results = m                      
-                else:
-                    print("Cannot determine cause of fault")
-                    print("Solver Status: ",  results.solver.status)
-                    #results = m
-            except:
-                print("Something failed during the solve process!")
-                try:
-                    options1 = {}
-                    options1['mu_strategy'] = 'adaptive'
-                    results = solver.solve(m,tee=False, options=options1)
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options2 = {}
-                        options2['mu_init'] = 1e-6
-                        #options['bound_push'] =1e-5
-                        results = solver.solve(m,tee=False, options=options2) 
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options3 = {}
-                            options3['mu_init'] = 1e-6
-                            options3['bound_push'] =1e-6
-                            results = solver.solve(m,tee=False, options=options3)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            #    solver = SolverFactory('./../../BARON/baron')
-                            #    results = solver.solve(m,tee=True)    
-                            else:
-                                print("Cannot determine cause of fault")
-                                print ("Solver Status: ",  results.solver.status)
-                                results = m
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  results.solver.status)
-                        results = m
-                except:
-                    print("Something failed again during the solve")
-                    try:
-                        
-                        options4 = {}
-                        options4['mu_init'] = 1e-6
-                        options4['bound_push'] =1e-6
-                        results = solver.solve(m,tee=False, options=options3)
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options4 = {}
-                            options4['mu_init'] = 1e-6
-                            #options['bound_push'] =1e-5
-                            results = solver.solve(m,tee=False, options=options4) 
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                                print("Second solve was infeasible")
-                                options4 = {}
-                                options4['mu_init'] = 1e-5
-                                options4['bound_push'] =1e-5
-                                results = solver.solve(m,tee=False, options=options4)
-                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                    print("successfully solved")
-                                elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                                    solver = SolverFactory('baron')
-                                    results = solver.solve(m,tee=True)    
-                                else:
-                                    print("Cannot determine cause of fault")
-                                    print ("Solver Status: ",  results.solver.status)
-                                    results = "Failed epically"
-                            else:
-                                print("Cannot determine cause of fault")
-                                print("Solver Status: ",  results.solver.status)
-                                results = "Failed epically"
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            results = "Failed epically"
-                        
-                    except:
-                        try:
-                            print("Something failed again again during the solve")
-                            options4 = {}
-                            options4['mu_init'] = 1e-5
-                            options4['bound_push'] =1e-5
-                            results = solver.solve(m,tee=False, options=options4)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            else:
-                                print("Cannot determine cause of fault")
-                                print ("Solver Status: ",  results.solver.status)
-                                results = "Failed epically"  
-                        except:
-                            results = "Failed epically"
-                            pass
-
-        print("This is to see why we are still solving with ipopt")
-        
-        if results == "Failed epically":
-            print("CONOPT assumed unsuccessful... IPOPT it is")
-            solver= SolverFactory('ipopt')
-            options={}
-            try:
-                results = solver.solve(m,tee=False, options=options)
-                #m.load(results)
-    
-                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                    print("successfully solved")
-                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                    print("First solve was infeasible")
-                    options1 = {}
-                    options1['mu_strategy'] = 'adaptive'
-                    results = solver.solve(m,tee=False, options=options1)
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options2 = {}
-                        options2['mu_init'] = 1e-6
-                        #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
-                        results = solver.solve(m,tee=False, options=options2) 
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options3 = {}
-                            options3['mu_init'] = 1e-6
-                            options['bound_push'] =1e-6
-                            results = solver.solve(m,tee=False, options=options3)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            #    solver = SolverFactory('./../../BARON/baron')
-                            #    results = solver.solve(m,tee=True)
-                            else:
-                                print("Cannot determine cause of fault")
-                                print("Solver Status:",  results.solver.status)
-                                results = m
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  results.solver.status)  
-                        results = m                      
-                else:
-                    print("Cannot determine cause of fault")
-                    print("Solver Status: ",  results.solver.status)
-                    results = m
-            except:
-                print("Something failed during the solve process!")
-                try:
-                    options1 = {}
-                    options1['mu_strategy'] = 'adaptive'
-                    results = solver.solve(m,tee=False, options=options1)
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options2 = {}
-                        options2['mu_init'] = 1e-6
-                        #options['bound_push'] =1e-5
-                        results = solver.solve(m,tee=False, options=options2) 
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options3 = {}
-                            options3['mu_init'] = 1e-6
-                            options3['bound_push'] =1e-6
-                            results = solver.solve(m,tee=False, options=options3)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            #    solver = SolverFactory('./../../BARON/baron')
-                            #    results = solver.solve(m,tee=True)    
-                            else:
-                                print("Cannot determine cause of fault")
-                                print ("Solver Status: ",  results.solver.status)
-                                results = m
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  results.solver.status)
-                        results = m
-                except:
-                    print("Something failed again during the solve")
-                    try:
-                        
-                        options4 = {}
-                        options4['mu_init'] = 1e-6
-                        options4['bound_push'] =1e-6
-                        results = solver.solve(m,tee=False, options=options3)
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options4 = {}
-                            options4['mu_init'] = 1e-6
-                            #options['bound_push'] =1e-5
-                            results = solver.solve(m,tee=False, options=options4) 
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                                print("Second solve was infeasible")
-                                options4 = {}
-                                options4['mu_init'] = 1e-5
-                                options4['bound_push'] =1e-5
-                                results = solver.solve(m,tee=False, options=options4)
-                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                    print("successfully solved")
-                                #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                                #    solver = SolverFactory('./../../BARON/baron')
-                                #    results = solver.solve(m,tee=True)    
-                                else:
-                                    print("Cannot determine cause of fault")
-                                    print ("Solver Status: ",  results.solver.status)
-                                    results = m
-                            else:
-                                print("Cannot determine cause of fault")
-                                print("Solver Status: ",  results.solver.status)
-                                results = m
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            results = m
-                        
-                    except:
-                        try:
-                            print("Something failed again again during the solve")
-                            options4 = {}
-                            options4['mu_init'] = 1e-5
-                            options4['bound_push'] =1e-5
-                            results = solver.solve(m,tee=False, options=options4)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            else:
-                                print("Cannot determine cause of fault")
-                                print ("Solver Status: ",  results.solver.status)
-                                results = "Failed epically"  
-                        except:
-                            results = m
-                            results = "Failed epically"
-        elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
-            print("successfully solved with CONOPT")
-        elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-            print("successfully solved using IPOPT")
-        else:
-            print("CONOPT assumed unsuccessful... IPOPT it is")
-            solver= SolverFactory('ipopt')
-            options={}
-            try:
-                results = solver.solve(m,tee=False, options=options)
-                #m.load(results)
-    
-                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                    print("successfully solved")
-                elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                    print("First solve was infeasible")
-                    options1 = {}
-                    options1['mu_strategy'] = 'adaptive'
-                    results = solver.solve(m,tee=False, options=options1)
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options2 = {}
-                        options2['mu_init'] = 1e-6
-                        #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
-                        results = solver.solve(m,tee=False, options=options2) 
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options3 = {}
-                            options3['mu_init'] = 1e-6
-                            options['bound_push'] =1e-6
-                            results = solver.solve(m,tee=False, options=options3)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            #    solver = SolverFactory('./../../BARON/baron')
-                            #    results = solver.solve(m,tee=True)
-                            else:
-                                print("Cannot determine cause of fault")
-                                print("Solver Status:",  results.solver.status)
-                                results = m
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  results.solver.status)  
-                        results = m                      
-                else:
-                    print("Cannot determine cause of fault")
-                    print("Solver Status: ",  results.solver.status)
-                    results = m
-            except:
-                print("Something failed during the solve process!")
-                try:
-                    options1 = {}
-                    options1['mu_strategy'] = 'adaptive'
-                    results = solver.solve(m,tee=False, options=options1)
-                    if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                        print("successfully solved")
-                    elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                        print("Second solve was infeasible")
-                        options2 = {}
-                        options2['mu_init'] = 1e-6
-                        #options['bound_push'] =1e-5
-                        results = solver.solve(m,tee=False, options=options2) 
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options3 = {}
-                            options3['mu_init'] = 1e-6
-                            options3['bound_push'] =1e-6
-                            results = solver.solve(m,tee=False, options=options3)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            #    solver = SolverFactory('./../../BARON/baron')
-                            #    results = solver.solve(m,tee=True)    
-                            else:
-                                print("Cannot determine cause of fault")
-                                print ("Solver Status: ",  results.solver.status)
-                                results = m
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            results = m
-                    else:
-                        print("Cannot determine cause of fault")
-                        print("Solver Status: ",  results.solver.status)
-                        results = m
-                except:
-                    print("Something failed again during the solve")
-                    try:
-                        
-                        options4 = {}
-                        options4['mu_init'] = 1e-6
-                        options4['bound_push'] =1e-6
-                        results = solver.solve(m,tee=False, options=options3)
-                        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                            print("successfully solved")
-                        elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                            print("Second solve was infeasible")
-                            options4 = {}
-                            options4['mu_init'] = 1e-6
-                            #options['bound_push'] =1e-5
-                            results = solver.solve(m,tee=False, options=options4) 
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                                print("Second solve was infeasible")
-                                options4 = {}
-                                options4['mu_init'] = 1e-5
-                                options4['bound_push'] =1e-5
-                                results = solver.solve(m,tee=False, options=options4)
-                                if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                    print("successfully solved")
-                                #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
-                                #    solver = SolverFactory('./../../BARON/baron')
-                                #    results = solver.solve(m,tee=True)    
-                                else:
-                                    print("Cannot determine cause of fault")
-                                    print ("Solver Status: ",  results.solver.status)
-                                    results = m
-                            else:
-                                print("Cannot determine cause of fault")
-                                print("Solver Status: ",  results.solver.status)
-                                results = m
-                        else:
-                            print("Cannot determine cause of fault")
-                            print("Solver Status: ",  results.solver.status)
-                            results = m
-                        
-                    except:
-                        try:
-                            print("Something failed again again during the solve")
-                            options4 = {}
-                            options4['mu_init'] = 1e-5
-                            options4['bound_push'] =1e-5
-                            results = solver.solve(m,tee=False, options=options4)
-                            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
-                                print("successfully solved")
-                            else:
-                                print("Cannot determine cause of fault")
-                                print ("Solver Status: ",  results.solver.status)
-                                results = "Failed epically"  
-                        except:
-                            results = m
-                            results = "Failed epically"
-        return results
-        
+               
     def Construct_pyomo_model(self):
         """ Constructs the first basic pyomo model. Used to initialize further models
         
@@ -566,7 +85,6 @@ class mass_exchanger(object):
             pre_solve_clone (clone of concrete model before solve statement): should only be used if solve failed
         """
         print("Setting up the 1st NLP subp-problem...")
-        print("Hi")
         m = ConcreteModel()
 
         #sets
@@ -732,7 +250,7 @@ class mass_exchanger(object):
         #options['bound_push'] =1e-5
         #options['mu_strategy'] = 'adaptive'
         presolved_clone = m.clone()
-        results = self.solve_until_feas(m)        
+        results = solve_until_feas_NLP(m)        
         #display(m)
         print(results)
 
@@ -815,70 +333,6 @@ class mass_exchanger(object):
         m.del_component(m.diameter)
         m.diameter = Var(initialize = diameter_init, bounds = (0.000001,None))
         
-        '''
-        if success_solve:
-            height_init=old_solve_clone.height.value
-            print("is this between WARNING1")
-        else:
-            height_init=m2.height.value
-            print("should mean didn't success solve")
-            
-        m.del_component(m.height)
-        m.height = Var(initialize = height_init,within=NonNegativeReals)
-        
-        
-        flux_init = {}
-        if success_solve:
-            for h in m.tau:
-                flux_init[h]=old_solve_clone.flux[h].value
-        else:
-            for h in m.tau:
-                flux_init[h]=m2.flux[h].value
-                
-        #m.del_component(m.flux)
-        #m.flux = Var(m.tau,initialize = flux_init)
-
-        cRs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cRs_init[h]=old_solve_clone.cRs[h].value 
-        else:
-            for h in m.tau:
-                cRs_init[h]=m2.cRs[h].value 
-        #m.del_component(m.cRs)
-        #m.cRs = Var(m.tau, initialize = cRs_init, within = NonNegativeReals)
-
-        cLs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cLs_init[h]=old_solve_clone.cLs[h].value  
-        else:
-            for h in m.tau:
-                cLs_init[h]=m2.cLs[h].value
-            
-        #m.del_component(m.cLs)
-        #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
-        
-        if success_solve:
-            if old_solve_clone.diameter.value == 0:
-                diameter_init=1
-            else:
-                diameter_init=old_solve_clone.diameter.value
-        else:
-            if m2.diameter.value == 0:
-                diameter_init=1
-            else:
-                diameter_init=m2.diameter.value
-        m.del_component(m.diameter)
-        m.diameter = Var(initialize = diameter_init, bounds = (0.000001,None))
-
-        #m.del_component(m.dheight)
-        #m.dheight = DerivativeVar(m.h)
-        #m.del_component(m.dCRdh)
-        #m.dCRdh= DerivativeVar(m.cRs, withrespectto=m.tau)
-        #m.del_component(m.dCLdh)
-        #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
-        '''
         #=========================================
         #New Parameters
         #=========================================
@@ -963,50 +417,6 @@ class mass_exchanger(object):
         m.VelocityL = Var(initialize = init_velocityL, bounds = (0.00000001,100))
         
         #========================================
-        #OLD CONSTRAINTS
-        #========================================
-        '''
-        #Differential Equations
-        #m.del_component(m.ODECR)
-        def ODECR_(m, h):
-            return m.dCRdh[h] == m.flux[h]/m.FlowRm
-        #m.ODECR = Constraint(m.tau, rule = ODECR_)
-
-        #m.del_component(m.ODECL)
-        def ODECL_(m, h):
-            return m.dCLdh[h] == m.flux[h]/m.FlowLm
-        #m.ODECL = Constraint(m.tau, rule = ODECL_)        
-        
-        #m.del_component(m.ode_h)
-        def ode_h_ (m,i):
-            if i == 0:
-                return Constraint.Skip
-            else:
-                return m.dheight[i] == m.height/self.nfe
-        #m.ode_h = Constraint(m.tau, rule= ode_h_)
-        
-        #m.del_component(m.initcon1)
-        def _init1(m):
-            return m.cRs[0] == self.rich_in[self.rich_stream_name]
-        #m.initcon1 = Constraint(rule=_init1)
-        #m.del_component(m.initcon2)
-        def _init2(m):
-            return m.cRs[1] == self.rich_out[self.rich_stream_name]
-        #m.initcon2 = Constraint(rule=_init2)
-        #m.del_component(m.initcon3)
-        def _init3(m):
-            return m.cLs[0] == self.rich_in[self.lean_stream_name]
-        #m.initcon3 = Constraint(rule=_init3)
-        #m.del_component(m.initcon4)
-        def _init4(m):
-            return m.cLs[1] == self.rich_out[self.lean_stream_name]
-        #m.initcon4 = Constraint(rule=_init4) 
-        #m.del_component(m.initcon5)
-        def _init5(m):
-            return m.h[0] == 0
-        #m.initcon5 = Constraint(rule=_init5)  
-        '''
-        #========================================
         #MODIFIED CONSTRAINTS
         #========================================
         
@@ -1065,7 +475,7 @@ class mass_exchanger(object):
         m.Obj1.activate()
         
         presolved_clone = m.clone()
-        results = self.solve_until_feas(m)
+        results = solve_until_feas_NLP(m)
         #========================================
         # POST PROCESSING AND PRINTING
         #========================================         
@@ -1154,93 +564,6 @@ class mass_exchanger(object):
         #To get inits we clone the solved model
         old_solve_clone = m.clone()
         
-        '''
-        if success_solve:
-            height_init=old_solve_clone.height.value
-        else:
-            height_init=m2.height.value
-            
-        #m.del_component(m.height)
-        #m.height = Var(initialize = height_init,bounds = (0.0000001,None))
-        
-        
-        flux_init = {}
-        if success_solve:
-            for h in m.tau:
-                flux_init[h]=old_solve_clone.flux[h].value
-        else:
-            for h in m.tau:
-                flux_init[h]=m2.flux[h].value
-                
-        #m.del_component(m.flux)
-        #m.flux = Var(m.tau,initialize = flux_init)
-
-        cRs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cRs_init[h]=old_solve_clone.cRs[h].value 
-        else:
-            for h in m.tau:
-                cRs_init[h]=m2.cRs[h].value 
-        #m.del_component(m.cRs)
-        #m.cRs = Var(m.tau, initialize = cRs_init, within = NonNegativeReals)
-
-        cLs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cLs_init[h]=old_solve_clone.cLs[h].value  
-        else:
-            for h in m.tau:
-                cLs_init[h]=m2.cLs[h].value
-            
-        #m.del_component(m.cLs)
-        #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
-        
-        
-
-        #m.del_component(m.dheight)
-        #m.dheight = DerivativeVar(m.h)
-        #m.del_component(m.dCRdh)
-        #m.dCRdh= DerivativeVar(m.cRs, withrespectto=m.tau)
-        #m.del_component(m.dCLdh)
-        #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
-        area_init = 0
-        if success_solve:
-            area_init=old_solve_clone.area.value
-        else:
-            area_init=m2.area.value
-            
-        m.del_component(m.area)
-        m.area = Var(initialize = area_init, within = NonNegativeReals)
-        
-        koga_init = 0
-        if success_solve:
-            koga_init=old_solve_clone.koga.value
-        else:
-            koga_init=m2.koga.value
-            
-        m.del_component(m.koga)
-        m.koga = Var(initialize = 0.05, bounds = (0.0000000001,None))
-        
-        VelocityR_init = 0
-        if success_solve:
-            VelocityR_init=old_solve_clone.VelocityR.value
-        else:
-            VelocityR_init=m2.VelocityR.value
-            
-        VelocityR_init=m.VelocityR.value
-        m.del_component(m.VelocityR)
-        m.VelocityR = Var(initialize = VelocityR_init, bounds = (0.00000001,15))
-        
-        VelocityL_init = 0
-        if success_solve:
-            VelocityL_init=old_solve_clone.VelocityL.value
-        else:
-            VelocityL_init=m2.VelocityL.value
-        
-        m.del_component(m.VelocityL)
-        m.VelocityL = Var(initialize =  VelocityL_init, bounds = (0.0000001,100)) 
-        '''
         #m.del_component(m.koga)
         #m.koga = Var(initialize = 0.05, bounds = (0.000000000001,None))
         
@@ -1309,98 +632,7 @@ class mass_exchanger(object):
         #========================================
         #OLD CONSTRAINTS
         #========================================
-        '''
-        #Differential Equations
-        m.del_component(m.ODECR)
-        def ODECR_(m, h):
-            return m.dCRdh[h] ==  m.height/self.nfe*m.flux[h]/m.FlowRm
-        m.ODECR = Constraint(m.tau, rule = ODECR_)
 
-        m.del_component(m.ODECL)
-        def ODECL_(m, h):
-            return m.dCLdh[h] ==  m.height/self.nfe*m.flux[h]/m.FlowLm
-        m.ODECL = Constraint(m.tau, rule = ODECL_)        
-        
-        #m.del_component(m.ode_h)
-        def ode_h_ (m,i):
-            if i == 0:
-                return Constraint.Skip
-            else:
-                return m.dheight[i] == m.height/self.nfe
-        #m.ode_h = Constraint(m.tau, rule= ode_h_)
-        
-        #m.del_component(m.ode_h1)
-        def ode_h1_ (m,i):
-            if i == 0:
-                return Constraint.Skip
-            else:
-                return m.h[i] == m.height/self.nfe +  m.h[i-1]
-        #m.ode_h1 = Constraint(m.tau, rule= ode_h1_)
-        #m.del_component(m.initcon)
-        #def _init(m):
-        #    yield m.cRs[0] == self.rich_in[self.rich_stream_name]
-            #yield m.cRs[1] == self.rich_out[self.rich_stream_name]
-        #    yield m.cLs[0] == self.rich_in[self.lean_stream_name]
-        #    yield m.cLs[1] == self.rich_out[self.lean_stream_name]
-        #    yield m.h[0] == 0
-        #m.initcon = ConstraintList(rule=_init) 
-        
-        #m.del_component(m.initcon1)
-        def _init1(m):
-            return m.cRs[0] == self.rich_in[self.rich_stream_name]
-        #m.initcon1 = Constraint(rule=_init1)
-        #m.del_component(m.initcon2)
-        def _init2(m):
-            return m.cRs[1] == self.rich_out[self.rich_stream_name]
-        #m.initcon2 = Constraint(rule=_init2)
-        #m.del_component(m.initcon3)
-        def _init3(m):
-            return m.cLs[0] == self.rich_in[self.lean_stream_name]
-        #m.initcon3 = Constraint(rule=_init3)
-        #m.del_component(m.initcon4)
-        def _init4(m):
-            return m.cLs[1] == self.rich_out[self.lean_stream_name]
-        #m.initcon4 = Constraint(rule=_init4) 
-        #m.del_component(m.initcon5)
-        def _init5(m):
-            return m.h[0] == 0
-        #m.initcon5 = Constraint(rule=_init5) 
-        
-        m.del_component(m.KogaEq)
-        def KogaEq_(m):
-            return m.koga == (m.VelocityR)/(m.porosity*m.poroCor)*m.ag*(((m.de*m.PartSizeCor*m.VelocityR)/(m.porosity*m.poroCor*m.visRich))**(-0.25))*(0.7**(-0.677))*1
-        
-        m.KogaEq = Constraint(rule=KogaEq_)
-        
-        m.del_component(m.VelocityREq)
-        def VelocityREq_(m):
-            return m.VelocityR*m.area == m.FlowRVlat
-            
-        m.VelocityREq = Constraint(rule=VelocityREq_)
-
-        m.del_component(m.VelocityLEq)
-        def VelocityLEq_(m):
-            return m.VelocityL*m.area == m.FlowLVlat
-            
-        m.VelocityLEq = Constraint(rule=VelocityLEq_)
-
-        m.del_component(m.AreaEq)
-        def AreaEq_(m):
-            return m.area == pi/4*(m.diameter**2)
-            
-        m.AreaEq = Constraint(rule=AreaEq_)
-        
-        m.del_component(m.TRateVap)
-
-        def TRateVap_(m, h):
-            if h==0:
-                return Constraint.Skip
-            else:
-                return m.flux[h] == -m.koga*m.area*m.surfarea*m.surfacor*\
-                                    (m.cRs[h]-m.henry*m.cLs[h])
-                                    
-        m.TRateVap = Constraint(m.tau, rule = TRateVap_)
-        '''
         #========================================
         #MODIFIED CONSTRAINTS
         #========================================
@@ -1459,7 +691,7 @@ class mass_exchanger(object):
         #m.Obj2.activate()   
         #solver = SolverFactory('./../../BARON/baron')
         presolve_clone = m.clone()
-        results = self.solve_until_feas(m)
+        results = solve_until_feas_NLP(m)
         
         #========================================
         # POST PROCESSING AND PRINTING
@@ -1544,138 +776,7 @@ class mass_exchanger(object):
         #=========================================
         
         old_solve_clone = m.clone()
-        '''
-        if success_solve:
-            print("This is the test")
-            print(old_solve_clone.height.value)
-            print(m.height.value)
-            height_init=old_solve_clone.height.value
-        else:
-            height_init=m2.height.value
-            
-        m.del_component(m.height)
-        m.height = Var(initialize = height_init,bounds = (0.0000001,None))
-        
-        
-        flux_init = {}
-        if success_solve:
-            for h in m.tau:
-                flux_init[h]=old_solve_clone.flux[h].value
-        else:
-            for h in m.tau:
-                flux_init[h]=m2.flux[h].value
-                
-        m.del_component(m.flux)
-        m.flux = Var(m.tau,initialize = flux_init)
 
-        cRs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cRs_init[h]=old_solve_clone.cRs[h].value 
-        else:
-            for h in m.h:
-                cRs_init[h]=m2.cRs[h].value 
-        #m.del_component(m.cRs)
-        #m.cRs = Var(m.tau, initialize = cRs_init, within = NonNegativeReals)
-
-        cLs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cLs_init[h]=old_solve_clone.cLs[h].value  
-        else:
-            for h in m.tau:
-                cLs_init[h]=m2.cLs[h].value
-            
-        #m.del_component(m.cLs)
-        #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
-        
-        if success_solve:
-            diameter_init=old_solve_clone.diameter.value
-        else:
-            diameter_init=m2.diameter.value
-        m.del_component(m.diameter)
-        m.diameter = Var(initialize = diameter_init, bounds = (0.0000001, None))
-
-        #m.del_component(m.dheight)
-        #m.dheight = DerivativeVar(m.h)
-        #m.del_component(m.dCRdh)
-        #m.dCRdh= DerivativeVar(m.cRs, withrespectto=m.tau)
-        #m.del_component(m.dCLdh)
-        #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
-        area_init = 0
-        if success_solve:
-            area_init=old_solve_clone.area.value
-        else:
-            area_init=m2.area.value
-            
-        m.del_component(m.area)
-        m.area = Var(initialize = area_init, within = NonNegativeReals)
-
-        koga_init = 0
-        if success_solve:
-            koga_init=old_solve_clone.koga.value
-        else:
-            koga_init=m2.koga.value
-            
-        m.del_component(m.koga)
-        m.koga = Var(initialize = koga_init, bounds = (0.001, 5))
-        
-        VelocityR_init = 0
-        if success_solve:
-            VelocityR_init=old_solve_clone.VelocityR.value
-        else:
-            VelocityR_init=m2.VelocityR.value
-            
-        #VelocityR_init=m.VelocityR.value
-        print("The velocityR init is :", VelocityR_init )
-        m.del_component(m.VelocityR)
-        m.VelocityR = Var(initialize = VelocityR_init, bounds =(0.001, 20))
-        
-        VelocityL_init = 0
-        if success_solve:
-            VelocityL_init=old_solve_clone.VelocityL.value
-        else:
-            VelocityL_init=m2.VelocityL.value
-        
-        m.del_component(m.VelocityL)
-        m.VelocityL = Var(initialize = VelocityL_init,bounds =(0.001, 20)) 
-        
-        ReL_init=0
-        if success_solve:
-            ReL_init=old_solve_clone.ReL.value
-        else:
-            ReL_init=m2.ReL.value
-            
-        m.del_component(m.ReL)
-        m.ReL = Var(initialize = ReL_init, bounds = (0.01, None)) 
-        
-        ReG_init=0
-        if success_solve:
-            ReG_init=old_solve_clone.ReG.value
-        else:
-            ReG_init=m2.ReG.value
-
-        m.del_component(m.ReG)
-        m.ReG = Var(initialize = ReG_init, bounds = (0.001, None))
-
-        Flood_init=0
-        if success_solve:
-            Flood_init=old_solve_clone.Flood.value
-        else:
-            Flood_init=m2.Flood.value
-
-        m.del_component(m.Flood)
-        m.Flood = Var(initialize = Flood_init, within = NonNegativeReals)
-
-        FloodAct_init=0
-        if success_solve:
-            FloodAct_init=old_solve_clone.FloodAct.value
-        else:
-            FloodAct_init=m2.FloodAct.value
-
-        m.del_component(m.FloodAct)
-        m.FloodAct = Var(initialize = FloodAct_init, within = NonNegativeReals)
-        '''
         packfact_init=0
         if success_solve:
             packfact_init=old_solve_clone.packfact.value
@@ -1705,106 +806,7 @@ class mass_exchanger(object):
         #OLD CONSTRAINTS
         #========================================
         #Differential Equations
-        '''
-        m.del_component(m.ODECR)
-        def ODECR_(m, h):
-
-            return m.dCRdh[h] ==  m.height/self.nfe*m.flux[h]/m.FlowRm
-        m.ODECR = Constraint(m.tau, rule = ODECR_)
-
-        m.del_component(m.ODECL)
-        def ODECL_(m, h):
-
-            return m.dCLdh[h] ==  m.height/self.nfe*m.flux[h]/m.FlowLm
-        m.ODECL = Constraint(m.tau, rule = ODECL_)        
-        
-        #m.del_component(m.ode_h)
-        def ode_h_ (m,i):
-            if i == 0:
-                return Constraint.Skip
-            else:
-                return m.dheight[i] == m.height/self.nfe
-        #m.ode_h = Constraint(m.tau, rule= ode_h_)
-        
-        #m.del_component(m.ode_h1)
-        def ode_h1_ (m,i):
-            if i == 0:
-                return Constraint.Skip
-            else:
-                return m.h[i] == m.height/self.nfe +  m.h[i-1]
-        #m.ode_h1 = Constraint(m.tau, rule= ode_h1_)
-        #m.del_component(m.initcon)
-        def _init(m):
-            yield m.cRs[0] == self.rich_in[self.rich_stream_name]
-            yield m.cRs[1] == self.rich_out[self.rich_stream_name]
-            yield m.cLs[0] == self.rich_in[self.lean_stream_name]
-            yield m.cLs[1] == self.rich_out[self.lean_stream_name]
-            yield m.h[0] == 0
-        #m.initcon = ConstraintList(rule=_init)  
-        #m.del_component(m.initcon1)
-        def _init1(m):
-            return m.cRs[0] == self.rich_in[self.rich_stream_name]
-        #m.initcon1 = Constraint(rule=_init1)
-        #m.del_component(m.initcon2)
-        def _init2(m):
-            return m.cRs[1] == self.rich_out[self.rich_stream_name]
-        #m.initcon2 = Constraint(rule=_init2)
-        #m.del_component(m.initcon3)
-        def _init3(m):
-            return m.cLs[0] == self.rich_in[self.lean_stream_name]
-        #m.initcon3 = Constraint(rule=_init3)
-        #m.del_component(m.initcon4)
-        def _init4(m):
-            return m.cLs[1] == self.rich_out[self.lean_stream_name]
-        #m.initcon4 = Constraint(rule=_init4) 
-        #m.del_component(m.initcon5)
-        def _init5(m):
-            return m.h[0] == 0
-        #m.initcon5 = Constraint(rule=_init5) 
-                
-        m.del_component(m.KogaEq)
-        def KogaEq_(m):
-            return m.koga == (m.VelocityR)/(m.porosity*m.poroCor)*m.ag*(((m.de*m.PartSizeCor*m.VelocityR)/(m.porosity*m.poroCor*m.visRich))**(-0.25))*(0.7**(-0.677))*1
-
-        m.KogaEq = Constraint(rule=KogaEq_)
-        
-        m.del_component(m.VelocityREq)
-        def VelocityREq_(m):
-            return m.VelocityR*m.area == m.FlowRVlat
-            
-        m.VelocityREq = Constraint(rule=VelocityREq_)
-
-        m.del_component(m.VelocityLEq)
-        def VelocityLEq_(m):
-            return m.VelocityL*m.area == m.FlowLVlat
-            
-        m.VelocityLEq = Constraint(rule=VelocityLEq_)
-
-        m.del_component(m.AreaEq)
-        def AreaEq_(m):
-            return m.area == pi/4*(m.diameter**2)
-            
-        m.AreaEq = Constraint(rule=AreaEq_)
-        
-        #Flooding equations
-        m.del_component(m.Flood1)
-        def Flood1_(m):
-            return m.Flood == 249.089/0.3048*(0.12*(m.packfact*0.3048)**0.7)  
-        m.Flood1 = Constraint(rule = Flood1_) 
-        
-        m.del_component(m.Flood2)
-        def Flood2_(m):
-            return m.FloodAct ==(94*((m.ReL**1.11)/(m.ReG**1.8))+4.4)*6*(1-m.porosity)/(m.de*((m.porosity)**3))*m.RHOG*(m.VelocityR**2)
-        # NOTE that 0.92 is actually the voidage and 0.05 is the m.de ... These are from my GAMS code and work well for inits
-        #                        (94*((ReLfinal(i,j,k)**1.11)/(ReGfinal(i,j,k)**1.8))+4.4)*6*(1-0.92)/(0.05*(0.92**3))*RHOG(i,j)*(velocityRfinal(i,j,k)**2);                                                                  
-        m.Flood2 = Constraint(rule = Flood2_)
-        
-        m.del_component(m.Flood3)
-        def Flood3_(m):
-            return m.Flood >=  m.FloodAct
-        
-        m.Flood3 = Constraint(rule = Flood3_) 
-        '''        
+    
         #========================================
         # MODIFIED CONSTRAINTS
         #========================================
@@ -1864,7 +866,7 @@ class mass_exchanger(object):
         #solver= SolverFactory('ipopt')
         #results = solver.solve(m,tee=True)
         presolve_clone = m.clone()
-        results = self.solve_until_feas(m)
+        results = solve_until_feas_NLP(m)
         
         #========================================
         # POST PROCESSING AND PRINT
@@ -2136,67 +1138,6 @@ class mass_exchanger(object):
         d = m.diameter.value
         m1.diameter = Var(initialize =d, within = NonNegativeReals)
 
-        #DIFFERENTIAL VAR
-        #m.dheight = DerivativeVar(m.h)
-        #m.dCRdh= DerivativeVar(m.cRs, withrespectto=m.tau)
-        #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
-        
-
-        #m1.height = Var(initialize = m.height.value, bounds = (0.01,None))
-        '''
-        
-        flux_init = {}
-        if success_solve:
-            for h in m.tau:
-                flux_init[h]=old_solve_clone.flux[h].value
-        else:
-            for h in m.tau:
-                flux_init[h]=m2.flux[h].value
-                
-        m.del_component(m.flux)
-        m.flux = Var(m.tau,initialize = flux_init)
-
-        cRs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cRs_init[h]=old_solve_clone.cRs[h].value 
-        else:
-            for h in m.tau:
-                cRs_init[h]=m2.cRs[h].value 
-        m.del_component(m.cRs)
-        m.cRs = Var(m.tau, initialize = cRs_init, within = NonNegativeReals)
-
-        cLs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cLs_init[h]=old_solve_clone.cLs[h].value  
-        else:
-            for h in m.tau:
-                cLs_init[h]=m2.cLs[h].value
-            
-        m.del_component(m.cLs)
-        m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
-        '''
-        #if success_solve:
-        #    diameter_init=old_solve_clone.diameter.value
-        #else:
-        #    diameter_init=m2.diameter.value
-        #m.del_component(m.diameter)
-        #m.diameter = Var(initialize = diameter_init, bounds = (0.0000001, 3))
-        
-        #m.del_component(m.dheight)
-        #m.dheight = DerivativeVar(m.h)
-        #m.del_component(m.dCRdh)
-        #m.dCRdh= DerivativeVar(m.cRs, withrespectto=m.tau)
-        #m.del_component(m.dCLdh)
-        #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
-        #area_init = 0
-        #if success_solve:
-        #    area_init=old_solve_clone.area.value
-        #else:
-        #    area_init=m2.area.value
-        #    
-        #m.del_component(m.area)
         m1.area = Var(initialize = m.area.value, within = NonNegativeReals)
 
         #koga_init = 0
@@ -2291,76 +1232,7 @@ class mass_exchanger(object):
         
         #m.del_component(m.PackCost)
         m1.PackCost = Var(initialize = (self.ME_inits["packcost"]*self.ME_inits["packcostcor"]), within = NonNegativeReals)
-        '''
-        #========================================
-        #OLD CONSTRAINTS
-        #========================================
-        #Differential Equations
-        m.del_component(m.ODECR)
-        def ODECR_(m, h):
-            return m.dCRdh[h] ==  m.height/self.nfe*m.flux[h]/m.FlowRm
-        m.ODECR = Constraint(m.tau, rule = ODECR_)
 
-        m.del_component(m.ODECL)
-        def ODECL_(m, h):
-
-            return m.dCLdh[h] ==  m.height/self.nfe*m.flux[h]/m.FlowLm
-        m.ODECL = Constraint(m.tau, rule = ODECL_)        
-        
-        #m.del_component(m.ode_h)
-        def ode_h_ (m,i):
-            if i == 0:
-                return Constraint.Skip
-            else:
-                return m.dheight[i] ==  m.height/self.nfe
-        #m.ode_h = Constraint(m.tau, rule= ode_h_)
-        
-        def ode_h1_ (m,i):
-            if i == 0:
-                return Constraint.Skip
-            else:
-                return m.h[i] == m.height/self.nfe +  m.h[i-1]
-        #m.ode_h1 = Constraint(m.tau, rule= ode_h1_)
-        
-        #m.del_component(m.initcon)
-        def _init(m):
-            yield m.cRs[0] == self.rich_in[self.rich_stream_name]
-            yield m.cRs[1] == self.rich_out[self.rich_stream_name]
-            yield m.cLs[0] == self.rich_in[self.lean_stream_name]
-            yield m.cLs[1] == self.rich_out[self.lean_stream_name]
-            yield m.h[0] == 0
-        #m.initcon = ConstraintList(rule=_init)  
-        
-        m.del_component(m.VelocityREq)
-        def VelocityREq_(m):
-            return m.VelocityR*m.area == m.FlowRVlat
-            
-        m.VelocityREq = Constraint(rule=VelocityREq_)
-
-        m.del_component(m.VelocityLEq)
-        def VelocityLEq_(m):
-            return m.VelocityL*m.area == m.FlowLVlat
-            
-        m.VelocityLEq = Constraint(rule=VelocityLEq_)
-
-        m.del_component(m.AreaEq)
-        def AreaEq_(m):
-            return m.area == pi/4*(m.diameter**2)
-            
-        m.AreaEq = Constraint(rule=AreaEq_)
-        
-        #Flooding equations
-        m.del_component(m.Flood1)
-        def Flood1_(m):
-            return m.Flood == 249.089/0.3048*(0.12*(m.packfact*0.3048)**0.7)  
-        m.Flood1 = Constraint(rule = Flood1_) 
-        
-        m.del_component(m.Flood3)
-        def Flood3_(m):
-            return m.Flood ==  m.FloodAct
-        
-        m.Flood3 = Constraint(rule = Flood3_) 
-        '''
         #========================================
         #CONSTRAINTS
         #========================================
@@ -2551,43 +1423,7 @@ class mass_exchanger(object):
         # OBJECTIVE and SOLVE
         #======================================== 
         #m.del_component(m.Obj3)        
-        '''
-        def Obj4_(model):
-           return model.koga
-       #m.AF*23805*(m.diameter**0.57)*1.15*m.height + m.AF*pi*(m.diameter**2)/4*m.height*m.PackCost
-       #capcost = m.AF*23805*(m.diameter.value**0.57)*1.15*m.height+\
-       #                         m.AF*pi*(m.diameter**2)/4*m.height*m.PackCost
 
-        m.Obj4 = Objective( rule = Obj4_,sense=maximize)
-        #m.Obj3.deactivate()
-        m.Obj4.activate() 
-        #m.height.pprint()
-        presolve_clone = m.clone()
-        results = self.solve_until_feas(m)
-        
-        print("The solve maximizing koga")
-        q= m.AF*23805*(m.diameter.value**0.57)*1.15*m.height.value
-        w=m.AF*pi*(m.diameter.value**2)/4*m.height.value*m.PackCost.value
-        print(m.FixCost, "shell",q,"packing   ", w)
-        
-        m.height.pprint()
-        m.diameter.pprint()
-        #m.ai.pprint()
-        m.FloodAct.pprint()
-        m.Flood.pprint()  
-        m.ai.pprint()
-        m.ap.pprint()
-        m.packfact.pprint()
-        m.VelocityR.pprint()
-        m.VelocityL.pprint()
-        m.koga.pprint()
-        m.packsize.pprint()
-        m.PackCost.pprint()
-        m.SpecAreaPacking.pprint()
-        m.ReL.pprint()
-        m.ReG.pprint()
-        m.packVoid.pprint()
-        '''
         print("is this the correct mass exchanger unit?")
         print("Solve with proper objective")
         #m.del_component(m.Obj4)        
@@ -2600,7 +1436,7 @@ class mass_exchanger(object):
         #m.Obj3.deactivate()
         #m.Obj4.activate() 
         presolve_clone = m1.clone()
-        results = self.solve_until_feas(m1)
+        results = solve_until_feas_NLP(m1)
         #m.display()
         #========================================
         # POST PROCESSING AND PRINT
@@ -2678,6 +1514,7 @@ class mass_exchanger(object):
         #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
         #    print("The exchanger problem could not be solved")
             #raise Exception("Could not find a valid model to continue iterations")
+        m1.success = success_solve
         return m1, results, presolve_clone, success_solve
     
     def Construct_pyomo_model_6 (self,m, success_solve, m2):
@@ -2703,330 +1540,6 @@ class mass_exchanger(object):
         #=========================================
         #Variables from Previous NLP
         #=========================================
-        '''if success_solve:
-            height_init=m.height.value
-        else:
-            height_init=m2.height.value
-            
-        m.del_component(m.height)
-        m.height = Var(initialize = height_init,bounds = (0.0000001,None))
-        
-        
-        flux_init = {}
-        if success_solve:
-            for h in m.tau:
-                flux_init[h]=m.flux[h].value
-        else:
-            for h in m.tau:
-                flux_init[h]=m2.flux[h].value
-                
-        m.del_component(m.flux)
-        m.flux = Var(m.tau,initialize = flux_init)
-
-        cRs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cRs_init[h]=m.cRs[h].value 
-        else:
-            for h in m.tau:
-                cRs_init[h]=m2.cRs[h].value 
-        #m.del_component(m.cRs)
-        #m.cRs = Var(m.tau, initialize = cRs_init, within = NonNegativeReals)
-
-        cLs_init = {}
-        if success_solve:
-            for h in m.tau:
-                cLs_init[h]=m.cLs[h].value  
-        else:
-            for h in m.tau:
-                cLs_init[h]=m2.cLs[h].value
-            
-        #m.del_component(m.cLs)
-        #m.cLs = Var(m.tau, initialize = cLs_init, within = NonNegativeReals)
-        
-        if success_solve:
-            diameter_init=m.diameter.value
-        else:
-            diameter_init=m2.diameter.value
-        m.del_component(m.diameter)
-        m.diameter = Var(initialize = diameter_init, bounds = (0.0001, None))
-
-        #m.del_component(m.dheight)
-        #m.dheight = DerivativeVar(m.h)
-        #m.del_component(m.dCRdh)
-        #m.dCRdh= DerivativeVar(m.cRs, withrespectto=m.tau)
-        #m.del_component(m.dCLdh)
-        #m.dCLdh= DerivativeVar(m.cLs, withrespectto=m.tau)
-        area_init = 0
-        if success_solve:
-            area_init=m.area.value
-        else:
-            area_init=m2.area.value
-            
-        m.del_component(m.area)
-        m.area = Var(initialize = area_init, within = NonNegativeReals)
-
-        koga_init = 0
-        if success_solve:
-            koga_init=m.koga.value
-        else:
-            koga_init=m2.koga.value
-            
-        m.del_component(m.koga)
-        m.koga = Var(initialize = koga_init, within = NonNegativeReals)
-        
-        VelocityR_init = 0
-        if success_solve:
-            VelocityR_init=m.VelocityR.value
-        else:
-            VelocityR_init=m2.VelocityR.value
-            
-        #VelocityR_init=m.VelocityR.value
-        m.del_component(m.VelocityR)
-        m.VelocityR = Var(initialize =VelocityR_init, bounds = (0.000000000001,None))
-        
-        VelocityL_init = 0
-        if success_solve:
-            VelocityL_init=m.VelocityL.value
-        else:
-            VelocityL_init=m2.VelocityL.value
-        
-        m.del_component(m.VelocityL)
-        m.VelocityL = Var(initialize = VelocityL_init, within = NonNegativeReals) 
-        
-        ReL_init=0
-        if success_solve:
-            ReL_init=m.ReL.value
-        else:
-            ReL_init=m2.ReL.value
-            
-        m.del_component(m.ReL)
-        m.ReL = Var(initialize = ReL_init, bounds = (0.00000000001,None)) 
-        
-        ReG_init=0
-        if success_solve:
-            ReG_init=m.ReG.value
-        else:
-            ReG_init=m2.ReG.value
-
-        m.del_component(m.ReG)
-        m.ReG = Var(initialize = ReG_init, bounds = (0.00000000001,None))
-
-        Flood_init=0
-        if success_solve:
-            Flood_init=m.Flood.value
-        else:
-            Flood_init=m2.Flood.value
-
-        m.del_component(m.Flood)
-        m.Flood = Var(initialize = Flood_init, within = NonNegativeReals)
-
-        FloodAct_init=0
-        if success_solve:
-            FloodAct_init=m.FloodAct.value
-        else:
-            FloodAct_init=m2.FloodAct.value
-
-        m.del_component(m.FloodAct)
-        m.FloodAct = Var(initialize = FloodAct_init, within = NonNegativeReals)
-        
-        packfact_init=0
-        if success_solve:
-            packfact_init=m.packfact.value
-        else:
-            packfact_init=m2.packfact.value
-            
-        m.del_component(m.packfact)
-        m.packfact = Var(initialize = packfact_init, bounds = (0.00001, None ))
-
-        ai_init=0
-        if success_solve:
-            ai_init=m.ai.value
-        else:
-            ai_init=m2.ai.value
-
-        m.del_component(m.ai)
-        m.ai = Var(initialize = ai_init, within = NonNegativeReals) 
-        
-        packsize_init=0
-        if success_solve:
-            packsize_init=m.packsize.value
-        else:
-            packsize_init=m2.packsize.value 
-        m.del_component(m.packsize)
-        m.packsize = Var(initialize = packsize_init, within = NonNegativeReals)
-        
-        SpecAreaPacking_init=0
-        if success_solve:
-            SpecAreaPacking_init=m.SpecAreaPacking.value
-        else:
-            SpecAreaPacking_init=m2.SpecAreaPacking.value 
-        m.del_component(m.SpecAreaPacking)
-        m.SpecAreaPacking = Var(initialize = ai_init, within = NonNegativeReals)
-        
-        packVoid_init=0
-        if success_solve:
-            packVoid_init=m.packVoid.value
-        else:
-            packVoid_init=m2.packVoid.value 
-        m.del_component(m.packVoid)
-        m.packVoid = Var(initialize=packVoid_init,within = NonNegativeReals)
-        
-        PackCost_init=0
-        if success_solve:
-            PackCost_init=m.PackCost.value
-        else:
-           PackCost_init=m2.PackCost.value 
-
-        m.del_component(m.PackCost)
-        m.PackCost = Var(initialize=PackCost_init, within = NonNegativeReals)
-        
-        #========================================
-        #OLD CONSTRAINTS
-        #========================================
-        #Differential Equations
-        m.del_component(m.ODECR)
-        def ODECR_(m, h):
-            if h==0:
-                return Constraint.Skip
-            else:
-                return m.dCRdh[h] ==  m.height/self.nfe*m.flux[h]/m.FlowRm
-        m.ODECR = Constraint(m.tau, rule = ODECR_)
-
-        m.del_component(m.ODECL)
-        def ODECL_(m, h):
-            if h==0:
-                return Constraint.Skip
-            else:
-                return m.dCLdh[h] ==  m.height/self.nfe*m.flux[h]/m.FlowLm
-        m.ODECL = Constraint(m.tau, rule = ODECL_)        
-        
-        #m.del_component(m.ode_h)
-        def ode_h_ (m,i):
-            if i == 0:
-                return Constraint.Skip
-            else:
-                return m.dheight[i] == m.height
-        #m.ode_h = Constraint(m.tau, rule= ode_h_)
-        
-        #m.del_component(m.initcon)
-        def _init(m):
-            yield m.cRs[0] == self.rich_in[self.rich_stream_name]
-            yield m.cRs[1] == self.rich_out[self.rich_stream_name]
-            yield m.cLs[0] == self.rich_in[self.lean_stream_name]
-            yield m.cLs[1] == self.rich_out[self.lean_stream_name]
-            yield m.h[0] == 0
-        #m.initcon = ConstraintList(rule=_init)  
-        
-        m.del_component(m.VelocityREq)
-        def VelocityREq_(m):
-            return m.VelocityR*m.area == m.FlowRVlat
-            
-        m.VelocityREq = Constraint(rule=VelocityREq_)
-
-        m.del_component(m.VelocityLEq)
-        def VelocityLEq_(m):
-            return m.VelocityL*m.area == m.FlowLVlat
-            
-        m.VelocityLEq = Constraint(rule=VelocityLEq_)
-
-        m.del_component(m.AreaEq)
-        def AreaEq_(m):
-            return m.area == pi/4*(m.diameter**2)
-            
-        m.AreaEq = Constraint(rule=AreaEq_)
-        
-        #Flooding equations
-        m.del_component(m.Flood1)
-        def Flood1_(m):
-            return m.Flood == 249.089/0.3048*0.12*((m.packfact*0.3048)**0.7)  
-        m.Flood1 = Constraint(rule = Flood1_) 
-        
-        m.del_component(m.Flood3)
-        def Flood3_(m):
-            return m.Flood >=  m.FloodAct
-        
-        m.Flood3 = Constraint(rule = Flood3_) 
-        
-        m.del_component(m.loverdup)
-        
-        def loverdup_(m):
-            return m.height <= 80*m.diameter
-            
-        #m.loverdup = Constraint(rule=loverdup_)
-        
-        m.del_component(m.loverdlo)
-        
-        def loverdlo_(m):
-            return m.height >= 0.5*m.diameter
-            
-        m.loverdlo = Constraint(rule=loverdlo_)
-       
-        m.del_component(m.TRateVap)
-
-        def TRateVap_(m, h):
-            if h==0:
-                return Constraint.Skip
-            else:
-                return m.flux[h] == -m.koga*m.ai*m.area*(m.cRs[h]-m.henry*m.cLs[h])
-        m.TRateVap = Constraint(m.tau, rule = TRateVap_)
-
-        m.del_component(m.KogaEq)
-        def KogaEq_(m):
-            return m.koga == (m.VelocityR)/(m.packVoid)*m.ag*(((m.packsize*m.VelocityR)/(m.packVoid*m.visRich))**(-0.25))*(0.7**(-0.677))*(1)
-        m.KogaEq = Constraint(rule=KogaEq_)
-
-        m.del_component(m.Flood2)
-        def Flood2_(m):
-            return m.FloodAct ==(94*((m.ReL**1.11)/(m.ReG**1.8))+4.4)*6*(1-m.packVoid)/(m.packsize*((m.packVoid)**3))*m.RHOG*(m.VelocityR**2)
-        
-        m.Flood2 = Constraint(rule = Flood2_)
-
-        m.del_component(m.ReynoldsG)
-        def ReynoldsG_(m):
-            return m.ReG ==   m.RHOG*m.VelocityR/(m.visRich*m.SpecAreaPacking);
-        m.ReynoldsG = Constraint(rule = ReynoldsG_) 
-        
-        m.del_component(m.ReynoldsL)
-        def ReynoldsL_(m):
-            return m.ReL ==   m.RHOL*m.VelocityL/(m.vis*m.ai);
-        m.ReynoldsL = Constraint(rule = ReynoldsL_) 
-        
-        m.del_component(m.Aid)
-        def Aid_(m):
-            return m.ai ==  m.SpecAreaPacking*(1-exp(-1.45*((0.075/m.surften)**0.75)*((m.RHOL*m.VelocityR/(m.vis*m.SpecAreaPacking))**0.1)*((m.SpecAreaPacking*(m.VelocityR**2)/9.81)**(-0.05))*((m.RHOL*(m.VelocityR**2)/(m.SpecAreaPacking*m.surften))**0.2)));
-
-        m.Aid = Constraint(rule = Aid_) 
-
-        m.del_component(m.packingFactorEq)
-        def packingFactorEq_(m):
-            return m.packfact == (2.0034)*(m.packsize**(-1.564))
-        
-        m.packingFactorEq = Constraint(rule=packingFactorEq_)
-        
-        m.del_component(m.AreaofPackingEq)
-        def AreaofPackingEq_(m):
-            return m.SpecAreaPacking == (5.0147)*(m.packsize**(-0.978))
-        
-        m.AreaofPackingEq = Constraint(rule=AreaofPackingEq_)  
-        
-        #def PackingDensityEq_(m):
-        #    return m.packDens == (-4E+06)*(m.packsize**(3))+ 653592*(m.packsize**(2))-31489*m.packsize + 1146.5
-        
-        #m.PackingDensityEq = Constraint(rule=PackingDensityEq_)
-        
-        m.del_component(m.PackVoidEq)
-        def PackVoidEq_(m):
-            return m.packVoid == 0.0569*log(m.packsize)+0.9114
-        
-        m.PackVoidEq = Constraint(rule=PackVoidEq_)
-        
-        m.del_component(m.PackCostEq)
-        def PackCostEq_(m):
-            return m.PackCost == 397431*(m.packsize**(2)) - 53449*(m.packsize) + 2366.1
-        
-        m.PackCostEq = Constraint(rule=PackCostEq_)   
-        '''
         m.del_component(m.loverdlo)
         
         def loverdlo_(m):
@@ -3053,7 +1566,7 @@ class mass_exchanger(object):
         m.Obj4.activate() 
         m.height.pprint()
         presolve_clone = m.clone()
-        results = self.solve_until_feas(m)
+        results = solve_until_feas_NLP(m)
         #========================================
         # POST PROCESSING AND PRINT
         #======================================== 
@@ -3128,8 +1641,501 @@ class mass_exchanger(object):
         #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
         #    print("The exchanger problem could not be solved")
             #raise Exception("Could not find a valid model to continue iterations")
+        m.success = success_solve
         return m, results, presolve_clone, success_solve
+
+    def full_exchanger_model(self):
+        """ Constructs the the 5th pyomo model of 5 from no initial values.
+        Contains all variables and model information.
+        
+        This will be attempted first to see whether the NLP initialization steps are necessary
+        
+        Args:
+            None
+            
+        Returns:
+            m (Concrete pyomo model): final solution.
+            results (solver results): ipopt solver output.
+            pre_solve_clone (clone of concrete model before solve statement): should only be used if solve failed
+            success_solve (bool): flag as to whether the model solved
+        
+        """
+        print("Setting up the full exchanger model from no inits")
+        #=========================================
+        #Variables from Previous NLP
+        #=========================================
+
+        m1 = ConcreteModel()
+        
+        #sets
+        m1.ii = RangeSet((self.nfe))
+        m1.jj = RangeSet((self.ncp))
+
+        #Table a(jj,jj) First order derivatives collocation matrix
+        a = {}
+        a[1,1] = 0.19681547722366
+        a[1,2] = 0.39442431473909
+        a[1,3] = 0.37640306270047
+        a[2,1] = -0.06553542585020
+        a[2,2] = 0.29207341166523
+        a[2,3] = 0.51248582618842
+        a[3,1] = 0.02377097434822
+        a[3,2] = -0.04154875212600
+        a[3,3] = 0.11111111111111
+        m1.a = Param(m1.jj,m1.jj, initialize = a)
+        
+        m1.ag = Param(initialize = 0.123)
+        
+        
+        m1.height = Var(initialize = 2,bounds = (0.15, None))
+        #=========================================
+        #Parameters
+        #=========================================
+        #I will fix these here for now, but the plan is to load these from a seperate file
+        #preferably for each component
+        rhog={}
+        rhol={}
+        m1.surft={}
+        m1.visR={}
+        m1.visL={}
+        count = 0
+        for i in self._stream_properties.stream:
+            if self._stream_properties.index[count]=='RHOG':
+                rhog[i]=self._stream_properties.iloc[count]['value']
+            if self._stream_properties.index[count]=='RHOL':
+                rhol[i]=self._stream_properties.iloc[count]['value']
+            if self._stream_properties.index[count]=='surften':
+                m1.surft[i]=self._stream_properties.iloc[count]['value']
+            if self._stream_properties.index[count]=='visRich':
+                m1.visR[i]=self._stream_properties.iloc[count]['value']
+            if self._stream_properties.index[count]=='vis':
+                m1.visL[i]=self._stream_properties.iloc[count]['value']
+            count+=1
+            
+        m1.de = Param(initialize=0.02)        
+        
+        #These need to come from data
+        m1.RHOG = Param(initialize = rhog[self.rich_stream_name])
+        m1.RHOL = Param(initialize = rhol[self.lean_stream_name])
+        #Henry for mol SO2 per mol H2O = 0.0234, but in this eg, it is already inc
+        m1.henry = Param(initialize = 1)
+        #print("mTHIS IS THE MASS_FLOWS", self.mass_flows)
+        m1.FlowRm = Param(initialize = self.mass_flows[self.rich_stream_name])
+        m1.FlowLm = Param (initialize = self.mass_flows[self.lean_stream_name])
+        #m.PackCost = Param(initialize = (self.ME_inits["packcost"]*self.ME_inits["packcostcor"]))
+        m1.AF = Param(initialize = 0.2)
+        m1.surften = Param(initialize = m1.surft[self.lean_stream_name])
+        m1.visRich = Param(initialize = m1.visR[self.rich_stream_name])
+        #m.visRich.pprint()
+        #m.de = Param(initialize=0.02)        
+        m1.vis = Param(initialize= m1.visL[self.lean_stream_name])
+        #These need to come from data
+        #m.RHOL.pprint()
+        #sys.exit()
+        #Henry for mol SO2 per mol H2O = 0.0234, but in this eg, it is already inc
+        #m.henry = Param(initialize = 1)
+        #m.FlowRm = Param(initialize = self.mass_flows['R1'])
+        #m.FlowLm = Param (initialize = self.mass_flows['L2'])
+        
+        FlowRVlat = self.mass_flows[self.rich_stream_name]/m1.RHOG
+        FlowLVlat = self.mass_flows[self.lean_stream_name]/m1.RHOL
+        FlowLVcor = (self.mass_flows[self.lean_stream_name]/self.mass_flows[self.rich_stream_name])*((m1.RHOG/m1.RHOL)**0.5)
+        
+        m1.FlowRVlat =Param(initialize=FlowRVlat)
+        m1.FlowLVlat =Param(initialize=FlowLVcor)
+        #=========================================
+        #Variables
+        #=========================================
+        flux_init = {}
+        for i in m1.ii:
+            for j in m1.jj:
+                flux_init[i,j]=-1e-4
+
+        cRs_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cRs_init[i,j]=0.001
+
+        cLs_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cLs_init[i,j]=0.001
+            
+        cL0_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cL0_init[i]= 0.001
+                                        
+        cR0_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cR0_init[i]= 0.001
+                    
+        h0_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                h0_init[i]=0.01
+                    
+        cdotR_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cdotR_init[i,j]=-1e-04
+                    
+        cdotL_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                cdotL_init[i,j]= -1e-04
+                    
+        hs_init = {}
+
+        for i in m1.ii:
+            for j in m1.jj:
+                hs_init[i,j]=0.1
+                    
+        #flux of the contaminant from vapour
+        m1.flux =Var(m1.ii,m1.jj, initialize = flux_init, bounds = (None, 0))
+        m1.cRs = Var(m1.ii,m1.jj,within = NonNegativeReals, initialize = cRs_init)
+        m1.cLs = Var(m1.ii,m1.jj,within = NonNegativeReals, initialize = cLs_init)
+        m1.cR0 = Var(m1.ii,within = NonNegativeReals, initialize = cR0_init)
+        m1.cL0 = Var(m1.ii,within = NonNegativeReals, initialize = cL0_init)
+        m1.h0 = Var(m1.ii,within = NonNegativeReals, initialize = h0_init)
+        
+        m1.cdotR = Var(m1.ii,m1.jj, initialize = cdotR_init)
+        m1.cdotL = Var(m1.ii,m1.jj, initialize = cdotL_init)
+        
+        m1.hs = Var(m1.ii,m1.jj,within = NonNegativeReals, initialize = hs_init)
+        
+        
+        d = 0.5
+        m1.diameter = Var(initialize =d, within = NonNegativeReals)
+
+        m1.area = Var(initialize = 0.25, within = NonNegativeReals)
+
+        m1.koga = Var(initialize = 0.04, within = NonNegativeReals)
+
+        m1.VelocityR = Var(initialize = 1, bounds=(0.00001,None))
+        
+        m1.VelocityL = Var(initialize = 1, bounds=(0.00001,None)) 
+        
+        m1.ReL = Var(initialize = 100, bounds = (0.00001,None)) 
+        
+        m1.ReG = Var(initialize = 100, bounds = (1,None))
+
+        m1.Flood = Var(initialize = 1000, within = NonNegativeReals)
+
+        m1.FloodAct = Var(initialize = 1000, within = NonNegativeReals)
+        
+        m1.packfact = Var(initialize = 2000, bounds =(40,4000))
+
+        m1.ai = Var(initialize = 150, within = NonNegativeReals) 
+        
+        m1.packsize = Var(initialize = 0.05, bounds=(0.005, None))
+        m1.SpecAreaPacking = Var(initialize =150, bounds=(5, None))
+        m1.packVoid = Var(initialize=0.68,bounds = (0.5, None))
+        
+        #m.del_component(m.PackCost)
+        m1.PackCost = Var(initialize = (self.ME_inits["packcost"]*self.ME_inits["packcostcor"]), within = NonNegativeReals)
+ 
+        #========================================
+        #CONSTRAINTS
+        #========================================
+
+        #Differential Equations
+        print(self.nfe)
+        def FECOLcr_(m, ii,jj):
+            return m1.cRs[ii,jj] ==  m1.cR0[ii] + m1.height/self.nfe*sum(m1.a[kk,jj]*m1.cdotR[ii,jj] for kk in m1.jj)
+        m1.FECOLcr = Constraint(m1.ii,m1.jj, rule = FECOLcr_)
+
+        def FECOLcl_(m, ii,jj):
+            return m1.cLs[ii,jj] ==  m1.cL0[ii] + m1.height/self.nfe*sum(m1.a[kk,jj]*m1.cdotL[ii,jj] for kk in m1.jj)
+        m1.FECOLcl = Constraint(m1.ii,m1.jj, rule = FECOLcl_)
+        
+        def FECOLch_(m, ii,jj):
+            return m1.hs[ii,jj] ==  m1.h0[ii] + m1.height/self.nfe*sum(m1.a[kk,jj] for kk in m1.jj)
+        m1.FECOLch = Constraint(m1.ii,m1.jj, rule = FECOLch_)
+        
+        #CONTINUITY EQUNS
+        def CONcR_(m, ii):
+            if ii == 1:
+                return Constraint.Skip
+            else:
+                return m1.cR0[ii] ==  m1.cR0[ii-1] + m1.height/self.nfe*sum(m1.cdotR[ii-1,jj]*m1.a[jj,3] for jj in m1.jj)
+        m1.CONcR = Constraint(m1.ii, rule = CONcR_)
+        
+        def CONcL_(m, ii):
+            if ii == 1:
+                return Constraint.Skip
+            else:
+                return m1.cL0[ii] ==  m1.cL0[ii-1] + m1.height/self.nfe*sum(m1.cdotL[ii-1,jj]*m1.a[jj,3] for jj in m1.jj)
+        m1.CONcL = Constraint(m1.ii, rule = CONcL_)
+        
+        def CONtt_(m, ii):
+            if ii == 1:
+                return Constraint.Skip
+            else:
+                return m1.h0[ii] ==  m1.h0[ii-1] + m1.height/self.nfe*sum(m1.a[jj,3] for jj in m1.jj)
+        m1.CONtt = Constraint(m1.ii, rule = CONtt_)
+        
+        # DIFFERENTIAL EQUATIONS
+        
+        def ODECL_(m, ii,jj):
+            return m1.cdotL[ii,jj] ==  m1.flux[ii,jj]/m1.FlowLm
+        m1.ODECL = Constraint(m1.ii,m1.jj, rule = ODECL_)
+        
+        
+        def ODECR_(m, ii,jj):
+            return m1.cdotR[ii,jj] ==  m1.flux[ii,jj]/m1.FlowRm
+        m1.ODECR = Constraint(m1.ii,m1.jj, rule = ODECR_)
+
+        #initial conditions
+        def _init1(m):
+            return m1.cR0[1] == self.rich_in[self.rich_stream_name]
+        m1.initcon1 = Constraint(rule=_init1)
+        def _init2(m):
+            return m1.cRs[self.nfe, 3] == self.rich_out[self.rich_stream_name]
+        m1.initcon2 = Constraint(rule=_init2)
+        def _init3(m):
+            return m1.cL0[1] == self.rich_in[self.lean_stream_name]
+        m1.initcon3 = Constraint(rule=_init3)
+        def _init4(m):
+            return m1.cLs[self.nfe, 3] == self.rich_out[self.lean_stream_name]
+        m1.initcon4 = Constraint(rule=_init4)        
+        def _init5(m):
+            return m1.h0[1] == 0
+        m1.initcon5 = Constraint(rule=_init5)  
+        
+        def loverdup_(m):
+            return m1.height <= 25*m1.diameter
+            
+        m1.loverdup = Constraint(rule=loverdup_)
+        
+        def loverdlo_(m):
+            return m1.height >= 2*m1.diameter
+            
+        m1.loverdlo = Constraint(rule=loverdlo_)
+
+        def TRateVap_(m, ii,jj):
+            return m1.flux[ii,jj] == -m1.koga*m1.ai*m1.area*(m1.cRs[ii,jj]-m1.henry*m1.cLs[ii,jj])
+        m1.TRateVap = Constraint(m1.ii,m1.jj, rule = TRateVap_)
+
+        #m.del_component(m.KogaEq)
+        def KogaEq_(m):
+            return m1.koga == (m1.VelocityR)/(m1.packVoid)*m1.ag*(((m1.packsize*m1.VelocityR)/(m1.packVoid*m1.visRich))**(-0.25))*(0.7**(-0.677))*(1)
+        m1.KogaEq = Constraint(rule=KogaEq_)
+
+        def VelocityREq_(m):
+            return m1.VelocityR*m1.area == m1.FlowRVlat
+            
+        m1.VelocityREq = Constraint(rule=VelocityREq_)
+
+        def VelocityLEq_(m):
+            return m1.VelocityL*m1.area == m1.FlowLVlat
+            
+        m1.VelocityLEq = Constraint(rule=VelocityLEq_)
+
+        def Flood1_(m):
+            return m1.Flood == 249.089/0.3048*0.12*((m1.packfact*0.3048)**0.7)  
+        m1.Flood1 = Constraint(rule = Flood1_) 
+        
+        def Flood3_(m):
+            return m1.Flood >=  m1.FloodAct
+        m1.Flood3 = Constraint(rule = Flood3_)
+        
+        def Flood2_(m):
+            return m1.FloodAct ==(94*((m1.ReL**1.11)/(m1.ReG**1.8))+4.4)*6*(1-m1.packVoid)/(m1.packsize*((m1.packVoid)**3))*m1.RHOG*((m1.VelocityR)**2)
+        
+        m1.Flood2 = Constraint(rule = Flood2_)
+
+        def ReynoldsG_(m):
+            return m1.ReG ==   m1.RHOG*m1.VelocityR/(m1.visRich*m1.SpecAreaPacking);
+        m1.ReynoldsG = Constraint(rule = ReynoldsG_) 
+        
+        def ReynoldsL_(m):
+            return m1.ReL ==   m1.RHOL*m1.VelocityL/(m1.vis*m1.ai);
+        m1.ReynoldsL = Constraint(rule = ReynoldsL_) 
+        
+        def Aid_(m):
+            return m1.ai ==  m1.SpecAreaPacking*(1-exp(-1.45*((0.075/m1.surften)**0.75)*((m1.RHOL*m1.VelocityR/(m1.vis*m1.SpecAreaPacking))**0.1)*((m1.SpecAreaPacking*(m1.VelocityR**2)/9.81)**(-0.05))*((m1.RHOL*(m1.VelocityR**2)/(m1.SpecAreaPacking*m1.surften))**0.2)));
+
+        m1.Aid = Constraint(rule = Aid_) 
+
+        def packingFactorEq_(m):
+            return m1.packfact == (2.0034)*(m1.packsize**(-1.564))
+        
+        m1.packingFactorEq = Constraint(rule=packingFactorEq_)
+        
+        def AreaofPackingEq_(m):
+            return m1.SpecAreaPacking == (5.0147)*(m1.packsize**(-0.978))
+        
+        m1.AreaofPackingEq = Constraint(rule=AreaofPackingEq_)  
+        
+        def AreaEq_(m):
+            return m1.area == pi/4*(m1.diameter**2)
+            
+        m1.AreaEq = Constraint(rule=AreaEq_)
+        
+        def PackVoidEq_(m):
+            return m1.packVoid == 0.0569*log(m1.packsize)+0.9114
+        
+        m1.PackVoidEq = Constraint(rule=PackVoidEq_)
+        
+        def PackCostEq_(m):
+            return m1.PackCost == 397431*(m1.packsize**(2)) - 53449*(m1.packsize) + 2366.1
+        
+        m1.PackCostEq = Constraint(rule=PackCostEq_)   
+        
+        
+        def PackSizeCons_(m):
+            return m1.packsize *20 >= m1.diameter
+        m1.PackSizeCons = Constraint(rule=PackSizeCons_)
+        #========================================
+        # OBJECTIVE and SOLVE
+        #======================================== 
+        #m.del_component(m.Obj3)        
+
+        print("is this the correct mass exchanger unit?")
+        print("Solve with proper objective")
+        #m.del_component(m.Obj4)        
+        def Obj4_(model):
+           return m1.AF*23805*(m1.diameter**0.57)*1.15*m1.height + m1.AF*pi*(m1.diameter**2)/4*m1.height*m1.PackCost
+       #m.AF*23805*(m.diameter**0.57)*1.15*m.height+\
+       #                         m.AF*pi*(m.diameter**2)/4*m.height*m.PackCost
+
+        m1.Obj4 = Objective( rule = Obj4_,sense=minimize)
+        #m.Obj3.deactivate()
+        #m.Obj4.activate() 
+        presolve_clone = m1.clone()
+        results = solve_until_feas_NLP(m1)
+        #m.display()
+        #========================================
+        # POST PROCESSING AND PRINT
+        #======================================== 
+        #display(m)
+        
+        print(type(results))
+        if results == "Failed epically":
+            print("The exchanger problem could not be solved")
+            
+        success_solve = bool
+
+        print("results type: ",type(results))
+        if results == 'failed epically':
+            print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
+            success_solve = False
+        elif not isinstance(results, str):
+            if isinstance(results, pyomo.core.base.PyomoModel.ConcreteModel):
+                print("model did not solve correctly, so it is skipped")
+                success_solve = False
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                success_solve=True
+            elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+                success_solve=True
+            else:
+                #Should add way to deal with unsolved NLPs (increase elements?)
+                print("NLP1 failed.")
+                success_solve = False
+        else:
+            success_solve = False
+        print("solve success = ", success_solve) 
+       
+        q= m1.AF*23805*(m1.diameter**0.57)*1.15*m1.height()
+        w=m1.AF*pi*(m1.diameter()**2)/4*m1.height()*m1.PackCost
+        print( "shell",q,"packing   ", w)
+        print("results from 5th NLP")
+        #m.CapCost.pprint()
+        m1.height.pprint()
+        m1.diameter.pprint()
+        #m.ai.pprint()
+        m1.area.pprint()
+        m1.FloodAct.pprint()
+        m1.Flood.pprint()  
+        m1.ai.pprint()
+        #m.ap.pprint()
+        m1.packfact.pprint()
+        m1.VelocityR.pprint()
+        m1.VelocityL.pprint()
+        m1.koga.pprint()
+        m1.packsize.pprint()
+        m1.PackCost.pprint()
+        m1.SpecAreaPacking.pprint()
+        m1.ReL.pprint()
+        m1.ReG.pprint()
+        m1.packVoid.pprint()
+        print("All inlet and outlet concs:")
+        q = m1.FlowRm.value*(m1.cR0[1].value-m1.cRs[self.nfe,self.ncp].value)
+        print("mass exchanged R:  ", q )
+        
+        q = m1.FlowLm.value*(m1.cL0[1].value-m1.cLs[self.nfe, self.ncp].value)
+        print("mass exchanged L:  ", q )
+        print("All inlet and outlet concs:")
+        print(m1.cR0[1].value, self.rich_in[self.rich_stream_name])
+        print(m1.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        print(m1.cL0[1].value, self.rich_in[self.lean_stream_name])
+        print(m1.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        print("number of variables", m1.nvariables())
+        
+        print("number of constraints", m1.nconstraints())
+        
+        #m.display()
+        print('=============================================================================================')
+        print(results)
+        #m.load(results)
+        #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
+        #    print("The exchanger problem could not be solved")
+            #raise Exception("Could not find a valid model to continue iterations")
+        m1.success = success_solve
+        return m1, results, presolve_clone, success_solve
     
+    def find_detailed_exchanger_design(self, FE_analysis = False):
+        """ finds the detailed exchanger design based on the inputs provided to the class
+        
+        It does so by first trying to solve the full problem without initializations from the other
+        functions. If it does find a feasible exchanger first time then it returns this. If not, the
+        full initialization scheme is used. If the option to perform the FE analysis is on then the
+        model will change the number of finite elements to determine what the best number of elements
+        for the particular boundary conditions.
+        
+        Args:
+            FE_analysis (bool, optional): when FE_analysis is on the FE analysis is performed on this exchanger
+            
+        Returns:
+            m (Concrete pyomo model): final solution.
+            results (solver results): ipopt solver output.
+            pre_solve_clone (clone of concrete model before solve statement): should only be used if solve failed
+            success_solve (bool): flag to tell whether we have a feasible exchanger
+        """
+        print("First trying to solve the exchanger with no initializations")
+        
+        ME5, ME5results, presolve_5, success = self.full_exchanger_model()
+        
+        if success == False:
+            ME1, success1, presolve_1 = self.Construct_pyomo_model()
+            ME2, success2, presolve_2 = self.Construct_pyomo_model_2(ME1, success1, presolve_1)
+            ME3, success3, presolve_3 = self.Construct_pyomo_model_3(ME2, success2, presolve_2)
+            ME4, success4, presolve_4 = self.Construct_pyomo_model_4(ME3, success3, presolve_3)
+            ME5, ME5results, presolve_5, success = self.Construct_pyomo_model_5(ME4, success4, presolve_4)
+            
+            if success == False:
+                print("5th NLP has failed for this match. Relaxing bounds on the L / D ratio")
+                ME6, ME6results, presolve_6, success6 = self.Construct_pyomo_model_6(ME5, success, presolve_5)
+                
+                if success6 == True:
+                    ME5 = ME6
+                    ME5results = ME6results
+                    success = success6
+                else:
+                    success = False
+        else:
+            print("We found a solution to the exchanger on the first try with lazy inits!")
+            
+        return ME5, ME5results
 
 '''
 CRin_Side = {}
