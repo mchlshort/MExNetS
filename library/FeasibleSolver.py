@@ -1123,4 +1123,71 @@ def solve_until_feas_MINLP_DICOPT(m):
             solversolved = 'bonmin'
         else:
             print("it seems that we have been unable to solve the problem with any of our MINLP solvers")
-        return results, solversolved, globalsol   
+        return results, solversolved, globalsol 
+    
+def simple_NLP_solve(m):
+    """The solve function for the intermediate NLPs.
+    
+    This function solves the NLP Pyomo model using ipopt. It is meant to not spend too much time
+    on the solves.
+    
+    Args:
+        m (pyomo model, concrete): the pyomo model of the MEN with all potential matches selected
+        
+    returns:
+        results (solver results): returns the solved model and results from the solve.
+        
+    """
+    options={}
+    #results = solver.solve(m,tee=True, solver = 'conopt')
+    try:
+        solver=SolverFactory('gams')
+        options={}
+        m1 = m
+        results = solver.solve(m1,tee=False, solver = 'conopt')
+        if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+            print("successfully solved")
+        elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+            print("successfully solved")
+        else:
+            solver= SolverFactory('ipopt')
+            options={}
+            try:
+                options['max_cpu_time'] = 1e+04
+                results = solver.solve(m,tee=False, options=options)
+            except:
+                print("Something failed during the solve process!")            
+                results = "Failed epically"
+    except:
+        print("conopt failed")
+        print("CONOPT assumed unsuccessful... IPOPT it is")
+        solver= SolverFactory('ipopt')
+        options={}
+        try:
+            options['max_cpu_time'] = 1e+04
+            results = solver.solve(m,tee=False, options=options)
+            #m.load(results)
+
+            if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+                print("successfully solved")
+
+            else:
+                print("Cannot determine cause of fault")
+                print("Solver Status: ",  results.solver.status)
+                results = m
+        except:
+            print("Something failed during the solve process!")            
+            results = "Failed epically"
+
+    #print("This is to see why we are still solving with ipopt")
+    
+    if results == "Failed epically":
+        print("This NLP failed")
+    elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.locallyOptimal):
+        print("successfully solved with CONOPT")
+    elif (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
+        print("successfully solved using IPOPT")
+    else:
+        print("Not sure why we would get here...")
+        pass
+    return results

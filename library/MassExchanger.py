@@ -691,7 +691,7 @@ class mass_exchanger(object):
         #m.Obj2.activate()   
         #solver = SolverFactory('./../../BARON/baron')
         presolve_clone = m.clone()
-        results = solve_until_feas_NLP(m)
+        results = simple_NLP_solve(m)
         
         #========================================
         # POST PROCESSING AND PRINTING
@@ -866,7 +866,7 @@ class mass_exchanger(object):
         #solver= SolverFactory('ipopt')
         #results = solver.solve(m,tee=True)
         presolve_clone = m.clone()
-        results = solve_until_feas_NLP(m)
+        results = simple_NLP_solve(m)
         
         #========================================
         # POST PROCESSING AND PRINT
