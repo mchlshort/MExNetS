@@ -244,6 +244,7 @@ class MENS(object):
             print(model.arex)          
 
         elif self.superstructure == 'SWS':
+            model.k = RangeSet((model.nstages+1)) 
             model.arex ={}
             for i in model.i:
                 for j in model.j:
