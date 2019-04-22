@@ -131,7 +131,7 @@ class HybridStrategy(object):
             correction=correction
         return correction   
     
-    def _get_correction_factors(self, MENS_model, ME_model):
+    def _get_correction_factors(self, MENS_model, ME_model, men_type = 'nlp'):
         """Obtains the correction factors by comparing the values from the MINLP and NLP suboptimization.
         
         The corrections are returned already filtered.
@@ -157,8 +157,13 @@ class HybridStrategy(object):
         for i in MENS_model.i:
             for j in MENS_model.j:
                 for k in MENS_model.k:
-                    
-                    if MENS_model.y[i,j,k]>=0.99 and MENS_model.M[i,j,k].value!=0 and m in ME_model:
+                    yvals = {}
+                    if men_type == 'minlp':
+                        yvals[i,j,k] = value(MENS_model.y[i,j,k])                            
+                    else:
+                        yvals[i,j,k] = MENS_model.y[i,j,k]
+                        
+                    if yvals[i,j,k]>=0.99 and MENS_model.M[i,j,k].value!=0 and m in ME_model:
                         if ME_model[m].success== True:
                             #should possibly have a way here to tell whether the exchanger model solved correctly
                             #if it didn't then we should set the correction to 1 for this iteration
@@ -194,7 +199,7 @@ class HybridStrategy(object):
                     
         return corrections   
   
-    def _check_convergence(self, MENS_model, exchanger_models, m, tol = 0.02, previous_corrections=None):
+    def _check_convergence(self, MENS_model, exchanger_models, m, tol = 0.02, previous_corrections=None, men_type = 'nlp'):
         """Convergence checking for the iterative procedure.
         
         This function compares the previous solutions 2 solutions as well as the globally best solution
@@ -212,6 +217,8 @@ class HybridStrategy(object):
             previous_corrections (dict, optional): The dictionary containing corrections for each match.
                                             Only to be used in the case of restarting the problem after a failed
                                             iteration when the user knows the last sets of corrections
+                                            
+            men_type (str): tells us if we have the MINLP or NLP subopt as optimal
         
         Returns:
             bool (boolean): returns True if model is converged within tolerance or False if not 
@@ -244,7 +251,13 @@ class HybridStrategy(object):
             for j in MENS_model.j:
                 for k in MENS_model.k:
                     print("do we get here?")
-                    if MENS_model.y[i,j,k]>=0.99 and MENS_model.M[i,j,k].value!=0 and count in exchanger_models:
+                    yvals = {}
+                    if men_type == 'minlp':
+                        yvals[i,j,k] = value(MENS_model.y[i,j,k])                            
+                    else:
+                        yvals[i,j,k] = MENS_model.y[i,j,k]
+                    
+                    if yvals[i,j,k]>=0.99 and MENS_model.M[i,j,k].value!=0 and count in exchanger_models:
                         r=exchanger_models[count].Obj4()
                         nlp_exshelval += value(exchanger_models[count].AF)*23805*(value(exchanger_models[count].diameter)**0.57)*1.15*value(exchanger_models[count].height) 
                         nlp_packcost += value(exchanger_models[count].AF)*pi*(value(exchanger_models[count].diameter)**2)/4*value(exchanger_models[count].height)*value(exchanger_models[count].PackCost)
@@ -320,7 +333,7 @@ class HybridStrategy(object):
             stop_flag1 = True
         
         previous_corrections=self.corrections
-        new_cors = self._get_correction_factors(MENS_model,exchanger_models)
+        new_cors = self._get_correction_factors(MENS_model,exchanger_models, men_type = men_type)
         self.correction_log[self.iter_count]=new_cors
         if bool(previous_corrections) == False:
             print("Is this false?")
@@ -565,14 +578,17 @@ class HybridStrategy(object):
                 print("Original objective func")
                 print(MENS_solved.TACeqn())
                 orig = False
+                men_type = str()
                 if con == True:
                     if subobj < MENS_solved.TACeqn():
                         orig = False
+                        men_type = 'nlp'
                         print("SUBOPT with non isocomp is better")
                         #Replace original model with sub
                         MENS_solved = MENS_solvedsub
                     else:
                         orig = True
+                        men_type = 'minlp'
                         print("ORIGINAL MINLP BETTER THAN SUBOPT, so orig is chosen")
                 
                 print(orig_ob)
@@ -620,7 +636,7 @@ class HybridStrategy(object):
                             
                             count = 10
                             while count >= 1:
-                                nfe = 200/count
+                                nfe = round(200/count)
                                 print("solving for ", nfe, "number of elements")
                                 mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j, rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates = FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
     
@@ -662,12 +678,12 @@ class HybridStrategy(object):
                         m+=1
             self.iter_count = ic
             if con == True:
-                stop = self._check_convergence(MENS_solved,exchanger_models,m,tol = self.tol)
+                stop = self._check_convergence(MENS_solved,exchanger_models,m,tol = self.tol, men_type = men_type)
             else:
                 stop = True
             print("These are the previous corrections")
             print(self.corrections)
-            self.corrections=self._get_correction_factors(MENS_solved,exchanger_models)    
+            self.corrections=self._get_correction_factors(MENS_solved,exchanger_models, men_type = men_type)    
             print("These are the current corrections")
             print(self.corrections)
             iter_end = time.clock()
