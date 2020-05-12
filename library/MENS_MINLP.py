@@ -20,12 +20,12 @@ from pyomo.opt import SolverFactory, ProblemFormat, TerminationCondition
 from library.FeasibleSolver import *
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2019"
+__copyright__ = "Copyright 2020"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Isafiade, AJ."]
 __license__ = "GPL-3"
 __version__ = "0.9"
 __maintainer__ =  "Michael Short"
-__email__ = "shortm@andrew.cmu.edu"
+__email__ = "m.short@surrey.ac.uk"
 __status__ = "Development"
 
 #=====================
@@ -177,14 +177,14 @@ class MENS(object):
                     supply_dict[count] = self._lean_data.at[j,'Cin']    
                     count += 1
             vals = sorted(supply_dict.values(), reverse=True)
-            print(vals)
+            #print(vals)
             
             ckval = {}
             for i in range(count):
-                print(i)
+                #print(i)
                 ckval[i+1] = vals[i]
             
-            print(ckval)
+            #print(ckval)
             model.k = RangeSet((len(ckval)))
             model.nstages = len(ckval) - 1
             model.ck =Param(model.k, initialize = ckval)
@@ -229,8 +229,8 @@ class MENS(object):
                     elif model.ck[k] >= self._lean_data.at[j,'Cin']:
                         model.l_exist[j,k] = 1
                                 
-            model.l_exist.pprint()        
-            model.r_exist.pprint() 
+            #model.l_exist.pprint()        
+            #model.r_exist.pprint() 
                         
             #Superstructure for SBS
             model.arex = {}
@@ -240,8 +240,7 @@ class MENS(object):
                         if model.l_exist[j,k] == 1 and model.r_exist[i,k] == 1:
                             model.arex[i,j,k] = 1
                         else:
-                            model.arex[i,j,k] = 0
-            print(model.arex)          
+                            model.arex[i,j,k] = 0         
 
         elif self.superstructure == 'SWS':
             model.k = RangeSet((model.nstages+1)) 
@@ -253,7 +252,6 @@ class MENS(object):
                             model.arex[i,j,k] = 1
                         else:
                             model.arex[i,j,k] = 0
-            print(model.arex)
             
             r_exist ={}
             for i in model.i:
@@ -299,7 +297,7 @@ class MENS(object):
             
         else:
             raise RuntimeError("Superstructure not SWS or SBS")
-               
+        #print(model.arex)       
         #=========================================================
         #   PARAMETERS
         #=========================================================
@@ -333,7 +331,7 @@ class MENS(object):
             else:
                 return False
         model.st = Param(model.k, initialize = m_stage)
-        model.stages = Param(model.k, initialize = m_stage)
+        model.stages = RangeSet(model.nstages)
         model.stages.pprint()
         model.last.pprint()
         parameters = dict()
@@ -563,7 +561,7 @@ class MENS(object):
         #rule for bounds of lean streams
         def L_bounds(model,j):
             if self._lean_data.at[j,'F']>0:
-                return (0.1,self._lean_data.at[j,'F'])
+                return (0.05,self._lean_data.at[j,'F'])
         
             else:
                 # THESE SHOULD BE GENERATED FROM DATA
@@ -664,7 +662,7 @@ class MENS(object):
             if model.arex[i,j,k] ==1:
                 return (0.0,None)
             else:
-                return (0.00000001,0.0)
+                return (0.0,0.0)
 
         model.height =  Var(model.i,model.j,model.k, initialize=height_init,bounds=height_bounds)
 
@@ -902,6 +900,7 @@ class MENS(object):
 
         model.Log_DC_RPS_LPS_LS1 = Constraint(model.i, model.j, model.k, rule = Log_DC_RPS_LPS_LS1_)
 
+
         '''
         #EQUATIONS FOR NON_ISOCOMP MIXING
         #def FlowLV_(model,i,j,k):
@@ -957,7 +956,7 @@ class MENS(object):
 
         print("THIS IS THE END OF THE NLP INITIALIZATION")
         success = bool
-        print(results)
+        #print(results)
         try:
             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                 model.height.pprint()
@@ -1006,7 +1005,7 @@ class MENS(object):
         
         return model, success
     
-    def MINLP_MENS_full(self, model, min_height_from_nlp=None, min_mass_ex_from_nlp=None, omega = None):
+    def MINLP_MENS_full(self, model, min_height_from_nlp=None, min_mass_ex_from_nlp=None, omega = None, bin_cuts = None, sym_cuts = None):
         """MINLP optimization model building and solving.
         
         This is the function that is called to solve the full MINLP model for MENS including binary variables
@@ -1054,8 +1053,8 @@ class MENS(object):
                             model.arex [i,j,k] =1
                             model.ih [i,j,k] = model.height[i,j,k].value
                     else:
-                        print("no min height from NLP set, so it is assumed to be 0.000001")
-                        if model.height[i,j,k].value <= 0.000001:
+                        #print("no min height from NLP set, so it is assumed to be 0.000001")
+                        if model.height[i,j,k].value <= 0.000000000001:
                             model.ih [i,j,k] = 0
                             model.arex[i,j,k] = 0
                         else:
@@ -1190,7 +1189,7 @@ class MENS(object):
         
             else:
                 #print("LEAN DATA:   ",0,2)
-                return (0.00001, 10)
+                return (0.1, 10)
         #model.L.pprint()
         l_init={}
         for j in model.j:
@@ -1380,6 +1379,45 @@ class MENS(object):
                 return Constraint.Skip
     
         model.KYTransferMass = Constraint(model.i, model.j, model.k, rule = KYTransferMass_) 
+
+        # Cut generation
+        model.cuts = ConstraintList()
+        
+        print('cuts:',bin_cuts)
+        if bin_cuts:
+            for cutnum in bin_cuts:
+                #print('cutnum:', cutnum)
+                #print('cut_iter:', bin_cuts[cutnum])
+                expr = 0
+                for i in model.i:
+                    for j in model.j:
+                        for k in model.stages:
+                            if bin_cuts[cutnum][i,j,k] == 1:
+                                expr += (1 - model.y[i,j,k])
+                                #print(expr)
+                            else:
+                                expr +=  model.y[i,j,k]
+                                
+                model.cuts.add(expr >= 1)
+        
+        if sym_cuts:
+            for cutnum in sym_cuts:
+                #print('cutnum sym:', cutnum)
+                #print('cut_iter sym:', sym_cuts[cutnum])
+                #print(type(sym_cuts[cutnum]))
+                expr = 0
+                if sym_cuts[cutnum]:
+                    for i in model.i:
+                        for j in model.j:
+                            for k in model.stages:
+                                if sym_cuts[cutnum][i,j,k] == 1:
+                                    expr += (1 - model.y[i,j,k])
+                                    #print(expr)
+                                else:
+                                    expr +=  model.y[i,j,k]
+                                
+                    model.cuts.add(expr >= 1)
+
         model.del_component(model.HeightColumn)
         model.del_component(model.HeightColumn_index)
         model.del_component(model.HeightColumn_index_index_0)

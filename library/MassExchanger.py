@@ -22,12 +22,12 @@ import numpy as np
 import sys
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2019"
+__copyright__ = "Copyright 2020"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Isafiade, AJ."]
 __license__ = "GPL-3"
 __version__ = "0.9"
 __maintainer__ =  "Michael Short"
-__email__ = "shortm@andrew.cmu.edu"
+__email__ = "m.short@surrey.ac.uk"
 __status__ = "Development"
 
 class mass_exchanger(object):
@@ -158,7 +158,7 @@ class mass_exchanger(object):
         m.TRateVap = Constraint(m.ii,m.jj, rule = TRateVap_)
 
         #Differential Equations
-        print(self.nfe)
+        print('Number of finite elements' ,self.nfe)
         def FECOLcr_(m, ii,jj):
             #if ii >= self.nfe:
             #    return Constraint.Skip
@@ -252,7 +252,7 @@ class mass_exchanger(object):
         presolved_clone = m.clone()
         results = solve_until_feas_NLP(m)        
         #display(m)
-        print(results)
+        #print(results)
 
         m.height.pprint()
         m.diameter.pprint()
@@ -261,11 +261,11 @@ class mass_exchanger(object):
         
         q = m.FlowLm.value*(m.cL0[1].value-m.cLs[self.nfe, self.ncp].value)
         print("mass exchanged L:  ", q )
-        print("All inlet and outlet concs:")
-        print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
-        print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
-        print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
-        print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        #print("All inlet and outlet concs:")
+        #print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
+        #print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        #print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
+        #print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
         #m.cLs.pprint()
         #m.cRs.pprint()
         success_solve = bool
@@ -499,16 +499,16 @@ class mass_exchanger(object):
         
         q = m.FlowLm.value*(m.cL0[1].value-m.cLs[self.nfe, self.ncp].value)
         print("mass exchanged L:  ", q )
-        print("All inlet and outlet concs:")
-        print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
-        print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
-        print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
-        print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        #print("All inlet and outlet concs:")
+        #print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
+        #print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        #print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
+        #print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
         #.cLs.pprint()
         #m.cRs.pprint()
         
         #m.display()
-        print(results)
+        #print(results)
         #results.pprint
         #q = m.FlowRm.value*(m.cRs[0].value-m.cRs[1].value)
         #print("mass exchanged R:  ", q )
@@ -696,7 +696,7 @@ class mass_exchanger(object):
         #========================================
         # POST PROCESSING AND PRINTING
         #======================================== 
-        print(results)
+        #print(results)
         #display(m)
         #results = solver_manager.solve(m,opt=solver)
         #q= m.AF*23805*(m.diameter**0.57)*1.15*m.height()
@@ -723,11 +723,11 @@ class mass_exchanger(object):
         
         q = m.FlowLm.value*(m.cL0[1].value-m.cLs[self.nfe, self.ncp].value)
         print("mass exchanged L:  ", q )
-        print("All inlet and outlet concs:")
-        print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
-        print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
-        print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
-        print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        #print("All inlet and outlet concs:")
+        #print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
+        #print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        #print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
+        #print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
         print("results type: ",type(results))
         if results == 'failed epically':
             print("The exchanger could not be solved. This means that for this exchanger no model is stored. Could result in failure to produce correction factors.")
@@ -799,7 +799,7 @@ class mass_exchanger(object):
 
         p = m.ap.value*m.surfacor.value*(1-exp(-1.45*((0.075/m.surften.value)**0.75)*((m.RHOL.value*m.VelocityR.value/(m.vis.value*m.ap.value))**0.1)*((m.ap.value*(m.VelocityR.value**2)/9.81)**(-0.05))*((m.RHOL.value*(m.VelocityR.value**2)/(m.ap.value*m.surften.value))**0.2)))
         p = m.ap.value*m.surfacor.value*(1-exp(-1.45*((0.075/m.surften.value)**0.75)*((m.RHOL.value*m.VelocityL.value/(m.vis.value*m.ap.value))**0.1)*(((m.ap.value*((m.RHOL.value*m.VelocityL.value)**2))/((m.RHOL.value**2)*9.81))**(-0.05))*((((m.RHOL.value*m.VelocityL.value)**2)/((m.RHOL.value**2)*m.ap.value*m.surften.value))**0.2)))
-        print("Ai initial value=", p)
+        #print("Ai initial value=", p)
         m.ai = Var(initialize = p, within = NonNegativeReals)
         
         #========================================
@@ -901,12 +901,12 @@ class mass_exchanger(object):
         
         q = m.FlowLm.value*(m.cL0[1].value-m.cLs[self.nfe, self.ncp].value)
         print("mass exchanged L:  ", q )
-        print("All inlet and outlet concs:")
-        print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
-        print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
-        print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
-        print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
-        print(results)
+        #print("All inlet and outlet concs:")
+        #print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
+        #print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        #print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
+        #print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        #print(results)
         #m.display()
         #results.pprint
         #q = m.FlowRm.value*(m.cRs[0].value-m.cRs[1].value)
@@ -1238,7 +1238,7 @@ class mass_exchanger(object):
         #========================================
 
         #Differential Equations
-        print(self.nfe)
+        print('Number of finite elements: ',self.nfe)
         def FECOLcr_(m, ii,jj):
             #if ii >= self.nfe:
             #    return Constraint.Skip
@@ -1424,8 +1424,8 @@ class mass_exchanger(object):
         #======================================== 
         #m.del_component(m.Obj3)        
 
-        print("is this the correct mass exchanger unit?")
-        print("Solve with proper objective")
+        #print("is this the correct mass exchanger unit?")
+        #print("Solve with proper objective")
         #m.del_component(m.Obj4)        
         def Obj4_(model):
            return m1.AF*23805*(m1.diameter**0.57)*1.15*m1.height + m1.AF*pi*(m1.diameter**2)/4*m1.height*m1.PackCost
@@ -1498,14 +1498,14 @@ class mass_exchanger(object):
         
         q = m1.FlowLm.value*(m1.cL0[1].value-m1.cLs[self.nfe, self.ncp].value)
         print("mass exchanged L:  ", q )
-        print("All inlet and outlet concs:")
-        print(m1.cR0[1].value, self.rich_in[self.rich_stream_name])
-        print(m1.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
-        print(m1.cL0[1].value, self.rich_in[self.lean_stream_name])
-        print(m1.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
-        print("number of variables", m1.nvariables())
+        #print("All inlet and outlet concs:")
+        #print(m1.cR0[1].value, self.rich_in[self.rich_stream_name])
+        #print(m1.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        #print(m1.cL0[1].value, self.rich_in[self.lean_stream_name])
+        #print(m1.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        #print("number of variables", m1.nvariables())
         
-        print("number of constraints", m1.nconstraints())
+        #print("number of constraints", m1.nconstraints())
         
         #m.display()
         print('=============================================================================================')
@@ -1608,14 +1608,14 @@ class mass_exchanger(object):
         
         q = m.FlowLm.value*(m.cL0[1].value-m.cLs[self.nfe, self.ncp].value)
         print("mass exchanged L:  ", q )
-        print("All inlet and outlet concs:")
-        print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
-        print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
-        print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
-        print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
-        print("number of variables", m.nvariables())
+        #print("All inlet and outlet concs:")
+        #print(m.cR0[1].value, self.rich_in[self.rich_stream_name])
+        #print(m.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        #print(m.cL0[1].value, self.rich_in[self.lean_stream_name])
+        #print(m.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        #print("number of variables", m.nvariables())
         
-        print("number of constraints", m.nconstraints())
+        #print("number of constraints", m.nconstraints())
         #m.CapCost.pprint()
         m.height.pprint()
         m.diameter.pprint()
@@ -1635,8 +1635,8 @@ class mass_exchanger(object):
         m.ReG.pprint()
         m.packVoid.pprint()
         #m.display()
-        print('=============================================================================================')
-        print(results)
+        #print('=============================================================================================')
+        #print(results)
         #m.load(results)
         #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
         #    print("The exchanger problem could not be solved")
@@ -1848,7 +1848,7 @@ class mass_exchanger(object):
         #========================================
 
         #Differential Equations
-        print(self.nfe)
+        print("Number of finite elements: ", self.nfe)
         def FECOLcr_(m, ii,jj):
             return m1.cRs[ii,jj] ==  m1.cR0[ii] + m1.height/self.nfe*sum(m1.a[kk,jj]*m1.cdotR[ii,jj] for kk in m1.jj)
         m1.FECOLcr = Constraint(m1.ii,m1.jj, rule = FECOLcr_)
@@ -2075,13 +2075,13 @@ class mass_exchanger(object):
         q = m1.FlowLm.value*(m1.cL0[1].value-m1.cLs[self.nfe, self.ncp].value)
         print("mass exchanged L:  ", q )
         print("All inlet and outlet concs:")
-        print(m1.cR0[1].value, self.rich_in[self.rich_stream_name])
-        print(m1.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
-        print(m1.cL0[1].value, self.rich_in[self.lean_stream_name])
-        print(m1.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
-        print("number of variables", m1.nvariables())
+        #print(m1.cR0[1].value, self.rich_in[self.rich_stream_name])
+        #print(m1.cRs[self.nfe,self.ncp].value, self.rich_out[self.rich_stream_name])
+        #print(m1.cL0[1].value, self.rich_in[self.lean_stream_name])
+        #print(m1.cLs[self.nfe,self.ncp].value, self.rich_out[self.lean_stream_name])
+        #print("number of variables", m1.nvariables())
         
-        print("number of constraints", m1.nconstraints())
+        #print("number of constraints", m1.nconstraints())
         
         #m.display()
         print('=============================================================================================')

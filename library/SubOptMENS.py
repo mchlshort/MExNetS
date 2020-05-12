@@ -21,12 +21,12 @@ import sys
 from library.FeasibleSolver import *
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2019"
+__copyright__ = "Copyright 2020"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Isafiade, AJ."]
 __license__ = "GPL-3"
 __version__ = "0.9"
 __maintainer__ =  "Michael Short"
-__email__ = "shortm@andrew.cmu.edu"
+__email__ = "m.short@surrey.ac.uk"
 __status__ = "Development"
 
 class SubOptMENS(object):
@@ -128,7 +128,7 @@ class SubOptMENS(object):
                         
         def M_bounds(model, i,j,k):
             if model.y[i,j,k] ==1:
-                return (0.0,None)
+                return (0.00000000001,None)
             else:
                 return (0.0,0.0)       
             
@@ -142,11 +142,11 @@ class SubOptMENS(object):
         def L_bounds(model,j):
             if model._lean_data.at[j,'F']>0:
                 #print("LEAN DATA:   ",self._lean_data.at[j,'F'])
-                return (0.0000000001,model._lean_data.at[j,'F'])
+                return (0.1,model._lean_data.at[j,'F'])
         
             else:
                 #print("LEAN DATA:   ",0,2)
-                return (0.000000001, 10)
+                return (0.1, 10)
         
         #model.L.pprint()
         l_init={}
@@ -228,12 +228,12 @@ class SubOptMENS(object):
         #   Flowrate of splits for non iso-compositional mixing
         def Flrich_bounds(model,i,j,k):
             if model.y[i,j,k] ==1:
-                return (0.00000000000000001, model._rich_data.at[i,'F'])
+                return (0, model._rich_data.at[i,'F'])
             else:
                 return (0.000000,50)
     
         def Flrich_init(model,i,j,k):
-            if k <= (model.nstages+1):
+            if k >= (model.nstages+1):
                 return Constraint.Skip
             elif y(i,j,k)==1:
                 if k in model.stages:
@@ -244,14 +244,14 @@ class SubOptMENS(object):
          
         def Flean_bounds(model,i,j,k):
             if model.y[i,j,k] ==1:
-                return (0.0,10)
+                return (0.000000001,10)
             else:
                 return (0.00,10)
     
         def Flean_init(model,i,j,k):
             if k == (model.nstages+1):
                 return Constraint.Skip
-            elif  y(i,j,k)==1 and k in model.stages == 1:
+            elif  y(i,j,k)==1:
                 return (model.M[i,j,k].value/(model.cl[j,k].value-model.cl[j,k+1].value))
             else:
                 return 0   
@@ -275,7 +275,13 @@ class SubOptMENS(object):
                 return 0.0 
         
         #model.flv = Var(model.i,model.j,model.k, within = NonNegativeReals)
-        
+        for i in model.i:
+            for j in model.j:
+                for k in model.k:
+                    if model.y[i,j,k] ==0:
+                        model.M[i,j,k].fix(0)
+                        #model.Flh[i,j,k].fix(0)
+                        #model.Flc[i,j,k].fix(0)
         #positive/negative tolerance
         model.del_component(model.pnhc)
         model.del_component(model.pnhc_index)
@@ -283,8 +289,6 @@ class SubOptMENS(object):
         model.del_component(model.snhc)
         model.del_component(model.snhc_index)
         model.del_component(model.snhc_index_index_0)
-        model.pnhc=Var(model.i,model.j,model.k, initialize= 1e-6,within = NonNegativeReals)
-        model.snhc=Var(model.i,model.j,model.k, initialize= 1e-6,within = NonNegativeReals)
 
         #mass transfer coefficient
         model.del_component(model.kya)
@@ -304,9 +308,9 @@ class SubOptMENS(object):
     
         def height_bounds(model, i,j,k):
             if model.y[i,j,k] ==1:
-                return (0.0,None)
+                return (0.00,None)
             else:
-                return (0.0,None)
+                return (0.0,0)
 
         model.del_component(model.height)
         model.del_component(model.height_index)
@@ -362,6 +366,15 @@ class SubOptMENS(object):
                 return Constraint.Skip
 
         model.CLeanOut = Constraint(model.j,model.k,rule=CLeanOut_)
+        
+        #Available mass in lean stream j
+        model.del_component(model.AvLean)
+        def AvLean_(model,j):
+            a = (model._lean_data.at[j,'Cout'])-(model._lean_data.at[j,'Cin'])
+            return model.avlean[j] == model.L1[j]*(a)
+
+        model.AvLean = Constraint(model.j, rule=AvLean_)
+        
         #EQUATIONS FOR NON_ISOCOMP MIXING
         #def FlowLV_(model,i,j,k):
         #    if y[i,j,k] == 1:
@@ -397,7 +410,7 @@ class SubOptMENS(object):
     
             if k == (model.nstages+1):
                 return Constraint.Skip
-            elif k in model.stages:
+            elif model.r_exist[i,k] == 1:
     
                 f =(model._rich_data.at[i,'F'])
                 c=f
@@ -416,7 +429,7 @@ class SubOptMENS(object):
             if k == (model.nstages+1):
                 return Constraint.Skip
     
-            elif k in model.stages:
+            elif model.l_exist[j,k] == 1:
                 return model.L1[j]*(model.cl[j,k] - model.cl[j,(k+1)]) == \
                     sum(model.M[i,j,k] for i in model.i if model.y[i,j,k] == 1)
                 
@@ -424,14 +437,6 @@ class SubOptMENS(object):
                 return Constraint.Skip 
             
         model.Stage_Mass_Lean = Constraint(model.j,model.k, rule = Stage_Mass_Lean_)
-
-        #Available mass in lean stream j
-        model.del_component(model.AvLean)
-        def AvLean_(model,j):
-            a = (model._lean_data.at[j,'Cout'])-(model._lean_data.at[j,'Cin'])
-            return model.avlean[j] == model.L1[j]*(a)
-
-        model.AvLean = Constraint(model.j, rule=AvLean_)
 
 
         model.del_component(model.Monot_Rich) 
@@ -462,7 +467,7 @@ class SubOptMENS(object):
             if k == (model.nstages+1):
                 return Constraint.Skip
             else:
-                return model.cr[i,k] >= model.crin[i,j,(k+1)]
+                return model.cr[i,k] >= model.crin[i,j,(k)]
 
         model.Monot_RichSub = Constraint(model.i, model.j, model.k, rule = Monot_RichSub_)
     
@@ -479,51 +484,45 @@ class SubOptMENS(object):
         model.del_component(model.P_index)
         model.del_component(model.P_index_index_0)
         
-        def P_(model,i,j,k):
-            if k == (model.nstages+1):
-                return Constraint.Skip
-            else:
-                return model.pnhc[i,j,k] == 1e-6
-        
-        model.P = Constraint(model.i, model.j, model.k, rule = P_)
         
         model.del_component(model.S) 
         model.del_component(model.S_index)
         model.del_component(model.S_index_index_0) 
         
-        def S_(model,i,j,k):
-            if k == (model.nstages+1):
-                return Constraint.Skip
-            else:
-                return model.snhc[i,j,k] == 1e-6
-
-        model.S = Constraint(model.i, model.j, model.k, rule = S_)
-        
         model.del_component(model.N) 
         model.del_component(model.N_index)
         model.del_component(model.N_index_index_0)
-        
-        def N_(model,i,j,k):
+
+        def mixing_rsub_(model, i, k):
             if k == (model.nstages+1):
                 return Constraint.Skip
+            elif model.r_exist[i,k] == 1:
+                return float(model._rich_data.at[i,'F'])*model.cr[i, k+1] == sum(model.crin[i,j,k]*model.Flrich[i,j,k] for j in model.j)
             else:
-                return model.y[i,j,k] == model.y1[i,j,k]+(model.pnhc[i,j,k]- model.snhc[i,j,k])
-
-        model.N = Constraint(model.i, model.j, model.k, rule = N_) 
-
-
+                return Constraint.Skip
+            
+        model.mixing_rsub = Constraint(model.i, model.k, rule = mixing_rsub_)
+        
+        def mixing_lsub_(model, j, k):
+            if k == (model.nstages+1):
+                return Constraint.Skip
+            elif model.l_exist[j,k] == 1:
+                return model.L1[j]*model.cl[j,k] == sum(model.clin[i,j,k]*model.Flean[i,j,k] for i in model.i)
+            else:
+                return Constraint.Skip
+        model.mixing_lsub = Constraint(model.j, model.k, rule = mixing_lsub_)
 
 
         # Mass balances over streams for non-iso-comp mixing
         def FlowRich_(model,i,k):
-            if k == (model.nstages+1):
+            if k == 1:
                 return Constraint.Skip
-            elif k in model.stages and model.y[i,j,k] == 1:
+            elif model.r_exist[i,k] == 1:
                 #c = float(model._rich_data.at[i,'F'])
-                print("We do get here.")
-                print(model._rich_data.at[i,'F'])
+                #print("We do get here.")
+                #print(model._rich_data.at[i,'F'])
                 #print()
-                return float(model._rich_data.at[i,'F']) == sum(model.Flrich[i,j,k] for j in model.j if model.y[i,j,k] == 1)
+                return float(model._rich_data.at[i,'F']) == sum(model.Flrich[i,j,k] for j in model.j)
             else:
                 return Constraint.Skip
     
@@ -531,10 +530,16 @@ class SubOptMENS(object):
     
         def FlowLean_(model,j,k):
             if k == (model.nstages+1):
+                #print("Eishpotash1.",j,k)
+                #print(model.L1[j], model.Flean[i,j,k],j,k)
                 return Constraint.Skip
-            elif k in model.stages and model.y[i,j,k] == 1:
-                return model.L1[j]== sum(model.Flean[i,j,k] for i in model.i if model.y[i,j,k]==1)
+            elif model.l_exist[j,k] == 1:
+                #print("Eish")
+                #print(model.L1[j])
+                return model.L1[j] == sum(model.Flean[i,j,k] for i in model.i)
             else:
+            #    print("Eishpotash3.",j,k) 
+            #    print(model.L1[j], model.Flean[i,j,k])
                 return Constraint.Skip
     
         model.FlowLean = Constraint(model.j, model.k,  rule = FlowLean_)
@@ -543,10 +548,10 @@ class SubOptMENS(object):
         def ExUnitR_(model,i,j,k):
             if k == (model.nstages+1):
                 return Constraint.Skip
-            elif model.y[i,j,k] == 1:
-              return model.Flrich[i,j,k]*(model.cr[i,k]-model.crin[i,j,(k+1)])== model.M[i,j,k]
+            elif model.r_exist[i,k] == 1 and model.y[i,j,k] == 1:
+              return model.Flrich[i,j,k]*(model.cr[i,k]-model.crin[i,j,(k)])== model.M[i,j,k]
             else:
-                return Constraint.Skip
+                return model.cr[i,k] == model.crin[i,j,(k)]
                 
         model.ExUnitR = Constraint(model.i, model.j, model.k, rule = ExUnitR_)
 
@@ -556,9 +561,48 @@ class SubOptMENS(object):
             elif model.y[i,j,k] == 1:   
                 return model.Flean[i,j,k]*(model.clin[i,j,k]-model.cl[j,(k+1)])== model.M[i,j,k]
             else:
-                return Constraint.Skip    
+                return model.clin[i,j,k] == model.cl[j,(k+1)] 
         model.ExUnitL = Constraint(model.i, model.j, model.k, rule = ExUnitL_)
        
+        def bypassoffr_(model,i,j,k):
+            #print("k", k)
+            #if k == (model.nstages+1):
+            #   return Constraint.Skip
+            if k ==(model.nstages+1):
+                return Constraint.Skip
+            elif sum(model.y[i,j,k] for j in model.j) == 0:
+                return Constraint.Skip
+            elif model.y[i,j,k] == 1:
+                return Constraint.Skip
+            else:
+                return model.Flrich[i,j,k] == 0.0
+            #else:
+            #    return model.fh[i] == sum(model.Flh[i,j,k] for j in model.j)
+                #return model.fh[i] == sum(model.Flh[i,j,k] for j in model.j if model.z[i,j,k] == 1)
+                #return Constraint.Skip
+    
+        #model.bypassoffr = Constraint(model.i, model.j, model.k, rule = bypassoffr_)
+        
+        def bypassoffl_(model,i,j,k):
+            #print("k", k)
+            #if k == (model.nstages+1):
+            #   return Constraint.Skip
+            if k ==(model.nstages+1):
+                return Constraint.Skip
+            elif sum(model.y[i,j,k] for i in model.i) == 0:
+                return Constraint.Skip
+            elif model.y[i,j,k] == 1:
+                return Constraint.Skip
+            else:
+                return model.Flean[i,j,k] == 0.0
+            #else:
+            #    return model.fh[i] == sum(model.Flh[i,j,k] for j in model.j)
+                #return model.fh[i] == sum(model.Flh[i,j,k] for j in model.j if model.z[i,j,k] == 1)
+                #return Constraint.Skip
+    
+        #model.bypassoffc = Constraint(model.i, model.j, model.k, rule = bypassoffl_)
+
+
         model.del_component(model.Log_M_RPS_LPS) 
         model.del_component(model.Log_M_RPS_LPS_index)
         model.del_component(model.Log_M_RPS_LPS_index_index_0)
@@ -567,11 +611,11 @@ class SubOptMENS(object):
             c = ((model._rich_data.at[i,'F'])*((model._rich_data.at[i,'Cin'])-(model._rich_data.at[i,'Cout'])))
             c=(c)
             d=(model.L1[j]*(((model._lean_data.at[j,'Cout'])-((model._lean_data.at[j,'Cin'])))))
-            if k in model.stages and model.y[i,j,k] == 1:
-                if value(c) >=value(d):
-                    return model.M[i,j,k] <= (model.L1[j]*(((model._lean_data.at[j,'Cout'])-((model._lean_data.at[j,'Cin'])))))*model.y[i,j,k]
-                else:
-                    return model.M[i,j,k] <= ((model._rich_data.at[i,'F'])*((model._rich_data.at[i,'Cin'])-(model._rich_data.at[i,'Cout'])))*model.y[i,j,k]
+            if model.y[i,j,k] == 1:
+                #if value(c) >=value(d):
+                #    return model.M[i,j,k] <= (model.L1[j]*(((model._lean_data.at[j,'Cout'])-((model._lean_data.at[j,'Cin'])))))
+                #else:
+                return model.M[i,j,k] <= ((model._rich_data.at[i,'F'])*((model._rich_data.at[i,'Cin'])-(model._rich_data.at[i,'Cout'])))
             else:
                 return Constraint.Skip
     
@@ -582,8 +626,8 @@ class SubOptMENS(object):
         model.del_component(model.Log_DC_RPS_LPS_RS_index)
         model.del_component(model.Log_DC_RPS_LPS_RS_index_index_0)
         def Log_DC_RPS_LPS_RS_(model,i,j,k):
-            if k in model.stages and model.y[i,j,k] == 1:
-                return model.dcin[i,j,k] <= model.cr[i,k] - model.clin[i,j,k]+ model.omega[i,j]*(1-model.y[i,j,k])
+            if model.y[i,j,k] == 1:
+                return model.dcin[i,j,k] == model.cr[i,k] - model.clin[i,j,k]
             else:
                 return Constraint.Skip
 
@@ -592,12 +636,12 @@ class SubOptMENS(object):
         model.del_component(model.Log_DC_RPS_LPS_RS1)
         model.del_component(model.Log_DC_RPS_LPS_RS1_index)
         model.del_component(model.Log_DC_RPS_LPS_RS1_index_index_0)        
-        def Log_DC_RPS_LPS_RS1_(model,i,j,k):
-            if k in model.stages and model.y[i,j,k] == 1:
-                return model.dcin[i,j,k] >= model.cr[i,k] - model.clin[i,j,k]- model.omega[i,j]*(1-model.y[i,j,k])
-            else:
-                return Constraint.Skip
-        model.Log_DC_RPS_LPS_RS1 = Constraint(model.i, model.j, model.k, rule = Log_DC_RPS_LPS_RS1_)
+        #def Log_DC_RPS_LPS_RS1_(model,i,j,k):
+        #    if k in model.stages and model.y[i,j,k] == 1:
+        #        return model.dcin[i,j,k] >= model.cr[i,k] - model.clin[i,j,k]- model.omega[i,j]*(1-model.y[i,j,k])
+        #    else:
+        #        return Constraint.Skip
+        #model.Log_DC_RPS_LPS_RS1 = Constraint(model.i, model.j, model.k, rule = Log_DC_RPS_LPS_RS1_)
 
         #LOGICAL CONSTRAINT ON Lean SIDE COMPOSITION DIFFERENCE BETWEEN RPS(I) AND LPS(J)
         model.del_component(model.Log_DC_RPS_LPS_LS)
@@ -606,9 +650,8 @@ class SubOptMENS(object):
         model.stages.pprint()
         model.k.pprint()
         def Log_DC_RPS_LPS_LS_(model,i,j,k):
-            if k in model.stages and model.y[i,j,(k)] == 1:
-                return model.dcout[i,j,(k+1)] <= model.crin[i,j,(k+1)] - model.cl[j,(k+1)]+\
-                                                 model.omega[i,j]*(1-model.y[i,j,k])
+            if model.y[i,j,(k)] == 1:
+                return model.dcout[i,j,(k+1)] == model.crin[i,j,(k)] - model.cl[j,(k+1)]
             else:
                 return Constraint.Skip
         model.Log_DC_RPS_LPS_LS = Constraint(model.i, model.j, model.k, rule = Log_DC_RPS_LPS_LS_)
@@ -616,14 +659,14 @@ class SubOptMENS(object):
         model.del_component(model.Log_DC_RPS_LPS_LS1)
         model.del_component(model.Log_DC_RPS_LPS_LS1_index)
         model.del_component(model.Log_DC_RPS_LPS_LS1_index_index_0)
-        def Log_DC_RPS_LPS_LS1_(model,i,j,k):
-            if model.y[i,j,k] == 1:
-                return model.dcout[i,j,(k+1)] >= model.crin[i,j,(k+1)] - model.cl[j,(k+1)] -\
-                                     model.omega[i,j]*(1-model.y[i,j,k])
-            else:
-                return Constraint.Skip
+        #def Log_DC_RPS_LPS_LS1_(model,i,j,k):
+        #    if model.y[i,j,k] == 1:
+        #        return model.dcout[i,j,(k+1)] >= model.crin[i,j,(k)] - model.cl[j,(k+1)] -\
+        #                             model.omega[i,j]*(1-model.y[i,j,k])
+        #    else:
+        #        return Constraint.Skip
 
-        model.Log_DC_RPS_LPS_LS1 = Constraint(model.i, model.j, model.k, rule = Log_DC_RPS_LPS_LS1_)        
+        #model.Log_DC_RPS_LPS_LS1 = Constraint(model.i, model.j, model.k, rule = Log_DC_RPS_LPS_LS1_)        
         
         model.del_component(model.KYTransferMass)
         model.del_component(model.KYTransferMass_index)
@@ -641,7 +684,7 @@ class SubOptMENS(object):
         model.del_component(model.HeightColumn_index_index_0)
         def HeightColumn_(model,i,j,k):
             if model.y[i,j,k] == 1:
-                return model.height[i,j,k] == model.y[i,j,k]*model.M[i,j,k]/(((model.kya[i,j,k]*np.pi/4*((model.dia[i,j,k]*model.diacor[i,j,k])**2))) *\
+                return model.height[i,j,k] == model.M[i,j,k]/(((model.kya[i,j,k]*np.pi/4*((model.dia[i,j,k]*model.diacor[i,j,k])**2))) *\
                                           (((model.dcin[i,j,k]*model.dcout[i,j,(k+1)])*\
                                            (model.dcin[i,j,k]+model.dcout[i,j,(k+1)])*0.5)**(0.33333333)))
             else:
@@ -677,7 +720,7 @@ class SubOptMENS(object):
         print ("BEGINNING THE NLP SUBOPTIMIZATION")
 
         results = solve_until_feas_NLP(model)
-
+        model.pprint()
         print(results)
         print(model.TACeqn())
 

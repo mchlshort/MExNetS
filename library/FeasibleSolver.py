@@ -51,12 +51,11 @@ def solve_until_feas_NLP(m):
         m1 = m
         results = solver.solve(m1,tee=False, solver = 'conopt')
     except:
-        print("conopt failed")
         print("CONOPT assumed unsuccessful... IPOPT it is")
         solver= SolverFactory('ipopt')
         options={}
         try:
-            options['max_cpu_time'] = 1e+05
+            options['max_cpu_time'] = 1e+04
             results = solver.solve(m,tee=False, options=options)
             #m.load(results)
 
@@ -65,7 +64,7 @@ def solve_until_feas_NLP(m):
             elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                 print("First solve was infeasible")
                 options1 = {}
-                options1['max_cpu_time'] = 1e+05
+                options1['max_cpu_time'] = 1e+03
                 options1['mu_strategy'] = 'adaptive'
                 results = solver.solve(m,tee=False, options=options1)
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -73,8 +72,8 @@ def solve_until_feas_NLP(m):
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                     print("Second solve was infeasible")
                     options2 = {}
-                    options2['max_cpu_time'] = 1e+05
-                    options2['mu_init'] = 1e-6
+                    options2['max_cpu_time'] = 1e+03
+                    options2['linear_solver'] = 'ma57'
                     #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
                     results = solver.solve(m,tee=False, options=options2) 
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -83,7 +82,8 @@ def solve_until_feas_NLP(m):
                         print("Second solve was infeasible")
                         options3 = {}
                         options3['mu_init'] = 1e-6
-                        options['bound_push'] =1e-6
+                        options3['max_cpu_time'] = 1e+03
+                        options3['bound_push'] =1e-6
                         results = solver.solve(m,tee=False, options=options3)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -118,6 +118,8 @@ def solve_until_feas_NLP(m):
                     print("Second solve was infeasible")
                     options2 = {}
                     options2['mu_init'] = 1e-6
+                    options2['max_cpu_time'] = 1e+03
+                    options2['linear_solver'] = 'ma57'
                     #options['bound_push'] =1e-5
                     results = solver.solve(m,tee=False, options=options2) 
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -127,6 +129,7 @@ def solve_until_feas_NLP(m):
                         options3 = {}
                         options3['mu_init'] = 1e-6
                         options3['bound_push'] =1e-6
+                        options3['max_cpu_time'] = 1e+03
                         results = solver.solve(m,tee=False, options=options3)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -152,6 +155,7 @@ def solve_until_feas_NLP(m):
                     options4 = {}
                     options4['mu_init'] = 1e-6
                     options4['bound_push'] =1e-6
+                    options4['max_cpu_time'] = 1e+04
                     results = solver.solve(m,tee=False, options=options3)
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
@@ -159,6 +163,8 @@ def solve_until_feas_NLP(m):
                         print("Second solve was infeasible")
                         options4 = {}
                         options4['mu_init'] = 1e-6
+                        options4['max_cpu_time'] = 1e+03
+                        options4['linear_solver'] = 'ma57'
                         #options['bound_push'] =1e-5
                         results = solver.solve(m,tee=False, options=options4) 
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -167,6 +173,7 @@ def solve_until_feas_NLP(m):
                             print("Second solve was infeasible")
                             options4 = {}
                             options4['mu_init'] = 1e-5
+                            options4['max_cpu_time'] = 1e+03
                             options4['bound_push'] =1e-5
                             results = solver.solve(m,tee=False, options=options4)
                             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -192,7 +199,8 @@ def solve_until_feas_NLP(m):
                         print("Something failed again again during the solve")
                         options4 = {}
                         options4['mu_init'] = 1e-5
-                        options4['bound_push'] =1e-5
+                        options4['max_cpu_time'] =1e4
+                        options4['linear_solver'] = 'ma57'
                         results = solver.solve(m,tee=False, options=options4)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -220,6 +228,7 @@ def solve_until_feas_NLP(m):
                 print("First solve was infeasible")
                 options1 = {}
                 options1['mu_strategy'] = 'adaptive'
+                options1['max_cpu_time'] = 1e+03
                 results = solver.solve(m,tee=False, options=options1)
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
@@ -227,6 +236,8 @@ def solve_until_feas_NLP(m):
                     print("Second solve was infeasible")
                     options2 = {}
                     options2['mu_init'] = 1e-6
+                    options2['linear_solver'] = 'ma57'
+                    options2['max_cpu_time'] = 1e+03
                     #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
                     results = solver.solve(m,tee=False, options=options2) 
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -235,7 +246,9 @@ def solve_until_feas_NLP(m):
                         print("Second solve was infeasible")
                         options3 = {}
                         options3['mu_init'] = 1e-6
-                        options['bound_push'] =1e-6
+                        options3['bound_push'] =1e-6
+                        options3['linear_solver'] = 'ma57'
+                        options3['max_cpu_time'] = 1e+03
                         results = solver.solve(m,tee=False, options=options3)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -270,6 +283,9 @@ def solve_until_feas_NLP(m):
                     print("Second solve was infeasible")
                     options2 = {}
                     options2['mu_init'] = 1e-6
+                    options2['linear_solver'] = 'ma57'
+                    options2['max_cpu_time'] = 1e+03
+                    
                     #options['bound_push'] =1e-5
                     results = solver.solve(m,tee=False, options=options2) 
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -279,6 +295,7 @@ def solve_until_feas_NLP(m):
                         options3 = {}
                         options3['mu_init'] = 1e-6
                         options3['bound_push'] =1e-6
+                        options3['max_cpu_time'] = 1e+03
                         results = solver.solve(m,tee=False, options=options3)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -304,13 +321,15 @@ def solve_until_feas_NLP(m):
                     options4 = {}
                     options4['mu_init'] = 1e-6
                     options4['bound_push'] =1e-6
-                    results = solver.solve(m,tee=False, options=options3)
+                    options4['max_cpu_time'] = 1e+03
+                    results = solver.solve(m,tee=False, options=options4)
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
                     elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
                         print("Second solve was infeasible")
                         options4 = {}
                         options4['mu_init'] = 1e-6
+                        options3['max_cpu_time'] = 1e+03
                         #options['bound_push'] =1e-5
                         results = solver.solve(m,tee=False, options=options4) 
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -320,6 +339,7 @@ def solve_until_feas_NLP(m):
                             options4 = {}
                             options4['mu_init'] = 1e-5
                             options4['bound_push'] =1e-5
+                            options3['max_cpu_time'] = 1e+03
                             results = solver.solve(m,tee=False, options=options4)
                             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                                 print("successfully solved")
@@ -345,6 +365,7 @@ def solve_until_feas_NLP(m):
                         options4 = {}
                         options4['mu_init'] = 1e-5
                         options4['bound_push'] =1e-5
+                        options3['max_cpu_time'] = 1e+03
                         results = solver.solve(m,tee=False, options=options4)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -373,12 +394,15 @@ def solve_until_feas_NLP(m):
                 print("First solve was infeasible")
                 options1 = {}
                 options1['mu_strategy'] = 'adaptive'
+                options1['max_cpu_time'] = 1e+03
                 results = solver.solve(m,tee=False, options=options1)
                 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                     print("successfully solved")
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or  (results.solver.termination_condition == TerminationCondition.maxIterations):
                     print("Second solve was infeasible")
                     options2 = {}
+                    options2['max_cpu_time'] = 1e+03
+                    options2['linear_solver'] = 'ma57'
                     options2['mu_init'] = 1e-6
                     #CAN STILL ADD MORE OPTIONS SPECIFICALLY WITH ANOTHER LINEAR SOLVER
                     results = solver.solve(m,tee=False, options=options2) 
@@ -388,7 +412,9 @@ def solve_until_feas_NLP(m):
                         print("Second solve was infeasible")
                         options3 = {}
                         options3['mu_init'] = 1e-6
-                        options['bound_push'] =1e-6
+                        options3['bound_push'] =1e-6
+                        options3['max_cpu_time'] = 1e+03
+                        options3['linear_solver'] = 'ma57'
                         results = solver.solve(m,tee=False, options=options3)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -422,6 +448,8 @@ def solve_until_feas_NLP(m):
                 elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
                     print("Second solve was infeasible")
                     options2 = {}
+                    options2['max_cpu_time'] = 1e+03
+                    options2['linear_solver'] = 'ma57'
                     options2['mu_init'] = 1e-6
                     #options['bound_push'] =1e-5
                     results = solver.solve(m,tee=False, options=options2) 
@@ -432,6 +460,8 @@ def solve_until_feas_NLP(m):
                         options3 = {}
                         options3['mu_init'] = 1e-6
                         options3['bound_push'] =1e-6
+                        options3['max_cpu_time'] = 1e+03
+                        options3['linear_solver'] = 'ma57'
                         results = solver.solve(m,tee=False, options=options3)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -457,13 +487,17 @@ def solve_until_feas_NLP(m):
                     options4 = {}
                     options4['mu_init'] = 1e-6
                     options4['bound_push'] =1e-6
-                    results = solver.solve(m,tee=False, options=options3)
+                    options4['max_cpu_time'] = 1e+03
+                    options4['linear_solver'] = 'ma57'
+                    results = solver.solve(m,tee=False, options=options4)
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("successfully solved")
                     elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):
                         print("Second solve was infeasible")
                         options4 = {}
                         options4['mu_init'] = 1e-6
+                        options4['max_cpu_time'] = 1e+03
+                        options4['linear_solver'] = 'ma57'
                         #options['bound_push'] =1e-5
                         results = solver.solve(m,tee=False, options=options4) 
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
@@ -473,6 +507,8 @@ def solve_until_feas_NLP(m):
                             options4 = {}
                             options4['mu_init'] = 1e-5
                             options4['bound_push'] =1e-5
+                            options4['max_cpu_time'] = 1e+03
+                            options4['linear_solver'] = 'ma57'
                             results = solver.solve(m,tee=False, options=options4)
                             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                                 print("successfully solved")
@@ -498,6 +534,8 @@ def solve_until_feas_NLP(m):
                         options4 = {}
                         options4['mu_init'] = 1e-5
                         options4['bound_push'] =1e-5
+                        options4['max_cpu_time'] = 1e+03
+                        options4['linear_solver'] = 'ma57'
                         results = solver.solve(m,tee=False, options=options4)
                         if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                             print("successfully solved")
@@ -1107,7 +1145,8 @@ def solve_until_feas_MINLP_DICOPT(m):
 
         except:
             print("First try encountered an error") 
-            results = opt.solve(m,options = options,tee=True)
+            BONMINsolved = False
+            #results = opt.solve(m,options = options,tee=True)
     
     if (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
         print("The MINLP problem could not be solved")

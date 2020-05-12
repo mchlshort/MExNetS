@@ -27,12 +27,12 @@ from library.MENS_MINLP import *
 from library.SubOptMENS import *
 
 __author__ = "Michael Short"
-__copyright__ = "Copyright 2019"
+__copyright__ = "Copyright 2020"
 __credits__ = ["Michael Short, Lorenz T. Biegler, Adeniyi J. Isafiade"]
 __license__ = "GPL-3"
 __version__ = "0.9"
 __maintainer__ =  "Michael Short"
-__email__ = "shortm@andrew.cmu.edu"
+__email__ = "m.short@surrey.ac.uk"
 __status__ = "Development"
 
 def write_to_csv(filename, data):
@@ -85,6 +85,8 @@ class HybridStrategy(object):
         self.capcost_log_nlp = dict()
         self.failed_exchanger = dict()
         self.utility_cost = dict()
+        self.binary_cuts = dict()
+        self.symmetry_cuts = dict()
         
     def _obtain_initializations(self, MENS_model,i,j,k):
         """This function is used to get the initializations for the individual mass exchanger 
@@ -370,17 +372,71 @@ class HybridStrategy(object):
         else:
             return False
         
-    def cut_generator(self, cut_type):
-        '''This function will serve to generate the cuts to the MINLP problem based on the previous solution.
-        These cuts will rely on whether the optimization problem is solved with a global solver such as BARON, 
-        or whether a local solution was obtained. The options need to be supplied as a dictionary with the keys
-        being the option name and the value being True or False. The types of cuts that we can add, will include:
-            cut_type (dict): dictionary that admit the following keywords as keys:
-                'bin_cut'
+    def _generate_binary_cut(self, MENS_model, iteration):
+        """Binary cut generator for the MINLP model
+        
+        This function removes the specific binary combination from the previous iterations and stores them
+        a dictionary. This dictionary is then used in subsequent MINLP steps to remove the specific binary
+        combination.
+        
+        Args:
+            MENS_model (pyomo model):   solved pyomo model from HENS_MINLP module
+            interation (int): iteration number
+        
+        Returns:
+            None 
+        """
+        cut_pack = dict()
+        for i in MENS_model.i:
+            for j in MENS_model.j:
+                for k in MENS_model.stages:
+                    cut_pack[i,j,k] = MENS_model.y[i,j,k].value
+        print("cut_pack",cut_pack)
+
+        print("Trying to detect equivalent networks:")
+        canplus1 = True
+        canminus1 = True
+        for i in MENS_model.i:
+            for j in MENS_model.j:
+                for k in MENS_model.stages:
+                    if MENS_model.y[i,j,k].value == 1 and k == 1:
+                        canminus1 = False
+                        print("Can minus 1? ", canminus1)
+                    elif MENS_model.y[i,j,k].value == 1 and MENS_model.nstages == k:
+                        canplus1 = False
+                        print("Can plus 1? ", canplus1)
+                        
+        print("Can minus 1? ", canminus1)
+        print("Can plus 1? ", canplus1)                
+        sym_cuts = None
         '''
+        if canplus1:   
+            sym_cuts  = dict()                
+            for i in HENS_model.i:
+                for j in HENS_model.j:
+                    for k in HENS_model.stages:
+                        if HENS_model.first[k] == True:
+                            sym_cuts[i,j,k] = 0
+                        else:
+                            sym_cuts[i,j,k] = HENS_model.z[i,j,k-1].value
+        
+        if canminus1:
+            sym_cuts  = dict() 
+            for i in HENS_model.i:
+                for j in HENS_model.j:
+                    for k in HENS_model.stages:
+                        if HENS_model.last[k] == True:
+                            sym_cuts[i,j,k] = 0
+                        else:
+                            sym_cuts[i,j,k] = HENS_model.z[i,j,k+1].value
+                            
+        print("sym_cut_pack",sym_cuts)  
+        '''              
+        self.binary_cuts[iteration] = cut_pack
+        self.symmetry_cuts[iteration] = sym_cuts
         
         
-    def run_hybrid_strategy(self, max_iter=None, cor_filter_size=None,rich_data=None,lean_data=None, correction_factors = None, parameter_data=None, stream_properties = None, tol = 0.02, exname = None, non_iso = True, stages = None, superstruct = 'SBS'):
+    def run_hybrid_strategy(self, max_iter=None, cor_filter_size=None,rich_data=None,lean_data=None, correction_factors = None, parameter_data=None, stream_properties = None, tol = 0.02, exname = None, non_iso = True, stages = None, superstruct = 'SBS', bin_cuts = False):
         """Starts the hybrid strategy iterative procedure by solving MINLP and NLP problems
         
         This function will be called by the user when they want to run the 
@@ -403,6 +459,8 @@ class HybridStrategy(object):
             non_iso (bool, optional):       True/False for whether to solve the suboptimization with non-isocompositional mixing. Default = True
             stages (int, optional):         Number of stages for the stagewise superstructure
             superstructure (str,optional):  The type of superstructure to be used. SBS and SWS currently supported
+            bin_cut (bool, optional):       If True, binary cut is generated to exclude a particular set of binary variables from all 
+                                            future iterations. Default is False.
         
         Returns:
             print that tells the user that the iterations have ended
@@ -466,7 +524,7 @@ class HybridStrategy(object):
             #min_mass_ex = 1e-7
             #initialize the MINLP with the NLP
             MEN_init, success_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
-            print("MEN_init")
+            print("Values used in the initialisation")
             MEN_init.height.pprint()
             MEN_init.M.pprint()
             MEN_init.L.pprint()
@@ -478,9 +536,9 @@ class HybridStrategy(object):
             #attempt to solve the first MINLP
             currentOmega = MEN_init.omega
             if success_init == True:
-                MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init, min_height_from_nlp=min_height)
+                MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init, min_height_from_nlp=min_height, bin_cuts = self.binary_cuts)
             else:
-                MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init)
+                MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init, bin_cuts = self.binary_cuts)
             #the aim of this loop is to make the MINLP more robust by changing which heights from the NLP are included in the MINLP
             #not sure how rigorous this really is as it only changes the selected matches by lowering the heights and masses
             #exchanged between the NLP and MINLP. Exits the program if no solution is found to MINLP.
@@ -493,9 +551,12 @@ class HybridStrategy(object):
                     mh=min_height/((i+1)*5)
                     #print("mh",mh)
                     MEN_init = Ex1MEN.NLP_MENS_init(correction_factors=self.corrections)
-                    MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init,min_height_from_nlp=(mh))
+                    MENS_solved,results = Ex1MEN.MINLP_MENS_full(MEN_init,min_height_from_nlp=(mh), bin_cuts = self.binary_cuts)
+                    
                     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                         print("MINLP solved")
+                        if bin_cuts ==True:
+                            self._generate_binary_cut(MENS_solved, ic)
                         break
                     #elif (results.solver.termination_condition == TerminationCondition.infeasible) or (results.solver.termination_condition == TerminationCondition.maxIterations):  
                     #    print("MINLP didn't solve, attempting new matches")  
@@ -516,13 +577,18 @@ class HybridStrategy(object):
                             print("new Omega", omegaNew)
                             if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
                                 print("MINLP solved")
+                                if bin_cuts ==True:
+                                    self._generate_binary_cut(MENS_solved, ic)
                                 break
                             else: 
                                 currentOmega = omegaNew 
             else:
                 print("The first solve of the MINLP is feasible")
-            print(MENS_solved)
-            print(results)
+                if bin_cuts ==True:
+                    self._generate_binary_cut(MENS_solved, ic)
+            
+            #print(MENS_solved)
+            #print(results)
             MENS_solved.height.pprint()
             MENS_solved.M.pprint()
             MENS_solved.L1.pprint()
@@ -633,10 +699,10 @@ class HybridStrategy(object):
                                 FlowM[j] = MENS_solved.M[i,j,k].value/(MENS_solved.clin[i,j,k].value-MENS_solved.cl[j,(k+1)].value)
                             
                             ME_inits = self._obtain_initializations(MENS_solved,i,j,k)   #, me_inits=ME_inits
-                            
-                            count = 10
-                            while count >= 1:
-                                nfe = round(200/count)
+                            finiteels = [20,50,100,200]
+                            count = 0
+                            while count <= 3:
+                                nfe = finiteels[count]
                                 print("solving for ", nfe, "number of elements")
                                 mx = mass_exchanger(rich_stream_name = i, lean_stream_name=j, rich_in_side=CRin_Side, rich_out_side=CRout_Side,flowrates = FlowM, me_inits = ME_inits, stream_properties = stream_properties, nfe =nfe)
     
@@ -664,9 +730,9 @@ class HybridStrategy(object):
                                     print("try to increase number of FEs")
                                 elif ME5.success == True:
                                     break
-                                count = count - 1
+                                count = count + 1
                         elif con ==True:
-                            print("MATCH: ", m, " match ", i, "with ", j, " is not a selected match in ", k)
+                            #print("MATCH: ", m, " match ", i, "with ", j, " is not a selected match in ", k)
                             if m in exchanger_models:
                                 pass
                             else:
@@ -681,11 +747,11 @@ class HybridStrategy(object):
                 stop = self._check_convergence(MENS_solved,exchanger_models,m,tol = self.tol, men_type = men_type)
             else:
                 stop = True
-            print("These are the previous corrections")
-            print(self.corrections)
+            #print("These are the previous corrections")
+            #print(self.corrections)
             self.corrections=self._get_correction_factors(MENS_solved,exchanger_models, men_type = men_type)    
-            print("These are the current corrections")
-            print(self.corrections)
+            #print("These are the current corrections")
+            #print(self.corrections)
             iter_end = time.clock()
             print("Iteration time: ", iter_end - iter_time)
             if stop:
@@ -701,43 +767,43 @@ class HybridStrategy(object):
         print("EVERY NLP OBJECTIVE FUNCTION SOLUTION AT EVERY ITERATION LOGGED")
         print("=======================================================================")
         print(self.solution_log)
-        write_to_csv('solution_log50it'+exname+'.csv', self.solution_log)
+        write_to_csv('solution_log'+exname+'.csv', self.solution_log)
         print("=======================================================================")
         print("\\\\\\\\\\\\\\\\\\\\\\  MINLP TAC Solution Log  ///////////////////////")  
         print("EVERY MINLP OBJECTIVE FUNCTION SOLUTION AT EVERY ITERATION LOGGED")
         print("=======================================================================")
         print(self.MINLP_TAC_log)
-        write_to_csv('MINLP_TAC_log50it'+exname+'.csv', self.MINLP_TAC_log)
+        write_to_csv('MINLP_TAC_log'+exname+'.csv', self.MINLP_TAC_log)
         print("=======================================================================")
         print("\\\\\\\\\\\\\\\\\\\\\\  Exchanger log  ///////////////////////")  
         print("How many binary variables were selected in every iteration")
         print("=======================================================================")
         print(self.exchanger_log)
-        write_to_csv('exchanger_log50it'+exname+'.csv', self.exchanger_log)
+        write_to_csv('exchanger_log'+exname+'.csv', self.exchanger_log)
         print("=======================================================================")
         print("\\\\\\\\\\\\\\\\\\\\\\  Capital costs for MINLP Solution Log  ///////////////////////")  
         print("            EVERY MINLP Capital cost logged               ")
         print("=======================================================================")
         print(self.capcost_log_MINLP)
-        write_to_csv('capcost_log_MINLP50it'+exname+'.csv', self.capcost_log_MINLP)
+        write_to_csv('capcost_log_MINLP'+exname+'.csv', self.capcost_log_MINLP)
         print("=======================================================================")
         print("\\\\\\\\\\\\\\\\\\\\\\  capital costs nlp Solution Log  ///////////////////////")  
         print("EVERY NLP OBJECTIVE FUNCTION SOLUTION AT EVERY ITERATION LOGGED")
         print("=======================================================================")
         print(self.capcost_log_nlp)
-        write_to_csv('capcost_log_nlp50it'+exname+'.csv', self.capcost_log_nlp)
+        write_to_csv('capcost_log_nlp'+exname+'.csv', self.capcost_log_nlp)
         print("=======================================================================")
         print("\\\\\\\\\\\\\\\\\\\\\\  exchanger failed during the NLP solution ///////////////////////")  
         print("Whether an NLP failed AT EVERY ITERATION LOGGED")
         print("=======================================================================")
         print(self.failed_exchanger)
-        write_to_csv('failed_exchanger50it'+exname+'.csv', self.failed_exchanger)
+        write_to_csv('failed_exchanger'+exname+'.csv', self.failed_exchanger)
         print("=======================================================================")
         print("\\\\\\\\\\\\\\\\\\\\\\  UTILITIES Solution Log  ///////////////////////")  
         print("         UTILITY COSTS AT EACH ITERATION LOGGED         ")
         print("=======================================================================")
         print(self.utility_cost)
-        write_to_csv('utility_cost50it'+exname+'.csv', self.utility_cost)
+        write_to_csv('utility_cost'+exname+'.csv', self.utility_cost)
         print("=======================================================================")
         print("=======================================================================")
         print("=======================================================================")
