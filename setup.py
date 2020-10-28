@@ -8,7 +8,7 @@ EXTENSIONS = []
 DESCRIPTION = 'Package for mass exchanger network synthesis'
 LONG_DESCRIPTION = '' #open('README.md').read()
 AUTHOR = 'Michael Short'
-MAINTAINER_EMAIL = 'shortm@andrew.cmu.edu'
+MAINTAINER_EMAIL = 'm,short@surrey.ac.uk'
 LICENSE = 'GPL-3'
 URL = 'https://github.com/mchlshort/mexnets'
 
